@@ -5,8 +5,11 @@ const colorSchema = Joi.object({
         .min(1)
         .max(20)
         .required()
-        .regex(/^\S.*\S$/)
+        .regex(/^[a-zA-Z\s]+$/)
         .custom((value, helpers) => {
+            if (/[\p{P}\p{S}\p{C}]/u.test(value)) {
+                return helpers.error('string.containsPunctuation');
+            }
             const lowercaseValue = value.toLowerCase().trim();
             if (lowercaseValue !== value) {
                 return helpers.error('string.caseChange');
@@ -19,7 +22,8 @@ const colorSchema = Joi.object({
     'string.min': 'Color name phải có ít nhất {#limit} ký tự.',
     'string.max': 'Color name không được vượt quá {#limit} ký tự.',
     'string.pattern.base': 'Color name không hợp lệ.',
-    'string.caseChange': 'Color name không được thay đổi chữ hoa chữ thường.',
+    'string.caseChange': 'Color name không được viết chữ hoa',
+    'string.containsPunctuation': 'Color name không được chứa dấu',
 });
 
 module.exports = { colorSchema };
