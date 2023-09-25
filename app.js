@@ -20,8 +20,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use('/api', routerProduct)
-app.use('/api/', routerColor)
-app.use('/api/', routerCategory)
+app.use('/api', routerColor)
+app.use('/api', routerCategory)
 app.use('/api', routerSize)
 io.on('connection', (socket) => {
     console.log('A user connected');
