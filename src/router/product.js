@@ -1,6 +1,6 @@
 const express = require("express");
-const { GetALlBook } = require("../component/product");
+const { AddProduct } = require("../component/product");
 const router = express.Router();
 
-router.get("/color", GetALlBook);
+router.post("/product/add", AddProduct);
 module.exports = router;
