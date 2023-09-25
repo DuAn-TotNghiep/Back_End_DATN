@@ -10,7 +10,7 @@ app.use(express.json());
 const routerProduct = require('./src/router/product')
 const routerColor = require('./src/router/color')
 const routerCategory = require('./src/router/category')
-
+const routerSize = require('./src/router/size')
 const corsOptions = {
     origin: '*', // Địa chỉ nguồn bạn muốn cho phép
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Các phương thức được phép
@@ -22,7 +22,7 @@ app.use(cors(corsOptions));
 app.use('/api', routerProduct)
 app.use('/api/', routerColor)
 app.use('/api/', routerCategory)
-
+app.use('/api', routerSize)
 io.on('connection', (socket) => {
     console.log('A user connected');
 
