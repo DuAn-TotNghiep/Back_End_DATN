@@ -22,11 +22,11 @@ const addCategory = async (req, res) => {
             const addValues = [category_name];
 
             connect.query(addQuery, addValues, (err, Result) => {
-                if (addErr) {
+                if (err) {
                     return res.status(500).json({ message: 'Thêm category thất bại' });
                 }
 
-                const data = addResult.rows[0];
+                const data = Result.rows[0];
                 return res.status(201).json({ message: 'Thêm category thành công', data });
             });
         });
