@@ -88,6 +88,6 @@ const getAllProducts = async (req, res)=>{
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
-module.exports = { GetALlBook , getAllProducts};
-module.exports = { AddProduct };
+module.exports = { AddProduct , getAllProducts};
+
 
