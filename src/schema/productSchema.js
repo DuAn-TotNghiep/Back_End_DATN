@@ -8,13 +8,15 @@ const customValidation = (value, helpers) => {
     return value;
 };
 const addProduct = Joi.object({
-    name: Joi.string().trim().min(10).max(200).required().regex(/^ [^\d] * $ /).messages({
-        "string.empty": "Khong duoc de trong name",
-        "any.required": "Truong name la truong bat buoc",
-        "string.min": "Truong ten phai co it nhat {#limit} ky tu",
-        "string.max": "Truong ten phai co nhieu nhat {#limit} ky tu}",
-        "string.pattern.base": "Trường name không được chứa toàn số"
+    name: Joi.string().trim().min(10).max(200).required().regex(/^[A-Za-z\s]+$/).messages({
+        "string.empty": "Không được để trống name",
+        "any.required": "Trường name là trường bắt buộc",
+        "string.min": "Trường tên phải có ít nhất {#limit} ký tự",
+        "string.max": "Trường tên phải có nhiều nhất {#limit} ký tự",
+        "string.pattern.base": "Trường name chỉ cho phép nhập chữ và khoảng trắng"
     }),
+
+
     price: Joi.number().positive().required().messages({
         "number.base": "Price phai la mot so",
         "any.required": "Price phai bat buoc co",
