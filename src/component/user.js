@@ -28,8 +28,8 @@ const Signup = async (req, res) => {
 
         // Tạo tài khoản mới
         const createUserQuery = `
-            INSERT INTO users (user_lastname, user_firstname, user_province, user_district, user_ward, user_address, user_image, user_email, user_password, user_phone )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            INSERT INTO users (user_lastname, user_firstname, user_province, user_district, user_ward, user_address, user_image, user_email, user_password, user_phone, role )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 1)
             RETURNING id, user_lastname, user_firstname, user_province, user_district, user_ward, user_address, user_image, user_email, user_password, user_phone
         `;
         const { rows: createdUser } = await connect.query(createUserQuery, [
@@ -37,7 +37,7 @@ const Signup = async (req, res) => {
         ]);
 
         // Tạo AccessToken
-        const accessToken = jwt.sign({ user_id: createdUser[0].id }, 'trungdeptrai', { expiresIn: '1d' });
+        const accessToken = jwt.sign({ user_id: createdUser[0].id }, 'datn', { expiresIn: '1d' });
 
         res.status(201).json({
             message: 'Đăng ký tài khoản thành công',

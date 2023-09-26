@@ -76,7 +76,6 @@ const RemoveCategory = async (req, res) => {
             if (err) {
                 return res.status(500).json({ message: 'Xoá category thất bại', err });
             }
-
             return res.status(200).json({ message: 'Xoá category và sản phẩm thành công' });
         });
     } catch (error) {

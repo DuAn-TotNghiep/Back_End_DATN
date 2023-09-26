@@ -23,23 +23,21 @@ const userSchema = Joi.object({
         "string.min": "Mật khẩu phải có ít nhất {#limit} ký tự",
     }),
 
-    user_address: Joi.string().trim().required().messages({
+    user_address: Joi.string().allow('').messages({
         "string.empty": "Không được để trống địa chỉ",
         "any.required": "Địa chỉ là trường bắt buộc",
     }),
 
-    user_province: Joi.string().trim().required().messages({
-        "string.empty": "Không được để trống tỉnh/thành phố",
+    user_province: Joi.string().allow('').messages({
         "any.required": "Tỉnh/thành phố là trường bắt buộc",
     }),
-
-    user_district: Joi.string().trim().required().messages({
-        "string.empty": "Không được để trống quận/huyện",
+    user_district: Joi.string().allow('').messages({
+   
         "any.required": "Quận/huyện là trường bắt buộc",
     }),
 
-    user_ward: Joi.string().trim().required().messages({
-        "string.empty": "Không được để trống phường/xã",
+    user_ward: Joi.string().allow('').messages({
+      
         "any.required": "Phường/xã là trường bắt buộc",
     }),
 
@@ -48,8 +46,8 @@ const userSchema = Joi.object({
         "any.required": "Số điện thoại là trường bắt buộc",
     }),
     
-    user_image: Joi.string().trim().required().messages({
-        "string.empty": "Không được để trống Image",
+    user_image: Joi.string().allow('').messages({
+       
         "any.required": "Image là trường bắt buộc",
     }),
 
