@@ -11,7 +11,8 @@ const routerProduct = require('./src/router/product')
 const routerColor = require('./src/router/color')
 const routerCategory = require('./src/router/category')
 const routerSize = require('./src/router/size')
-const routerUser= require('./src/router/user')
+const routerUser = require('./src/router/user')
+const routerCart = require('./src/router/cart')
 const corsOptions = {
     origin: '*', // Địa chỉ nguồn bạn muốn cho phép
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Các phương thức được phép
@@ -24,7 +25,8 @@ app.use('/api', routerProduct)
 app.use('/api', routerColor)
 app.use('/api', routerCategory)
 app.use('/api', routerSize)
-app.use('/api',routerUser)
+app.use('/api', routerUser)
+app.use('/api', routerCart)
 io.on('connection', (socket) => {
     console.log('A user connected');
 
