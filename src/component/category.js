@@ -86,24 +86,6 @@ const RemoveCategory = async (req, res) => {
 
 async function removeProductsOfCategory(category_id) {
     try {
-        // Xoá các bản ghi trong color_detail_product liên quan đến sản phẩm của danh mục
-        const deleteColorDetailQuery = `
-            DELETE FROM color_detail_product
-            WHERE product_id IN (SELECT product_id FROM product WHERE category_id = ${category_id})`;
-        await connect.query(deleteColorDetailQuery);
-
-        // Xoá các bản ghi trong image liên quan đến sản phẩm của danh mục
-        const deleteImageQuery = `
-            DELETE FROM image
-            WHERE product_id IN (SELECT product_id FROM product WHERE category_id = ${category_id})`;
-        await connect.query(deleteImageQuery);
-
-        // Xoá các bản ghi trong size_detail_product liên quan đến sản phẩm của danh mục
-        const deleteSizeDetailQuery = `
-            DELETE FROM size_detail_product
-            WHERE product_id IN (SELECT product_id FROM product WHERE category_id = ${category_id})`;
-        await connect.query(deleteSizeDetailQuery);
-
         // Xoá sản phẩm của danh mục
         const deleteProductsQuery = `DELETE FROM product WHERE category_id = ${category_id}`;
         await connect.query(deleteProductsQuery);
@@ -114,7 +96,6 @@ async function removeProductsOfCategory(category_id) {
         // Xử lý lỗi nếu cần
     }
 }
-
 
 
 module.exports = { addCategory, getAllCategory, RemoveCategory };
