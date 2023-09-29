@@ -61,8 +61,6 @@ const RemoveProduct = async (req, res) => {
                 return res.status(500).json({ message: 'Khong lay duoc san pham', err })
             }
             const product = resolve.rows[0]
-            console.log(product);
-            console.log(product.color_id);
             const sql2 = `DELETE FROM product WHERE product_id = ${id}`
             connect.query(sql2, (err, result) => {
                 if (err) {
@@ -70,8 +68,17 @@ const RemoveProduct = async (req, res) => {
                 }
             })
             const time = (now.toString());
-
-            const sqlbin = `INSERT INTO recycle_bin_product (product, deleted_at ) VALUES('{"product_id": ${id} , "product_name": "${product.product_name}", "product_description":"${product.product_description}", "product_price":${product.product_price} , "category_id":${product.category_id}, "image_id":${product.image_id}, "size_id":${product.size_id},"color_id":${product.color_id}}',
+            const imageStrings = product.image.map(image => `"${image}"`);
+            // Create a new object with the updated image property
+            const updatedProduct = {
+                ...product,
+                "image": imageStrings
+            };
+            console.log(updatedProduct.image);
+            const imageJSON = JSON.stringify(product.image);
+            const colorIdJSON = JSON.stringify(product.color_id);
+            const sizeIdJSON = JSON.stringify(product.size_id);
+            const sqlbin = `INSERT INTO recycle_bin_product (product, deleted_at ) VALUES('{"product_id": ${id} , "product_name": "${product.product_name}", "product_description":"${product.product_description}", "product_price":${product.product_price} , "category_id":${product.category_id}, "image":${updatedProduct.image}, "size_id":${sizeIdJSON},"color_id":${colorIdJSON}}',
 '${time}') RETURNING *`
             connect.query(sqlbin, (err, result) => {
                 if (err) {
