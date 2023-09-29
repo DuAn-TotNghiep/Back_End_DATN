@@ -18,4 +18,19 @@ const checkout = (req, res) => {
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
-module.exports = { checkout };
+const getOneheckout = (req, res) => {
+    try {
+        const { id } = req.params
+        const sql = `SELECT * FROM checkout WHERE id=${id}`
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Khong lay duoc ', err })
+            }
+            const data = result.rows[0]
+            return res.status(200).json({ message: 'Lay 1 thanh cong', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi API', err })
+    }
+}
+module.exports = { checkout, getOneheckout };
