@@ -1,6 +1,7 @@
 
 
 const connect = require('../../database');
+const jwt = require('jsonwebtoken');
 const { addProduct } = require('../schema/productSchema');
 const { DateTime } = require('luxon')
 const AddProduct = async (req, res, next) => {
@@ -53,6 +54,9 @@ const getAllProducts = async (req, res) => {
 }
 const RemoveProduct = async (req, res) => {
     try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const decoded = jwt.verify(token, "datn");
+        const userId = decoded.user_id;
         const { id } = req.params
         const now = DateTime.now().setZone('Asia/Ho_Chi_Minh');
         const sql1 = `SELECT * FROM product WHERE product_id=${id}`
@@ -69,17 +73,14 @@ const RemoveProduct = async (req, res) => {
             })
             const time = (now.toString());
             const imageStrings = product.image.map(image => `"${image}"`);
-            // Create a new object with the updated image property
             const updatedProduct = {
                 ...product,
                 "image": imageStrings
             };
-            console.log(updatedProduct.image);
-            const imageJSON = JSON.stringify(product.image);
             const colorIdJSON = JSON.stringify(product.color_id);
             const sizeIdJSON = JSON.stringify(product.size_id);
-            const sqlbin = `INSERT INTO recycle_bin_product (product, deleted_at ) VALUES('{"product_id": ${id} , "product_name": "${product.product_name}", "product_description":"${product.product_description}", "product_price":${product.product_price} , "category_id":${product.category_id}, "image":${updatedProduct.image}, "size_id":${sizeIdJSON},"color_id":${colorIdJSON}}',
-'${time}') RETURNING *`
+            const sqlbin = `INSERT INTO recycle_bin_product (product, deleted_at, user_id ) VALUES('{"product_id": ${id} , "product_name": "${product.product_name}", "product_description":"${product.product_description}", "product_price":${product.product_price} , "category_id":${product.category_id}, "image":${updatedProduct.image}, "size_id":${sizeIdJSON},"color_id":${colorIdJSON}}',
+'${time}', ${userId}) RETURNING *`
             connect.query(sqlbin, (err, result) => {
                 if (err) {
                     return res.status(500).json({ message: "Loi khi them vao thung rac", err })
