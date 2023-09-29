@@ -18,6 +18,8 @@ const checkout = (req, res) => {
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
+
+
 const getOneheckout = (req, res) => {
     try {
         const { id } = req.params
