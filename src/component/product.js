@@ -33,25 +33,34 @@ const AddProduct = async (req, res, next) => {
 
 const getAllProducts = async (req, res) => {
     try {
-        const page = req.query.page || 1; // Trang mặc định là 1
+        const page = req.query.page;
         const perPage = 3; // Số sản phẩm trên mỗi trang
 
-        const offset = (page - 1) * perPage; // Tính toán offset để truy vấn dữ liệu phù hợp
+        let sql = 'SELECT * FROM product';
+        const values = [];
 
-        const sql = 'SELECT * FROM product LIMIT $1 OFFSET $2';
-        const values = [perPage, offset];
+        if (page !== undefined) {
+            // Nếu có tham số 'page', thực hiện phân trang
+            const offset = (page - 1) * perPage;
+            sql += ` LIMIT ${perPage} OFFSET ${offset}`;
+        }
 
-        connect.query(sql, values, (err, result) => {
+        connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: 'Không lấy được danh sách sản phẩm' });
             }
             const products = result.rows;
-            return res.status(200).json({ message: `Danh sách sản phẩm trang ${page}`, products });
+            
+            if (page !== undefined) {
+                return res.status(200).json({ message: `Danh sách sản phẩm trang ${page}`, products });
+            } else {
+                return res.status(200).json({ message: 'Danh sách sản phẩm', products });
+            }
         });
     } catch (error) {
         return res.status(500).json({ message: 'Lỗi API' });
     }
-}
+};
 const RemoveProduct = async (req, res) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
