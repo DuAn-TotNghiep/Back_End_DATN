@@ -25,4 +25,19 @@ const order = async (req, res) => {
     }
 };
 
-module.exports = { order };
+const getAllOrder = async (req, res) => {
+    try {
+        let sql = 'SELECT * FROM orders';
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Không lấy được danh sách order' });
+            }
+            const orders = result.rows;
+            return res.status(200).json({ message: "lấy danh sách order thành công", orders });
+        })
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+
+module.exports = { order, getAllOrder };
