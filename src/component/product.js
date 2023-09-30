@@ -130,6 +130,26 @@ const GetSale = async (req, res) => {
         return res.status(500).json({ message: 'Loi api', err })
     }
 }
-module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale };
+
+const getNewProduct = async (req, res) => {
+    try {
+        let sqlQuery = `SELECT * FROM product ORDER BY product_id DESC LIMIT 8;`;
+        connect.query(sqlQuery, (err, result) => {
+            if (err) {
+                return res.status(500).json({
+                    message: "Lỗi truy vấn cơ sở dữ liệu"
+                })
+            }
+            const data = result.rows;
+            return res.json({
+                message: "Danh sách 8 sản phẩm mới nhất",
+                data
+            });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct };
 
 
