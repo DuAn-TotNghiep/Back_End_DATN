@@ -102,7 +102,20 @@ const RemoveProduct = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
-
-module.exports = { AddProduct, getAllProducts, RemoveProduct };
+ const GetOutstan = async (req, res) => {
+    try {
+        const sql = `SELECT * FROM product WHERE outstan IS NOT NULL AND outstan = true LIMIT 8`
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lay outstan that bai', err })
+            }
+            const data = results.rows
+            return res.status(200).json({ message: 'Lay outstan thanh cong', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi api', err })
+    }
+}
+module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan };
 
 
