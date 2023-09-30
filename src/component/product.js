@@ -50,7 +50,7 @@ const getAllProducts = async (req, res) => {
                 return res.status(500).json({ message: 'Không lấy được danh sách sản phẩm' });
             }
             const products = result.rows;
-            
+
             if (page !== undefined) {
                 return res.status(200).json({ message: `Danh sách sản phẩm trang ${page}`, products });
             } else {
@@ -88,7 +88,7 @@ const RemoveProduct = async (req, res) => {
             };
             const colorIdJSON = JSON.stringify(product.color_id);
             const sizeIdJSON = JSON.stringify(product.size_id);
-            const sqlbin = `INSERT INTO recycle_bin_product (product, deleted_at, user_id ) VALUES('{"product_id": ${id} , "product_name": "${product.product_name}", "product_description":"${product.product_description}", "product_price":${product.product_price} , "category_id":${product.category_id}, "image":${updatedProduct.image}, "size_id":${sizeIdJSON},"color_id":${colorIdJSON}}',
+            const sqlbin = `INSERT INTO recycle_bin_product (product, deleted_at, user_id ) VALUES('{"product_id": ${id} , "product_name": "${product.product_name}", "product_description":"${product.product_description}", "product_price":${product.product_price} , "category_id":${product.category_id}, "image":${updatedProduct.image}, "size_id":${sizeIdJSON},"color_id":${colorIdJSON} , "sale_id":${product.sale_id}, "outstan":${product.outstan}}',
 '${time}', ${userId}) RETURNING *`
             connect.query(sqlbin, (err, result) => {
                 if (err) {
@@ -102,7 +102,7 @@ const RemoveProduct = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
- const GetOutstan = async (req, res) => {
+const GetOutstan = async (req, res) => {
     try {
         const sql = `SELECT * FROM product WHERE outstan IS NOT NULL AND outstan = true LIMIT 8`
         connect.query(sql, (err, results) => {
@@ -116,6 +116,20 @@ const RemoveProduct = async (req, res) => {
         return res.status(500).json({ message: 'Loi api', err })
     }
 }
-module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan };
+const GetSale = async (req, res) => {
+    try {
+        const sql = `SELECT * FROM product WHERE sale_id > 0 LIMIT 8;`
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lay sale that bai', err })
+            }
+            const data = results.rows
+            return res.status(200).json({ message: 'Lay sale thanh cong', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi api', err })
+    }
+}
+module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale };
 
 
