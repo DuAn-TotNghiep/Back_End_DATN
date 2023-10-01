@@ -93,6 +93,7 @@ const Signin = async (req, res) => {
                 user_image: user.user_image,
                 user_email: user.user_email,
                 user_phone: user.user_phone,
+                role:user.role
             },
             accessToken: accessToken
         });
