@@ -76,34 +76,37 @@ const searchProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     try {
-        const page = req.query.page;
-        const perPage = 3; // Số sản phẩm trên mỗi trang
+        const { page, perPage } = req.query; // Lấy thông tin trang và số mục trên mỗi trang từ query parameters
 
-        let sql = 'SELECT * FROM product';
-        const values = [];
+        const pageNumber = parseInt(page) || 1; // Chuyển đổi page thành số nguyên, mặc định là 1 nếu không có hoặc không hợp lệ
+        const itemsPerPage = parseInt(perPage) || 3; // Chuyển đổi perPage thành số nguyên, mặc định là 3 nếu không có hoặc không hợp lệ
 
-        if (page !== undefined) {
-            // Nếu có tham số 'page', thực hiện phân trang
-            const offset = (page - 1) * perPage;
-            sql += ` LIMIT ${perPage} OFFSET ${offset}`;
-        }
+        const offset = (pageNumber - 1) * itemsPerPage; // Tính toán offset dựa trên trang hiện tại và số mục trên mỗi trang
 
-        connect.query(sql, (err, result) => {
+        let sqlTotal = `SELECT COUNT(*) FROM product`; // Đếm tổng số dòng trong bảng category
+        let sql = `SELECT * FROM product ORDER BY product_id LIMIT $1 OFFSET $2`; // Sử dụng LIMIT và OFFSET để thực hiện phân trang
+
+        const totalResults = await connect.query(sqlTotal);
+        const totalCategories = parseInt(totalResults.rows[0].count);
+
+        const totalPages = Math.ceil(totalCategories / itemsPerPage);
+
+        connect.query(sql, [itemsPerPage, offset], (err, results) => {
             if (err) {
-                return res.status(500).json({ message: 'Không lấy được danh sách sản phẩm' });
+                return res.status(500).json({ message: 'Lấy tất cả product thất bại' });
             }
-            const products = result.rows;
-
-            if (page !== undefined) {
-                return res.status(200).json({ message: `Danh sách sản phẩm trang ${page}`, products });
-            } else {
-                return res.status(200).json({ message: 'Danh sách sản phẩm', products });
-            }
+            const data = results.rows;
+            return res.status(200).json({
+                message: 'Lấy tất cả product thành công',
+                data,
+                totalPages,
+                currentPage: pageNumber,
+            });
         });
-    } catch (error) {
+    } catch (err) {
         return res.status(500).json({ message: 'Lỗi API' });
     }
-};
+}
 const RemoveProduct = async (req, res) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
