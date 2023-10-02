@@ -76,37 +76,25 @@ const searchProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     try {
-        const { page, perPage } = req.query; // Lấy thông tin trang và số mục trên mỗi trang từ query parameters
+        const sql = `SELECT * FROM product`;
 
-        const pageNumber = parseInt(page) || 1; // Chuyển đổi page thành số nguyên, mặc định là 1 nếu không có hoặc không hợp lệ
-        const itemsPerPage = parseInt(perPage) || 3; // Chuyển đổi perPage thành số nguyên, mặc định là 3 nếu không có hoặc không hợp lệ
+        const results = await connect.query(sql);
 
-        const offset = (pageNumber - 1) * itemsPerPage; // Tính toán offset dựa trên trang hiện tại và số mục trên mỗi trang
+        if (!results || !results.rows || results.rows.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy sản phẩm nào.' });
+        }
 
-        let sqlTotal = `SELECT COUNT(*) FROM product`; // Đếm tổng số dòng trong bảng category
-        let sql = `SELECT * FROM product ORDER BY product_id LIMIT $1 OFFSET $2`; // Sử dụng LIMIT và OFFSET để thực hiện phân trang
+        const data = results.rows;
 
-        const totalResults = await connect.query(sqlTotal);
-        const totalCategories = parseInt(totalResults.rows[0].count);
-
-        const totalPages = Math.ceil(totalCategories / itemsPerPage);
-
-        connect.query(sql, [itemsPerPage, offset], (err, results) => {
-            if (err) {
-                return res.status(500).json({ message: 'Lấy tất cả product thất bại' });
-            }
-            const data = results.rows;
-            return res.status(200).json({
-                message: 'Lấy tất cả product thành công',
-                data,
-                totalPages,
-                currentPage: pageNumber,
-            });
+        return res.status(200).json({
+            message: 'Lấy tất cả product thành công',
+            data,
         });
     } catch (err) {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+
 const RemoveProduct = async (req, res) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
