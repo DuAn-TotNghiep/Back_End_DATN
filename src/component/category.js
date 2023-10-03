@@ -73,7 +73,16 @@ const getAllCategory = async (req, res) => {
     }
 }
 
-
+const GetAllCat = (req, res) => {
+    let sql = `SELECT * FROM category`;
+    connect.query(sql, (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Loi khong lay duco all" })
+        }
+        const data = results.rows
+        return res.status(200).json({ message: 'lay thanh cong', data })
+    })
+}
 
 
 const RemoveCategory = async (req, res) => {
@@ -111,4 +120,4 @@ async function removeProductsOfCategory(category_id) {
 }
 
 
-module.exports = { addCategory, getAllCategory, RemoveCategory };
+module.exports = { addCategory, getAllCategory, RemoveCategory, GetAllCat };
