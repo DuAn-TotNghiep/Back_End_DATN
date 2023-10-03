@@ -76,34 +76,21 @@ const searchProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     try {
-        const page = req.query.page;
-        const perPage = 3; // Số sản phẩm trên mỗi trang
-
-        let sql = 'SELECT * FROM product';
-        const values = [];
-
-        if (page !== undefined) {
-            // Nếu có tham số 'page', thực hiện phân trang
-            const offset = (page - 1) * perPage;
-            sql += ` LIMIT ${perPage} OFFSET ${offset}`;
+        const sql = `SELECT * FROM product`;
+        const results = await connect.query(sql);
+        if (!results || !results.rows || results.rows.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy sản phẩm nào.' });
         }
-
-        connect.query(sql, (err, result) => {
-            if (err) {
-                return res.status(500).json({ message: 'Không lấy được danh sách sản phẩm' });
-            }
-            const products = result.rows;
-
-            if (page !== undefined) {
-                return res.status(200).json({ message: `Danh sách sản phẩm trang ${page}`, products });
-            } else {
-                return res.status(200).json({ message: 'Danh sách sản phẩm', products });
-            }
+        const data = results.rows;
+        return res.status(200).json({
+            message: 'Lấy tất cả product thành công',
+            data,
         });
-    } catch (error) {
+    } catch (err) {
         return res.status(500).json({ message: 'Lỗi API' });
     }
-};
+}
+
 const RemoveProduct = async (req, res) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
@@ -161,7 +148,7 @@ const GetOutstan = async (req, res) => {
 }
 const GetSale = async (req, res) => {
     try {
-      const sql = `SELECT product.*, sale.sale_distcount FROM product
+        const sql = `SELECT product.*, sale.sale_distcount FROM product
         JOIN sale ON product.sale_id = sale.sale_id
         WHERE sale.sale_distcount > 0
         LIMIT 8;
