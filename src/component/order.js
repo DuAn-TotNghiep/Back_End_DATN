@@ -4,8 +4,8 @@ const order = async (req, res) => {
     try {
         const { checkout_id, user_id, order_total } = req.body;
 
-        // Sử dụng Luxon để tạo giá trị thời gian hiện tại
-        const order_date = DateTime.local(); // Tạo thời gian hiện tại
+        // Sử dụng Luxon để tạo giá trị thời gian hiện tại cho khu vực "Asia/Ho_Chi_Minh"
+        const order_date = DateTime.local().setZone('Asia/Ho_Chi_Minh'); // Tạo thời gian hiện tại cho khu vực "Asia/Ho_Chi_Minh"
 
         // Sử dụng Prepared Statement để tránh SQL Injection
         const sql = {
