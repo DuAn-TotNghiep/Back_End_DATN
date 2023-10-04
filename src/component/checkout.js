@@ -3,10 +3,24 @@ const connect = require('../../database');
 
 const checkout = (req, res) => {
     try {
-        const { product_id, province, district, ward, address, payment, user_id, total } = req.body
-        const sql = `INSERT INTO checkout (user_id, province, district, ward, payment, address, product_id, total) VALUES (${user_id}, '${province}', '${district}', '${ward}', '${payment}', '${address}', ARRAY[${product_id}], ${total}) RETURNING *`;
-
-        connect.query(sql, (err, result) => {
+        const { product, province, district, ward, address, payment, user_id, total } = req.body
+        const productJSON = JSON.stringify(product);
+        const sql = `
+  INSERT INTO checkout (user_id, province, district, ward, payment, address, product, total)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+  RETURNING *;
+`;
+        const values = [
+            user_id,
+            province,
+            district,
+            ward,
+            payment,
+            address,
+            productJSON, // Sử dụng giá trị đã chuẩn bị ở trên
+            total,
+        ];
+        connect.query(sql, values, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: "Khong them duoc check out", err })
             }
