@@ -199,6 +199,31 @@ const GetOneProduct = async (req, res) => {
         return res.status(500).json({ message: 'Loi api', err })
     }
 }
-module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct };
+const GetTopSaleProduct = async (req, res) => {
+    try {
+        const sql = `
+        SELECT product.sale_id, COUNT(orders.user_id) AS product_count, product.product_name
+        FROM product
+        LEFT JOIN orders ON product.sale_id = orders.user_id
+        WHERE product.sale_id > 0
+        GROUP BY product.sale_id, product.product_name
+        ORDER BY product_count DESC
+        LIMIT 10
+    `;
+
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy sản phẩm giảm giá bán chạy thất bại', err });
+            }
+
+            const data = results.rows;
+            return res.status(200).json({ message: 'Lấy sản phẩm giảm giá bán chạy nhất thành công', data });
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', err });
+    }
+}
+
+module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct , GetTopSaleProduct};
 
 
