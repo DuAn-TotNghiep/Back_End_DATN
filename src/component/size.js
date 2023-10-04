@@ -28,5 +28,21 @@ const addSize = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+const getAllSize = async (req, res) => {
+    try {
 
-module.exports = { addSize };
+        let sql = `SELECT * FROM size`;
+
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'lay size thất bại' });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: 'lay size thành công', data });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+
+module.exports = { addSize, getAllSize };

@@ -78,7 +78,7 @@ const Signin = async (req, res) => {
         }
 
         // Tạo AccessToken
-        const accessToken = jwt.sign({ user_id: user.user_id }, 'datn', { expiresIn: '1d' });
+        const accessToken = jwt.sign({ user_id: user.id }, 'datn', { expiresIn: '1d' });
 
         res.status(200).json({
             message: 'Đăng nhập thành công',

@@ -37,4 +37,20 @@ const addColor = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
-module.exports = { addColor };
+const getAllColor = async (req, res) => {
+    try {
+
+        let sql = `SELECT * FROM color`;
+
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lay color thất bại' });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: 'Kay color thành công', data });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+module.exports = { addColor, getAllColor };
