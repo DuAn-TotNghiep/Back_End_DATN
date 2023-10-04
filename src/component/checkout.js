@@ -25,8 +25,14 @@ const checkout = (req, res) => {
                 return res.status(500).json({ message: "Khong them duoc check out", err })
             }
             const data = result.rows[0]
-            console.log(data);
-            return res.status(200).json({ message: "Them thanh cong", data })
+            const sql1 = `DELETE FROM cart
+WHERE user_id = ${user_id}`
+            connect.query(sql1, (err, result) => {
+                if (err) {
+                    return res.status(500).json({ message: 'xoas dudwocj sanr pham trong gio hang', err })
+                }
+                return res.status(200).json({ message: "Them thanh cong", data })
+            })
         })
     } catch (err) {
         return res.status(500).json({ message: 'Loi API', err })
