@@ -103,4 +103,26 @@ const Signin = async (req, res) => {
         res.status(500).json({ message: 'Đã xảy ra lỗi' });
     }
 };
-module.exports = { Signup,Signin };
+const TopUser = async (req, res)=>{
+    try {
+        const sql = `
+            SELECT user_id, COUNT(*) as order_count
+            FROM orders
+            GROUP BY user_id
+            ORDER BY order_count DESC
+            LIMIT 10
+        `;
+
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy top user thất bại', err });
+            }
+
+            const data = results.rows;
+            return res.status(200).json({ message: 'Lấy top user thành công', data });
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', err });
+    }
+}
+module.exports = { Signup,Signin, TopUser };
