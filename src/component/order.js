@@ -2,15 +2,15 @@ const connect = require('../../database');
 const { DateTime } = require('luxon');
 const order = async (req, res) => {
     try {
-        const { checkout_id, user_id, order_total } = req.body;
+        const { checkout_id, user_id, order_total, payment_status } = req.body;
 
         // Sử dụng Luxon để tạo giá trị thời gian hiện tại cho khu vực "Asia/Ho_Chi_Minh"
         const order_date = DateTime.local().setZone('Asia/Ho_Chi_Minh'); // Tạo thời gian hiện tại cho khu vực "Asia/Ho_Chi_Minh"
 
         // Sử dụng Prepared Statement để tránh SQL Injection
         const sql = {
-            text: 'INSERT INTO orders (checkout_id, user_id, order_date, order_total) VALUES ($1, $2, $3, $4) RETURNING *',
-            values: [checkout_id, user_id, order_date, order_total],
+            text: 'INSERT INTO orders (checkout_id, user_id, order_date, order_total, status, payment_status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            values: [checkout_id, user_id, order_date, order_total, 1, payment_status],
         };
 
         const result = await connect.query(sql);
