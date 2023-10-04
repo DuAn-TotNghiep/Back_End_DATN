@@ -11,15 +11,21 @@
 		"bcrypt": "^5.1.1",
 		"bcryptjs": "^2.4.3",
 		"concurrently": "^8.2.1",
+		"config": "^3.3.9",
 		"cors": "^2.8.5",
+		"dateformat": "^5.0.3",
 		"express": "^4.18.2",
 		"http": "0.0.1-security",
 		"install": "^0.13.0",
 		"joi": "^17.10.2",
+		"jquery": "^3.7.1",
 		"jsonwebtoken": "^9.0.2",
 		"luxon": "^3.4.3",
+		"moment": "^2.29.4",
 		"nodemon": "^3.0.1",
 		"pg": "^8.11.3",
-		"socket.io": "^4.7.2"
+		"request": "^2.88.2",
+		"socket.io": "^4.7.2",
+		"sorted-object": "^2.0.1"
 	}
 }

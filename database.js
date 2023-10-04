@@ -10,9 +10,12 @@ const connect = new Client({
     // port: 3001, // Cổng mặc định của PostgreSQL là 5432
     // database: 'DU_AN_TOT_NGHIEP',
 
-    database: 'DUANTN'
+    database: 'DUANTN',
+    // database: 'DATN',
+
+    database: 'DATN_2023_MAIN'
 
 
 
 });
-module.exports = connect;
+module.exports = connect; 
