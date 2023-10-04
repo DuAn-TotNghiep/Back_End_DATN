@@ -202,28 +202,78 @@ const GetOneProduct = async (req, res) => {
 const GetTopSaleProduct = async (req, res) => {
     try {
         const sql = `
-        SELECT product.sale_id, COUNT(orders.user_id) AS product_count, product.product_name
-        FROM product
-        LEFT JOIN orders ON product.sale_id = orders.user_id
-        WHERE product.sale_id > 0
-        GROUP BY product.sale_id, product.product_name
-        ORDER BY product_count DESC
-        LIMIT 10
+    SELECT * FROM product WHERE sale_id > 0
     `;
 
-        connect.query(sql, (err, results) => {
+        connect.query(sql, async (err, results) => {
             if (err) {
                 return res.status(500).json({ message: 'Lấy sản phẩm giảm giá bán chạy thất bại', err });
             }
 
             const data = results.rows;
-            return res.status(200).json({ message: 'Lấy sản phẩm giảm giá bán chạy nhất thành công', data });
+
+            let resolve = []
+            const resultPromises = data.map(async (productId) => {
+                console.log(productId.product_id);
+                // Tạo một Promise cho mỗi câu truy vấn SQL
+                return new Promise((resolve, reject) => {
+                    const sqlQuery = `SELECT * FROM checkout WHERE EXISTS (
+                    SELECT * FROM jsonb_array_elements(product) AS p
+                    WHERE p->>'product_id' ='${productId.product_id}')`;
+                    connect.query(sqlQuery, (err, results) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(results.rows);
+                        }
+
+
+                    });
+                });
+            });
+
+            //   console.log(resultPromises);
+            // Sử dụng Promise.all để gộp kết quả từ tất cả các truy vấn
+            const allResults = await Promise.all(resultPromises);
+
+            // Bây giờ allResults chứa mảng các kết quả từ các truy vấn
+            console.log(allResults);
+
+            // Gộp tất cả kết quả thành một mảng duy nhất
+            const mergedResults = [].concat(...allResults);
+
+            // Tạo một đối tượng để theo dõi số lượng sản phẩm mua
+            const productCountMap = {};
+
+            // Đếm số lượng sản phẩm mua
+            mergedResults.forEach((row) => {
+                if (!productCountMap[row.product[0].product_id]) {
+                    productCountMap[row.product[0].product_id] = 1;
+                } else {
+                    productCountMap[row.product[0].product_id]++;
+                }
+            });
+
+            // Chuyển đổi thành mảng các đối tượng có thông tin sản phẩm và số lượng
+            const productListWithCounts = Object.keys(productCountMap).map((productId) => ({
+                product_id: productId,
+                count: productCountMap[productId],
+            }));
+
+            // Sắp xếp danh sách theo số lượng giảm dần
+            productListWithCounts.sort((a, b) => b.count - a.count);
+
+            // In danh sách sản phẩm và số lượng từ cao xuống
+            console.log(productListWithCounts);
+
+
+            return res.status(200).json({ message: 'Lấy sản phẩm giảm giá bán chạy nhất thành công', productListWithCounts });
         });
     } catch (err) {
         return res.status(500).json({ message: 'Lỗi API', err });
     }
 }
 
-module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct , GetTopSaleProduct};
+module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct };
 
 
