@@ -42,4 +42,25 @@ const getAllOrder = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
-module.exports = { order, getAllOrder };
+const TotalAmountAllProductOrder = async (req, res) => {
+    try {
+        const sql = `
+            SELECT o.user_id, CONCAT(u.user_firstname, ' ', u.user_lastname) AS user_name, SUM(o.order_total) AS total_amount
+            FROM orders o
+            JOIN users u ON o.user_id = u.id
+            GROUP BY o.user_id, user_name
+        `;
+
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy tổng số tiền đơn hàng thất bại', err });
+            }
+
+            const totalAmountByUser = results.rows;
+            return res.status(200).json({ message: 'Lấy tổng số tiền đơn hàng thành công', totalAmountByUser });
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', err });
+    }
+}
+module.exports = { order, getAllOrder, TotalAmountAllProductOrder };
