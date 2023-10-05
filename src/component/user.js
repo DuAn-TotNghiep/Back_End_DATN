@@ -54,7 +54,7 @@ const Signin = async (req, res) => {
     try {
         const { user_email, user_password } = req.body;
 
-  
+
         const { error } = userSignin.validate(req.body);
         if (error) {
             return res.status(400).json({ message: error.details[0].message });
@@ -78,7 +78,7 @@ const Signin = async (req, res) => {
         }
 
         // Tạo AccessToken
-        const accessToken = jwt.sign({ user_id: user.id }, 'datn', { expiresIn: '1d' });
+        const accessToken = jwt.sign({ user_id: user.user_id }, 'datn', { expiresIn: '1d' });
 
         res.status(200).json({
             message: 'Đăng nhập thành công',
@@ -93,7 +93,7 @@ const Signin = async (req, res) => {
                 user_image: user.user_image,
                 user_email: user.user_email,
                 user_phone: user.user_phone,
-                role:user.role
+                role: user.role
             },
             accessToken: accessToken
         });
@@ -103,7 +103,7 @@ const Signin = async (req, res) => {
         res.status(500).json({ message: 'Đã xảy ra lỗi' });
     }
 };
-const TopUser = async (req, res)=>{
+const TopUser = async (req, res) => {
     try {
         const sql = `
             SELECT user_id, COUNT(*) as order_count
@@ -125,4 +125,22 @@ const TopUser = async (req, res)=>{
         return res.status(500).json({ message: 'Lỗi API', err });
     }
 }
-module.exports = { Signup,Signin, TopUser };
+const GetOneUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sql = `SELECT * FROM users WHERE id = ${id}`;
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy thông tin người dùng thất bại', error: err });
+            }
+            const data = results.rows[0];
+            return res.status(200).json({ message: 'Lấy thông tin người dùng thành công', data });
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', error: err });
+    }
+}
+
+
+
+module.exports = { Signup, Signin, TopUser, GetOneUser };
