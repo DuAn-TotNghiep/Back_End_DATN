@@ -1,5 +1,6 @@
 const connect = require('../../database');
 const { DateTime } = require('luxon');
+const jwt = require('jsonwebtoken');
 const order = async (req, res) => {
     try {
         const { checkout_id, user_id, order_total, payment_status } = req.body;
@@ -42,6 +43,24 @@ const getAllOrder = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+const getOneOrder = async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const decoded = jwt.verify(token, "datn");
+        const userId = decoded.user_id;
+        const { id } = req.params
+        let sql = `SELECT * FROM orders WHERE order_id =${id} AND user_id=${userId}`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Không lấy được danh sách order' });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: "lấy danh sách order thành công", data });
+        })
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
 const TotalAmountAllProductOrder = async (req, res) => {
     try {
         const sql = `
@@ -63,4 +82,4 @@ const TotalAmountAllProductOrder = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', err });
     }
 }
-module.exports = { order, getAllOrder, TotalAmountAllProductOrder };
+module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder };
