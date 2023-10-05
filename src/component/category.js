@@ -72,6 +72,25 @@ const getAllCategory = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+const getAllCategoryNoPagination = async (req, res) => {
+    try {
+        let sql = `SELECT * FROM category`;
+
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy tất cả category thất bại' });
+            }
+            const data = results.rows;
+            return res.status(200).json({
+                message: 'Lấy tất cả category thành công',
+                data,
+            });
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+
 
 const GetAllCat = (req, res) => {
     let sql = `SELECT * FROM category`;
@@ -120,4 +139,4 @@ async function removeProductsOfCategory(category_id) {
 }
 
 
-module.exports = { addCategory, getAllCategory, RemoveCategory, GetAllCat };
+module.exports = { addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination };
