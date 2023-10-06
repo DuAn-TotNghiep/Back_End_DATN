@@ -1,7 +1,8 @@
 const express = require("express");
-const { getTotolDay } = require("../component/dashboard");
+const { getTotalDay, getTotalWeek } = require("../component/dashboard");
+
 const router = express.Router();
 
-router.get("/totalday", getTotolDay);
-
+router.get("/totalday", getTotalDay);
+router.get("/totalweek", getTotalWeek);
 module.exports = router;
