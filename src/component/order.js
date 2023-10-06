@@ -18,7 +18,6 @@ const order = async (req, res) => {
 
         if (result.rowCount > 0) {
             const data = result.rows[0];
-            console.log(data);
             return res.status(200).json({ message: 'Thêm thành công order', data });
         } else {
             return res.status(500).json({ message: 'Không thêm được order' });
