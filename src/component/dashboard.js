@@ -29,7 +29,6 @@ const getTotalWeek = (req, res) => {
     // Lấy ngày cuối cùng của tuần
     const lastDayOfWeek = today.endOf("week");
     const targetDate = today.minus({ days: 6 });
-    console.log(today.toISODate(), targetDate.toISODate());
     const sql = `
     SELECT SUM(order_total) AS total_amount_week
 FROM orders
@@ -51,5 +50,28 @@ WHERE
     return res.status(500).json({ message: "Loi API", err });
   }
 };
-
+const getTotalMonth = (req, res) => {
+  try {
+    const sql = `
+    SELECT SUM(order_total) AS total_amount_month
+    FROM orders
+    WHERE 
+      EXTRACT(YEAR FROM order_date::date) = EXTRACT(YEAR FROM CURRENT_DATE) AND
+      EXTRACT(MONTH FROM order_date::date) = EXTRACT(MONTH FROM CURRENT_DATE);
+  `;
+    connect.query(sql, (err, results) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "không lấy được tiền trong tháng này", err });
+      }
+      const data = results.rows[0];
+      return res
+        .status(200)
+        .json({ message: "Lấy thành công tổng tiền trong tháng này", data });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Loi API", err });
+  }
+};
 module.exports = { getTotalDay, getTotalWeek };
