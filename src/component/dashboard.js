@@ -105,8 +105,40 @@ const TopProductToday = async (req, res) => {
     return res.status(500).json({ message: 'Lỗi API', error: err.message });
   }
 };
+const TopProductWeek = async (req, res) => {
+  try {
+    const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+    const firstDayOfWeek = today.startOf("week");
+    // Lấy ngày cuối cùng của tuần
+    const lastDayOfWeek = today.endOf("week");
+    const targetDate = today.minus({ days: 6 });
+    const sql = `
+  SELECT p->>'product_id' AS product_id, COUNT(*) AS total_count
+    FROM checkout, jsonb_array_elements(product) AS p
+    WHERE DATE(checkout_date) BETWEEN '${targetDate.toISODate()}' AND '${today.toISODate()}'
+    GROUP BY p->>'product_id'
+    ORDER BY total_count DESC
+    LIMIT 3;
+`
+    connect.query(sql, (err, results) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "không lấy được sản phẩm bán chạy trong tuần ", err });
+      }
+      const data = results.rows;
+      return res
+        .status(200)
+        .json({ message: "Lấy thành công sản phẩm bán chạy trong tuần", data });
+    });
+
+  } catch (error) {
+
+  }
+}
 
 
 
 
-module.exports = { getTotalDay, getTotalWeek, TopProductToday };
+
+module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek };
