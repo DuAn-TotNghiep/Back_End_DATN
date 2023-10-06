@@ -51,13 +51,14 @@ WHERE
   }
 };
 const getTotalMonth = (req, res) => {
+  const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+  const targetDate = today.minus({ days: 30 });
   try {
     const sql = `
-    SELECT SUM(order_total) AS total_amount_month
-    FROM orders
-    WHERE 
-      EXTRACT(YEAR FROM order_date::date) = EXTRACT(YEAR FROM CURRENT_DATE) AND
-      EXTRACT(MONTH FROM order_date::date) = EXTRACT(MONTH FROM CURRENT_DATE);
+    SELECT SUM(order_total) AS total_amount_week
+FROM orders
+WHERE 
+ DATE(order_date) BETWEEN '${targetDate.toISODate()}' AND '${today.toISODate()}';
   `;
     connect.query(sql, (err, results) => {
       if (err) {
@@ -133,12 +134,39 @@ const TopProductWeek = async (req, res) => {
     });
 
   } catch (error) {
+    return res.status(500).json({ message: 'Lỗi API', error: err.message });
+  }
+}
+const TopProductMonth = async (req, res) => {
+  try {
+    const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+    const targetDate = today.minus({ days: 30 });
+    const sql = `
+  SELECT p->>'product_id' AS product_id, COUNT(*) AS total_count
+    FROM checkout, jsonb_array_elements(product) AS p
+    WHERE DATE(checkout_date) BETWEEN '${targetDate.toISODate()}' AND '${today.toISODate()}'
+    GROUP BY p->>'product_id'
+    ORDER BY total_count DESC
+    LIMIT 3;
+`
+    connect.query(sql, (err, results) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Không lấy được sản phẩm bán chạy trong tháng", err });
+      }
+      const data = results.rows;
+      return res
+        .status(200)
+        .json({ message: "Lấy thành công sản phẩm bán chạy trong tháng", data });
+    });
 
+  } catch (error) {
+    return res.status(500).json({ message: 'Lỗi API', error: error.message });
   }
 }
 
 
 
 
-
-module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek };
+module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth };
