@@ -130,8 +130,6 @@ async function removeProductsOfCategory(category_id) {
         // Xoá sản phẩm của danh mục
         const deleteProductsQuery = `DELETE FROM product WHERE category_id = ${category_id}`;
         await connect.query(deleteProductsQuery);
-
-        console.log(`Deleted products for category ${category_id}`);
     } catch (error) {
         console.error(`Error deleting products for category ${category_id}:`, error);
         // Xử lý lỗi nếu cần

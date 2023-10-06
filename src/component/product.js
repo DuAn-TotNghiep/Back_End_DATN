@@ -204,17 +204,14 @@ const GetTopSaleProduct = async (req, res) => {
         const sql = `
     SELECT * FROM product WHERE sale_id > 0
     `;
-
         connect.query(sql, async (err, results) => {
             if (err) {
                 return res.status(500).json({ message: 'Lấy sản phẩm giảm giá bán chạy thất bại', err });
             }
-
             const data = results.rows;
 
             let resolve = []
             const resultPromises = data.map(async (productId) => {
-                console.log(productId.product_id);
                 // Tạo một Promise cho mỗi câu truy vấn SQL
                 return new Promise((resolve, reject) => {
                     const sqlQuery = `SELECT * FROM checkout WHERE EXISTS (
@@ -226,25 +223,16 @@ const GetTopSaleProduct = async (req, res) => {
                         } else {
                             resolve(results.rows);
                         }
-
-
                     });
                 });
             });
-
-            //   console.log(resultPromises);
             // Sử dụng Promise.all để gộp kết quả từ tất cả các truy vấn
             const allResults = await Promise.all(resultPromises);
-
             // Bây giờ allResults chứa mảng các kết quả từ các truy vấn
-            console.log(allResults);
-
             // Gộp tất cả kết quả thành một mảng duy nhất
             const mergedResults = [].concat(...allResults);
-
             // Tạo một đối tượng để theo dõi số lượng sản phẩm mua
             const productCountMap = {};
-
             // Đếm số lượng sản phẩm mua
             mergedResults.forEach((row) => {
                 if (!productCountMap[row.product[0].product_id]) {
@@ -253,20 +241,14 @@ const GetTopSaleProduct = async (req, res) => {
                     productCountMap[row.product[0].product_id]++;
                 }
             });
-
             // Chuyển đổi thành mảng các đối tượng có thông tin sản phẩm và số lượng
             const productListWithCounts = Object.keys(productCountMap).map((productId) => ({
                 product_id: productId,
                 count: productCountMap[productId],
             }));
-
             // Sắp xếp danh sách theo số lượng giảm dần
             productListWithCounts.sort((a, b) => b.count - a.count);
-
             // In danh sách sản phẩm và số lượng từ cao xuống
-            console.log(productListWithCounts);
-
-
             return res.status(200).json({ message: 'Lấy sản phẩm giảm giá bán chạy nhất thành công', productListWithCounts });
         });
     } catch (err) {

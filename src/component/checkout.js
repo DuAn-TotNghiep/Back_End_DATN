@@ -1,13 +1,14 @@
 const connect = require('../../database');
-
+const { DateTime } = require('luxon');
 
 const checkout = (req, res) => {
     try {
         const { product, province, district, ward, address, payment, user_id, total } = req.body
         const productJSON = JSON.stringify(product);
+        const order_date = DateTime.local().setZone('Asia/Ho_Chi_Minh');
         const sql = `
-  INSERT INTO checkout (user_id, province, district, ward, payment, address, product, total)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+  INSERT INTO checkout (user_id, province, district, ward, payment, address, product, total,checkout_date)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
   RETURNING *;
 `;
         const values = [
@@ -19,6 +20,7 @@ const checkout = (req, res) => {
             address,
             productJSON, // Sử dụng giá trị đã chuẩn bị ở trên
             total,
+            order_date
         ];
         connect.query(sql, values, (err, result) => {
             if (err) {
