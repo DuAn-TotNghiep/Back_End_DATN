@@ -199,18 +199,18 @@ const TopRevenueProductToday = async (req, res) => {
 const TopRevenueProductThisWeek = async (req, res) => {
   try {
     const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
-    const startOfWeek = today.startOf('week');
-    const endOfWeek = today.endOf('week');
+    const startOfLast7Days = today.minus({ days: 7 });
 
-    // Thực hiện truy vấn SQL để lấy sản phẩm có doanh thu cao nhất trong tuần
+    // Thực hiện truy vấn SQL để lấy sản phẩm có doanh thu cao nhất từ 7 ngày trước đến thời điểm hiện tại
     const sqlQuery = `
     SELECT p->>'product_id' AS product_id, SUM((p->>'product_price')::numeric) AS total_revenue
     FROM checkout, jsonb_array_elements(product) AS p
-    WHERE DATE(checkout_date) >= '${startOfWeek.toFormat("yyyy-MM-dd")}' 
-      AND DATE(checkout_date) <= '${endOfWeek.toFormat("yyyy-MM-dd")}'
+    WHERE DATE(checkout_date) >= '${startOfLast7Days.toFormat("yyyy-MM-dd")}' 
+      AND DATE(checkout_date) <= '${today.toFormat("yyyy-MM-dd")}'
+      AND p->>'product_price' IS NOT NULL
     GROUP BY p->>'product_id'
     ORDER BY total_revenue DESC
-    LIMIT 5;
+    LIMIT 3;
     `;
 
     // Thực hiện truy vấn SQL
@@ -218,10 +218,44 @@ const TopRevenueProductThisWeek = async (req, res) => {
 
     // Kiểm tra nếu không có kết quả
     if (result.length === 0) {
-      return res.status(404).json({ message: 'Không có sản phẩm có doanh thu trong tuần.' });
+      return res.status(404).json({ message: 'Không có sản phẩm có doanh thu trong khoảng thời gian này.' });
     }
 
-    // Lấy thông tin sản phẩm có doanh thu cao nhất trong tuần
+    // Lấy thông tin sản phẩm có doanh thu cao nhất trong khoảng thời gian này
+    const topProducts = result.rows;
+
+    return res.status(200).json(topProducts);
+  } catch (err) {
+    return res.status(500).json({ message: 'Lỗi API', error: err.message });
+  }
+};
+
+const TopRevenueProductThisMonth = async (req, res) => {
+  try {
+    const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+    const startOfLastMonth = today.startOf('month').minus({ months: 1 });
+
+    // Thực hiện truy vấn SQL để lấy sản phẩm có doanh thu cao nhất từ ngày này của tháng trước đến thời điểm hiện tại và không hiển thị sản phẩm không có giá
+    const sqlQuery = `
+    SELECT p->>'product_id' AS product_id, SUM((p->>'product_price')::numeric) AS total_revenue
+    FROM checkout, jsonb_array_elements(product) AS p
+    WHERE DATE(checkout_date) >= '${startOfLastMonth.toFormat("yyyy-MM-dd")}' 
+      AND DATE(checkout_date) <= '${today.toFormat("yyyy-MM-dd")}'
+      AND p->>'product_price' IS NOT NULL
+    GROUP BY p->>'product_id'
+    ORDER BY total_revenue DESC
+    LIMIT 3;
+    `;
+
+    // Thực hiện truy vấn SQL
+    const result = await connect.query(sqlQuery);
+
+    // Kiểm tra nếu không có kết quả
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'Không có sản phẩm có doanh thu trong khoảng thời gian này.' });
+    }
+
+    // Lấy thông tin sản phẩm có doanh thu cao nhất trong khoảng thời gian này
     const topProducts = result.rows;
 
     return res.status(200).json(topProducts);
@@ -233,5 +267,4 @@ const TopRevenueProductThisWeek = async (req, res) => {
 
 
 
-
-module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek };
+module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth };
