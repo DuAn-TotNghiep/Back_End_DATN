@@ -169,4 +169,20 @@ const GetOneUser = async (req, res) => {
   }
 };
 
-module.exports = { Signup, Signin, TopUser, GetOneUser };
+const getAllUser = async (req, res) => {
+  try {
+    const sql = `SELECT * FROM users`;
+    const results = await connect.query(sql);
+    if (!results || !results.rows || results.rows.length === 0) {
+      return res.status(404).json({ message: 'Không tìm thấy user nào.' });
+    }
+    const data = results.rows;
+    return res.status(200).json({
+      message: 'Lấy tất cả user thành công',
+      data,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: 'Lỗi API' });
+  }
+}
+module.exports = { Signup, Signin, TopUser, GetOneUser, getAllUser };
