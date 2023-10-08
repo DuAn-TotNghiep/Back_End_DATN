@@ -167,14 +167,14 @@ const TopProductMonth = async (req, res) => {
 }
 const TopRevenueProductToday = async (req, res) => {
   try {
-    const checkout_date = DateTime.local().setZone("Asia/Ho_Chi_Minh");
-    const formattedDate = checkout_date.toFormat("yyyy-MM-dd");
+    const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
 
-    // Thực hiện truy vấn SQL để lấy sản phẩm có doanh thu lớn nhất trong ngày
+    // Thực hiện truy vấn SQL để lấy sản phẩm có doanh thu cao nhất trong ngày hôm nay và không hiển thị sản phẩm có doanh thu bằng 0 hoặc không có doanh thu
     const sqlQuery = `
     SELECT p->>'product_id' AS product_id, SUM((p->>'product_price')::numeric) AS total_revenue
     FROM checkout, jsonb_array_elements(product) AS p
-    WHERE DATE(checkout_date) = '${formattedDate}'
+    WHERE DATE(checkout_date) = '${today.toFormat("yyyy-MM-dd")}' 
+      AND (p->>'product_price')::numeric > 0
     GROUP BY p->>'product_id'
     ORDER BY total_revenue DESC
     LIMIT 3;
@@ -183,12 +183,12 @@ const TopRevenueProductToday = async (req, res) => {
     // Thực hiện truy vấn SQL
     const result = await connect.query(sqlQuery);
 
-    // Kiểm tra nếu không có kết quả
-    if (result.length === 0) {
-      return res.status(404).json({ message: 'Không có sản phẩm có doanh thu trong ngày.' });
+    if (result.length === 0 || result.rows.every(row => row.total_revenue === "0")) {
+      // Nếu không có sản phẩm có doanh thu hoặc tất cả sản phẩm có doanh thu bằng 0, gửi thông báo
+      return res.status(404).json({ message: 'Hôm nay không có doanh thu.' });
     }
 
-    // Lấy thông tin sản phẩm có doanh thu lớn nhất
+    // Lấy thông tin sản phẩm có doanh thu cao nhất trong ngày hôm nay
     const topProducts = result.rows;
 
     return res.status(200).json(topProducts);
@@ -196,6 +196,7 @@ const TopRevenueProductToday = async (req, res) => {
     return res.status(500).json({ message: 'Lỗi API', error: err.message });
   }
 };
+
 const TopRevenueProductThisWeek = async (req, res) => {
   try {
     const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
