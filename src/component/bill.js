@@ -1,6 +1,25 @@
 const { DateTime } = require('luxon');
 const connect = require('../../database');
 
+
+
+const getBill = async (req, res) => {
+    try {
+        const sql = `SELECT * FROM bill`;
+        const results = await connect.query(sql);
+        if (!results || !results.rows || results.rows.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy bill nào.' });
+        }
+        const data = results.rows;
+        return res.status(200).json({
+            message: 'Lấy tất cả bill thành công',
+            data,
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+
 const bill = async (req, res) => {
     try {
         const { user_id, order_id } = req.body;
@@ -37,4 +56,4 @@ const bill = async (req, res) => {
     }
 }
 
-module.exports = { bill };
+module.exports = { bill, getBill };
