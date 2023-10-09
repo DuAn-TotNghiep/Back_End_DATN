@@ -105,4 +105,19 @@ const CountOrderOnline = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', err });
     }
 }
-module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline };
+const UpdateCancell = (req, res) => {
+    try {
+        const { id } = req.body
+        const sql = `UPDATE orders SET status=0 WHERE order_id=${id}`
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'khong sua duoc trang thai cancell', err })
+            }
+            const data = result.rows[0]
+            return res.status(200).json({ message: 'sua thanh cong trang thai cancell', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi API', err })
+    }
+}
+module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell };
