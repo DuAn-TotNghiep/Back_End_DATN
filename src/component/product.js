@@ -255,7 +255,30 @@ const GetTopSaleProduct = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', err });
     }
 }
+const CountOrdersToday = async (req, res) => {
+    try {
+        const checkout_date = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        const formattedDate = checkout_date.toFormat("yyyy-MM-dd");
 
-module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct };
+        // Thực hiện truy vấn SQL để đếm số đơn hàng trong ngày
+        const sqlQuery = `
+        SELECT COUNT(*) AS checkout_date
+        FROM checkout
+        WHERE DATE(checkout_date) = '${formattedDate}';
+      `;
+
+        // Thực hiện truy vấn SQL
+        const result = await connect.query(sqlQuery);
+
+        // Lấy số đơn hàng được đặt trong ngày
+        const orderCount = result.rows[0].checkout_date;
+
+        return res.status(200).json({ checkout_date: orderCount });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', error: err.message });
+    }
+};
+
+module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday };
 
 

@@ -3,7 +3,7 @@ const connect = new Client({
   user: "postgres",
 
   // password: 'jajaja1234z',
-  password: "admin",
+  password: "ADMIN",
 
   host: "localhost",
   port: 5432, // Cổng mặc định của PostgreSQL là 5432
@@ -12,8 +12,8 @@ const connect = new Client({
 
   // database: 'DUANTN',
   // database: "DATN",
-  database: "DATN_2023_MAIN"
+  // database: "DATN_2023_MAIN"
 
-  // database: "DUANTN",
+  database: "DUANTN",
 });
 module.exports = connect;

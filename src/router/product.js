@@ -1,5 +1,5 @@
 const express = require("express");
-const { getAllProducts, AddProduct, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct,  } = require("../component/product");
+const { getAllProducts, AddProduct, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, } = require("../component/product");
 const router = express.Router();
 router.post("/product/add", AddProduct);
 router.get("/product", getAllProducts);
@@ -10,4 +10,5 @@ router.get("/product/outstan", GetOutstan);
 router.get("/product/sale", GetSale);
 router.get("/product/:id/getone", GetOneProduct);
 router.get("/product/topproductsale", GetTopSaleProduct);
+router.get("/product/countproductday", CountOrdersToday)
 module.exports = router;
