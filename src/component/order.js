@@ -81,4 +81,23 @@ const TotalAmountAllProductOrder = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', err });
     }
 }
-module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder };
+const CountOrderOnline = async (req, res) => {
+    try {
+        const sql = `
+        SELECT COUNT(*) AS DonHangThanhToanOnline
+        FROM orders
+        WHERE payment_status = '2';
+        `;
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy số đơn hàng thanh toán Online thất bại', err });
+            }
+
+            const soDonHangThanhToanOnline = results.rows;
+            return res.status(200).json({ message: 'Lấy số đơn hàng thanh toán Online thành công', soDonHangThanhToanOnline });
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', err });
+    }
+}
+module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline };
