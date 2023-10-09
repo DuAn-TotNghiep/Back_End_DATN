@@ -30,7 +30,12 @@ const order = async (req, res) => {
 
 const getAllOrder = async (req, res) => {
     try {
-        let sql = 'SELECT * FROM orders';
+        let sql = `SELECT * FROM orders
+ORDER BY CASE 
+    WHEN status = '1' THEN 1
+    WHEN status = '0' THEN 3
+    ELSE 2
+END`
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: 'Không lấy được danh sách order' });
