@@ -6,7 +6,6 @@ const AddToCart = (req, res, next) => {
         const token = req.headers.authorization?.split(" ")[1];
         const decoded = jwt.verify(token, "datn");
         const userId = decoded.user_id;
-        console.log(token);
         const text = 'SELECT * FROM cart WHERE user_id = $1 AND product @> $2';
         const values = [userId, { product_id: product_id, color: productColor, size: productSize }];
         // const values = [product_id, userId]

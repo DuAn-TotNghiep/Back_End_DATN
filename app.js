@@ -19,6 +19,7 @@ const routerSale = require("./src/router/sale");
 const routerVnpay = require("./src/router/vnpay");
 const routerDashBoard = require("./src/router/dashboard");
 const routerBill = require('./src/router/bill')
+const routerAction = require('./src/router/actions')
 const corsOptions = {
   origin: "*", // Địa chỉ nguồn bạn muốn cho phép
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Các phương thức được phép
@@ -39,6 +40,7 @@ app.use("/api", routerSale);
 app.use("/api", routerVnpay);
 app.use("/api", routerDashBoard);
 app.use("/api", routerBill);
+app.use("/api", routerAction);
 io.on("connection", (socket) => {
   console.log("A user connected");
 
