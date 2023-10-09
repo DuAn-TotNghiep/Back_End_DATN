@@ -262,7 +262,27 @@ const TopRevenueProductThisMonth = async (req, res) => {
   }
 };
 
+const CountPaymentOff = async (req, res) => {
+  try {
+    const sql = `
+      SELECT COUNT(*) AS order_payment_offline
+      FROM orders
+      WHERE payment_status = '1';
+      `;
+    connect.query(sql, (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: 'Lấy số đơn hàng thanh toán Offline thất bại', err });
+      }
+
+      const data = results.rows;
+      return res.status(200).json({ message: 'Lấy số đơn hàng thanh toán Offline thành công', data });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: 'Lỗi API', err });
+  }
+}
 
 
 
-module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth };
+
+module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff };
