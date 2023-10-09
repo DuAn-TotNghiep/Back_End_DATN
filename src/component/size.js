@@ -44,5 +44,20 @@ const getAllSize = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+const GetOneSize = async (req, res) => {
+    try {
+        const { id } = req.params
+        const sql = `SELECT * FROM size WHERE size_id = ${id}`
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lay one that bai', err })
+            }
+            const data = results.rows
+            return res.status(200).json({ message: 'Lay one thanh cong', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi api', err })
+    }
+}
 
-module.exports = { addSize, getAllSize };
+module.exports = { addSize, getAllSize, GetOneSize };

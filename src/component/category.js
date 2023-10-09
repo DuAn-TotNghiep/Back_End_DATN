@@ -102,6 +102,21 @@ const GetAllCat = (req, res) => {
         return res.status(200).json({ message: 'lay thanh cong', data })
     })
 }
+const getOneCat = async (req, res) => {
+    try {
+        const { id } = req.params
+        const sql = `SELECT * FROM category WHERE category_id = ${id}`
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lay one that bai', err })
+            }
+            const data = results.rows
+            return res.status(200).json({ message: 'Lay one thanh cong', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi api', err })
+    }
+}
 
 
 const RemoveCategory = async (req, res) => {
@@ -137,4 +152,4 @@ async function removeProductsOfCategory(category_id) {
 }
 
 
-module.exports = { addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination };
+module.exports = { getOneCat, addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination };
