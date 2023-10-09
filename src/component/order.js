@@ -120,4 +120,19 @@ const UpdateCancell = (req, res) => {
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
-module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell };
+const UpdateConfirm = (req, res) => {
+    try {
+        const { id } = req.body
+        const sql = `UPDATE orders SET status=2 WHERE order_id=${id}`
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'khong sua duoc trang thai confirm order', err })
+            }
+            const data = result.rows[0]
+            return res.status(200).json({ message: 'sua thanh cong trang thai confirm order', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi API', err })
+    }
+}
+module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm };
