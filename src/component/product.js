@@ -262,7 +262,7 @@ const CountOrdersToday = async (req, res) => {
 
         // Thực hiện truy vấn SQL để đếm số đơn hàng trong ngày
         const sqlQuery = `
-        SELECT COUNT(*) AS checkout_date
+        SELECT COUNT(*) AS checkoutday_date
         FROM checkout
         WHERE DATE(checkout_date) = '${formattedDate}';
       `;
@@ -271,14 +271,37 @@ const CountOrdersToday = async (req, res) => {
         const result = await connect.query(sqlQuery);
 
         // Lấy số đơn hàng được đặt trong ngày
-        const orderCount = result.rows[0].checkout_date;
+        const orderCount = result.rows[0].checkoutday_date;
 
-        return res.status(200).json({ checkout_date: orderCount });
+        return res.status(200).json({ checkoutday_date: orderCount });
     } catch (err) {
         return res.status(500).json({ message: 'Lỗi API', error: err.message });
     }
 };
+const CountOrdersMonth = async (req, res) => {
+    try {
+        const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        const targetDate = today.minus({ days: 30 });
 
-module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday };
+        // Thực hiện truy vấn SQL để đếm số đơn hàng trong tháng
+        const sqlQuery = `
+          SELECT COUNT(*) AS checkoutmonth_count
+          FROM checkout
+          WHERE DATE(checkout_date) BETWEEN '${targetDate.toISODate()}' AND '${today.toISODate()}';
+        `;
+
+        // Thực hiện truy vấn SQL
+        const result = await connect.query(sqlQuery);
+
+        // Lấy số đơn hàng được đặt trong tháng
+        const orderCount = result.rows[0].checkoutmonth_count;
+
+        return res.status(200).json({ checkoutmonth_count: orderCount });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', error: err.message });
+    }
+}
+
+module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth };
 
 
