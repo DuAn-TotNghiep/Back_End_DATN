@@ -1,23 +1,22 @@
 const connect = require('../../database');
 const { DateTime } = require('luxon');
 const jwt = require('jsonwebtoken');
+const io= require('../../app')
+
+
 const order = async (req, res) => {
     try {
         const { checkout_id, user_id, order_total, payment_status } = req.body;
-
-        // Sử dụng Luxon để tạo giá trị thời gian hiện tại cho khu vực "Asia/Ho_Chi_Minh"
-        const order_date = DateTime.local().setZone('Asia/Ho_Chi_Minh'); // Tạo thời gian hiện tại cho khu vực "Asia/Ho_Chi_Minh"
-
-        // Sử dụng Prepared Statement để tránh SQL Injection
+        const order_date = DateTime.local().setZone('Asia/Ho_Chi_Minh');
+        console.log("quan");
         const sql = {
             text: 'INSERT INTO orders (checkout_id, user_id, order_date, order_total, status, payment_status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
             values: [checkout_id, user_id, order_date, order_total, 1, payment_status],
         };
-
         const result = await connect.query(sql);
-
         if (result.rowCount > 0) {
             const data = result.rows[0];
+            io.emit('addorder', { message: 'Người dùng đã được thêm', data });
             return res.status(200).json({ message: 'Thêm thành công order', data });
         } else {
             return res.status(500).json({ message: 'Không thêm được order' });

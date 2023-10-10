@@ -3,8 +3,12 @@ const http = require("http");
 const socketIo = require("socket.io");
 const connect = require("./database");
 const app = express();
+const { DateTime } = require('luxon');
 const server = http.createServer(app);
-const io = socketIo(server);
+// const io = socketIo(server);
+const initSocket = require('./socket');
+const io = initSocket(server);
+module.exports = io
 const cors = require("cors");
 app.use(express.json());
 const routerProduct = require("./src/router/product");
@@ -21,13 +25,27 @@ const routerDashBoard = require("./src/router/dashboard");
 const routerBill = require('./src/router/bill')
 const routerAction = require('./src/router/actions')
 const corsOptions = {
-  origin: "*", // Địa chỉ nguồn bạn muốn cho phép
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Các phương thức được phép
-  credentials: true, // Cho phép gửi cookie (nếu cần)
-  optionsSuccessStatus: 204, // Trả về mã trạng thái 204 (No Content) cho yêu cầu kiểm tra trước
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  optionsSuccessStatus: 204,
 };
-
 app.use(cors(corsOptions));
+
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  socket.on("message", (message) => {
+    console.log(`Received message: ${message}`);
+    io.emit("message", message);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
+  });
+});
+
+
 app.use("/api", routerProduct);
 app.use("/api", routerColor);
 app.use("/api", routerCategory);
@@ -41,18 +59,7 @@ app.use("/api", routerVnpay);
 app.use("/api", routerDashBoard);
 app.use("/api", routerBill);
 app.use("/api", routerAction);
-io.on("connection", (socket) => {
-  console.log("A user connected");
 
-  socket.on("message", (message) => {
-    console.log(`Received message: ${message}`);
-    io.emit("message", message); // Gửi tin nhắn tới tất cả các kết nối
-  });
-
-  socket.on("disconnect", () => {
-    console.log("A user disconnected");
-  });
-});
 connect.connect((err) => {
   if (err) {
     console.log("That bai !");
@@ -63,3 +70,4 @@ const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
