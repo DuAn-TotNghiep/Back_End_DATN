@@ -34,7 +34,21 @@ const getOneBill = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', err })
     }
 }
-
+const getOneBillInCheckOut = async (req, res) => {
+    try {
+        const { id } = req.params
+        const sql = `SELECT * FROM bill WHERE order_id = ${id}`
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy 1 id thất bại', err })
+            }
+            const data = results.rows
+            return res.status(200).json({ message: 'Lấy 1 id thành công', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', err })
+    }
+}
 const bill = async (req, res) => {
     try {
         const { user_id, order_id } = req.body;
@@ -71,4 +85,4 @@ const bill = async (req, res) => {
     }
 }
 
-module.exports = { bill, getBill, getOneBill };
+module.exports = { bill, getBill, getOneBill, getOneBillInCheckOut };
