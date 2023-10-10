@@ -2,7 +2,7 @@
 
 const connect = require('../../database');
 const jwt = require('jsonwebtoken');
-const { addProduct } = require('../schema/productSchema');
+const { addProduct, updateProduct } = require('../schema/productSchema');
 const { DateTime } = require('luxon')
 const AddProduct = async (req, res, next) => {
     try {
@@ -30,6 +30,57 @@ const AddProduct = async (req, res, next) => {
         return res.status(500).json({ message: 'Loi api', err })
     }
 }
+//update product
+
+const UpdateProduct = async (req, res, next) => {
+    try {
+        const productId = req.params.id;
+        const { color_id, size_id, category_id, name, image, desc, price } = req.body;
+        const { error } = updateProduct.validate(req.body, { abortEarly: false });
+        if (error) {
+            const errs = error.details.map(err => err.message);
+            return res.status(400).json(errs);
+        }
+        // Kiểm tra xem sản phẩm có tồn tại không
+        const sql1 = `SELECT * FROM product WHERE product_id = ${productId}`;
+        connect.query(sql1, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu', err });
+            }
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({ message: 'Sản phẩm không tồn tại' });
+            }
+
+            // Sản phẩm tồn tại, tiến hành cập nhật
+            const sql2 = `
+                UPDATE product 
+                SET 
+                    size_id = Array[${size_id}],
+                    color_id = Array[${color_id}],
+                    image = Array['${image}'],
+                    category_id = ${category_id},
+                    product_name = '${name}',
+                    product_description = '${desc}',
+                    product_price = ${price}
+                WHERE product_id = ${productId}
+                RETURNING *`;
+
+            connect.query(sql2, (err, result) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Lỗi không thể cập nhật sản phẩm', err });
+                }
+
+                const data = result.rows[0];
+                return res.status(200).json({ message: 'Sửa sản phẩm thành công', data });
+            });
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', err });
+    }
+}
+
+
 
 
 // serachProduct
@@ -302,6 +353,6 @@ const CountOrdersMonth = async (req, res) => {
     }
 }
 
-module.exports = { AddProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth };
+module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth };
 
 
