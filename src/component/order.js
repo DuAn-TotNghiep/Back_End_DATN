@@ -1,7 +1,7 @@
 const connect = require('../../database');
 const { DateTime } = require('luxon');
 const jwt = require('jsonwebtoken');
-const io= require('../../app')
+const io = require('../../app')
 
 
 const order = async (req, res) => {
@@ -130,6 +130,7 @@ const UpdateConfirm = (req, res) => {
                 return res.status(500).json({ message: 'khong sua duoc trang thai confirm order', err })
             }
             const data = result.rows[0]
+            io.emit('confirm', { message: 'Đơn hàng đã được xác nhận', data });
             return res.status(200).json({ message: 'sua thanh cong trang thai confirm order', data })
         })
     } catch (err) {
