@@ -2,7 +2,7 @@ const { Client } = require("pg");
 const connect = new Client({
   user: "postgres",
 
-  password: 'jajaja1234z',
+  password: 'admin',
   // password: "admin",
 
   host: "localhost",
@@ -11,7 +11,7 @@ const connect = new Client({
   // database: 'DU_AN_TOT_NGHIEP',
 
   // database: 'DUANTN',
-  database: "DATN_MAIN",
+  database: "DATN",
   // database: "DATN_2023_MAIN"
 
   // database: "DUANTN",

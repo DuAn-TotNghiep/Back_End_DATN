@@ -16,7 +16,7 @@ const order = async (req, res) => {
         const result = await connect.query(sql);
         if (result.rowCount > 0) {
             const data = result.rows[0];
-            io.emit('addorder', { message: 'Người dùng đã được thêm', data });
+            io.emit('addorder', { message: 'Có Đơn Hàng Mới', data });
             return res.status(200).json({ message: 'Thêm thành công order', data });
         } else {
             return res.status(500).json({ message: 'Không thêm được order' });
@@ -114,6 +114,7 @@ const UpdateCancell = (req, res) => {
                 return res.status(500).json({ message: 'khong sua duoc trang thai cancell', err })
             }
             const data = result.rows[0]
+            io.emit('cancell', { message: 'Đơn Hàng Đã Bị Hủy', data });
             return res.status(200).json({ message: 'sua thanh cong trang thai cancell', data })
         })
     } catch (err) {
