@@ -33,8 +33,9 @@ const getAllOrder = async (req, res) => {
         let sql = `SELECT * FROM orders
 ORDER BY CASE 
     WHEN status = '1' THEN 1
-    WHEN status = '0' THEN 3
-    ELSE 2
+    WHEN status = '2' THEN 2
+     WHEN status = '3' THEN 3
+      WHEN status = '0' THEN 4
 END`
         connect.query(sql, (err, result) => {
             if (err) {
@@ -135,7 +136,7 @@ const UpdateConfirm = (req, res) => {
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
-const UpdateDone= (req, res) => {
+const UpdateDone = (req, res) => {
     try {
         const { id } = req.body
         const sql = `UPDATE orders SET status=3 WHERE order_id=${id}`
