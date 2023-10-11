@@ -38,6 +38,45 @@ const addCategory = async (req, res) => {
     }
 }
 
+//updateCategory
+
+const updateCategory = (req, res) => {
+    try {
+        const categoryId = req.params.id;
+        const { category_name } = req.body;
+        const sql1 = `SELECT * FROM category WHERE category_id = ${categoryId}`;
+        connect.query(sql1, (err, selectResult) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu', err });
+            }
+
+            if (selectResult.rows.length === 0) {
+                return res.status(404).json({ message: 'Category không tồn tại' });
+            }
+
+            // Category tồn tại, tiến hành cập nhật
+            const sql2 = `
+                UPDATE category 
+                SET 
+                    category_name='${category_name}'
+                WHERE category_id = ${categoryId}
+                RETURNING *`;
+
+            connect.query(sql2, (err, updateResult) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Lỗi không thể cập nhật sản phẩm', err });
+                }
+
+                const data = updateResult.rows[0];
+                return res.status(200).json({ message: 'Sửa category thành công', data });
+            });
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+
 // getAllCategory 
 const getAllCategory = async (req, res) => {
     try {
@@ -152,4 +191,4 @@ async function removeProductsOfCategory(category_id) {
 }
 
 
-module.exports = { getOneCat, addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination };
+module.exports = { updateCategory, getOneCat, addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination };
