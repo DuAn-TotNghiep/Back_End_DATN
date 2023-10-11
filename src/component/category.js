@@ -189,6 +189,60 @@ async function removeProductsOfCategory(category_id) {
         // Xử lý lỗi nếu cần
     }
 }
+const ProductinCategory = async (req, res) => {
+    try {
+        // Thực hiện truy vấn SQL để lấy thông tin sản phẩm từ bảng "checkout"
+        const checkoutSql = `SELECT * FROM checkout`;
+        connect.query(checkoutSql, (err, checkoutResults) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lỗi truy vấn SQL:', err });
+            }
+
+            const data = checkoutResults.rows;
+
+            // Tạo một mảng chứa các "product_id" để tránh nhiều truy vấn SQL riêng lẻ
+            const productIds = [];
+            data?.map((data) => {
+                data?.product?.map((data2) => {
+                    productIds.push(data2.product_id);
+                });
+            });
+
+            // Thực hiện truy vấn SQL để lấy thông tin sản phẩm dựa trên danh sách "productIds"
+            const productSql = `SELECT p.product_id, p.category_id FROM product p WHERE p.product_id IN (${productIds.join(',')})`;
+            connect.query(productSql, (err, productResults) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Lỗi truy vấn SQL:', err });
+                }
+
+                const productData = productResults.rows;
+
+                // Thực hiện truy vấn SQL để lấy danh sách các danh mục và số lượng sản phẩm trong mỗi danh mục
+                const categorySql = `
+                    SELECT c.category_name, COUNT(p.product_id) as product_count
+                    FROM product p
+                    INNER JOIN category c ON p.category_id = c.category_id
+                    GROUP BY c.category_name
+                    ORDER BY product_count DESC
+                `;
+
+                connect.query(categorySql, (err, categoryResults) => {
+                    if (err) {
+                        return res.status(500).json({ message: 'Lỗi truy vấn SQL:', err });
+                    }
+
+                    const categoryCounts = categoryResults.rows;
+
+                    return res.status(200).json({ message: 'Thành công', categoryCounts });
+                });
+            });
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', err });
+    }
+};
 
 
-module.exports = { updateCategory, getOneCat, addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination };
+module.exports = { updateCategory, getOneCat, addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination, ProductinCategory };
+
+
