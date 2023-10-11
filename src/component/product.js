@@ -352,7 +352,29 @@ const CountOrdersMonth = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: err.message });
     }
 }
+const SumProductDay = (req, res) => {
+    try {
+        const checkout_date = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        const formattedDate = checkout_date.toFormat("yyyy-MM-dd");
+        const sql = `SELECT * FROM checkout WHERE DATE(checkout_date) = '${formattedDate}' `
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'loi', err })
+            }
+            let totalProductIds = 0;
+            const data = result.rows
+            data?.map((data) => {
+                data?.product.map((data) => {
+                    totalProductIds++;
+                })
+            })
+            return res.status(200).json({ totalProductIds });
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', error: err.message });
+    }
+}
 
-module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth };
+module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay };
 
 
