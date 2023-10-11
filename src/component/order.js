@@ -49,11 +49,8 @@ END`
 }
 const getOneOrder = async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        const decoded = jwt.verify(token, "datn");
-        const userId = decoded.user_id;
         const { id } = req.params
-        let sql = `SELECT * FROM orders WHERE order_id =${id} AND user_id=${userId}`;
+        let sql = `SELECT * FROM orders WHERE order_id =${id} `;
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: 'Không lấy được danh sách order' });
@@ -124,7 +121,7 @@ const UpdateCancell = (req, res) => {
 const UpdateConfirm = (req, res) => {
     try {
         const { id } = req.body
-        const sql = `UPDATE orders SET status=2 WHERE order_id=${id}`
+        const sql = `UPDATE orders SET status=2 WHERE order_id=${id} RETURNING*`
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: 'khong sua duoc trang thai confirm order', err })
