@@ -337,15 +337,15 @@ const getTotalPerMonth = (req, res) => {
     for (let i = 0; i < 6; i++) { // Lấy dữ liệu cho 6 tháng
       const endOfMonth = today.minus({ months: i }).endOf('month');
       const startOfMonth = endOfMonth.startOf('month');
-      const monthName = startOfMonth.setLocale('vi').toFormat('LLLL yyyy'); // Lấy tên tháng
-  
+      const monthName = startOfMonth.setLocale('vi').toFormat('M/yyyy'); // Lấy tên tháng
+
       const sql = `
         SELECT SUM(order_total) AS total_amount_month
-        FROM orders
+        FROM orders 
         WHERE 
-        DATE(order_date) BETWEEN '${startOfMonth.toISODate()}' AND '${endOfMonth.toISODate()}';
+        DATE(order_date) BETWEEN '${startOfMonth.toISODate()}' AND '${endOfMonth.toISODate()}'
       `;
-  
+
       connect.query(sql, (err, results) => {
         if (err) {
           return res.status(500).json({ message: "Không lấy được tiền trong tháng này", err });
@@ -362,13 +362,13 @@ const getTotalPerMonth = (req, res) => {
   } catch (err) {
     return res.status(500).json({ message: "Lỗi API", err });
   }
-  
-  
-  
+
+
+
 };
 
 
 
 
 
-module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff ,getTotalPerMonth};
+module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff, getTotalPerMonth };
