@@ -36,11 +36,7 @@ const UpdateProduct = async (req, res, next) => {
     try {
         const productId = req.params.id;
         const { color_id, size_id, category_id, name, image, desc, price } = req.body;
-        const { error } = updateProduct.validate(req.body, { abortEarly: false });
-        if (error) {
-            const errs = error.details.map(err => err.message);
-            return res.status(400).json(errs);
-        }
+
         // Kiểm tra xem sản phẩm có tồn tại không
         const sql1 = `SELECT * FROM product WHERE product_id = ${productId}`;
         connect.query(sql1, (err, result) => {
