@@ -329,8 +329,46 @@ const CountPaymentOff = async (req, res) => {
     return res.status(500).json({ message: 'Lỗi API', err });
   }
 }
+const getTotalPerMonth = (req, res) => {
+  const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+
+  try {
+    const monthlyTotals = [];
+    for (let i = 0; i < 6; i++) { // Lấy dữ liệu cho 6 tháng
+      const endOfMonth = today.minus({ months: i }).endOf('month');
+      const startOfMonth = endOfMonth.startOf('month');
+      const monthName = startOfMonth.setLocale('vi').toFormat('LLLL yyyy'); // Lấy tên tháng
+  
+      const sql = `
+        SELECT SUM(order_total) AS total_amount_month
+        FROM orders
+        WHERE 
+        DATE(order_date) BETWEEN '${startOfMonth.toISODate()}' AND '${endOfMonth.toISODate()}';
+      `;
+  
+      connect.query(sql, (err, results) => {
+        if (err) {
+          return res.status(500).json({ message: "Không lấy được tiền trong tháng này", err });
+        }
+        const data = results.rows[0];
+        data.month = monthName; // Thêm tên tháng vào dữ liệu
+        monthlyTotals.push(data);
+        if (monthlyTotals.length === 6) {
+          // Tất cả các tháng đã được lấy, trả về kết quả
+          return res.status(200).json({ message: "Lấy thành công tổng tiền từng tháng", data: monthlyTotals });
+        }
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({ message: "Lỗi API", err });
+  }
+  
+  
+  
+};
 
 
 
 
-module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff };
+
+module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff ,getTotalPerMonth};
