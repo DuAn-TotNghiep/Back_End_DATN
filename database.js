@@ -14,7 +14,7 @@ const connect = new Client({
   database: 'DUANTN',
 
   // database: "DATN",
-  // database: "DATN_2023_MAIN"
+  database: "DATN_2023_MAIN"
 
   // database: "DUANTN",
 });
