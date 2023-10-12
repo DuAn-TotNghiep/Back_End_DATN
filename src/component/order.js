@@ -149,4 +149,20 @@ const UpdateDone = (req, res) => {
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
-module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone };
+const GetOrderPlacedDay=(req, res) => {
+    try {
+        const order_date = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        const formattedDate = order_date.toFormat("yyyy-MM-dd");
+        const sql = `SELECT COUNT(*) as order_count FROM orders WHERE status = '1' AND DATE(order_date) = '${formattedDate}'`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Loi', err })
+            }
+            const data = result.rows[0].order_count
+            return res.status(200).json({ message: 'Thanh cong', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi API', err })
+    }
+}
+module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay };
