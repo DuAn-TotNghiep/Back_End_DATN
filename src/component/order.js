@@ -197,4 +197,37 @@ const GetOrderDoneDay = (req, res) => {
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
-module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay };
+const ListOrderInWeek = (req, res) => {
+    const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+  
+    try {
+      const dailyTotals = [];
+      for (let i = 0; i < 7; i++) { // Lấy dữ liệu cho 7 ngày
+        const endOfDay = today.minus({ days: i }); // Để lấy ngày cuối của tháng
+        const startOfDay = endOfDay.startOf('day'); // Để lấy ngày đầu của tháng
+        const dayName = startOfDay.setLocale('vi').toFormat('dd/MM/yyyy'); // Lấy tên ngày với định dạng "dd/MM/yyyy"
+        const sql = `
+          SELECT COUNT(*) AS total_products
+          FROM orders
+          WHERE DATE(order_date) = '${startOfDay.toISODate()}'
+        `;
+  
+        connect.query(sql, (err, results) => {
+          if (err) {
+            return res.status(500).json({ message: "Không lấy được sản phẩm trong ngày", err });
+          }
+          const data = results.rows[0];
+          data.date = dayName; // Thêm tên ngày vào dữ liệu
+          dailyTotals.push(data);
+          if (dailyTotals.length === 7) {
+            // Tất cả các ngày đã được lấy, trả về kết quả
+            return res.status(200).json({ message: "Lấy thành công sản phẩm từng ngày", data: dailyTotals });
+          }
+        });
+      }
+    } catch (err) {
+      return res.status(500).json({ message: "Lỗi API", err });
+    }
+  };
+  
+module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay,ListOrderInWeek };
