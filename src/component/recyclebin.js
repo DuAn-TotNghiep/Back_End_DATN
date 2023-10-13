@@ -47,5 +47,21 @@ const RestoreProduct = async (req, res) => {
     }
 }
 
+const RemoveProductRecyclebin = async (req, res) => {
+    try {
+        const id = req.params.id;
+        let sql = `DELETE FROM recycle_bin_product WHERE id = ${id} RETURNING * `
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Khong xoa duoc', err })
+            }
+            const data = result.rows[0]
+            return res.json({ message: 'Xoa thanh cong Recyclebin', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: "Loi api", err })
+    }
+}
 
-module.exports = { getAllRecyclebin, RestoreProduct };
+
+module.exports = { getAllRecyclebin, RestoreProduct, RemoveProductRecyclebin };
