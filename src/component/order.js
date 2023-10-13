@@ -247,7 +247,7 @@ const ListOrderInWeek = (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
   }
-  const getConfirmedOrders = async (req, res) => {
+  const getPlacedOrders = async (req, res) => {
     try {
         const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
         const formattedDate = today.toFormat("yyyy-MM-dd");
@@ -256,7 +256,7 @@ const ListOrderInWeek = (req, res) => {
       const result = await connect.query(sql);
   
       const confirmedOrders = result.rows;
-      return res.status(200).json({ message: 'Lấy danh sách đơn hàng đã xác nhận thành công', orders: confirmedOrders });
+      return res.status(200).json({ message: 'Lấy danh sách đơn hàng chờ xác nhận thành công', orders: confirmedOrders });
     } catch (error) {
       return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
@@ -275,4 +275,18 @@ const ListOrderInWeek = (req, res) => {
       return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
   };
-module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay,ListOrderInWeek,GetOrderForAdmin ,getConfirmedOrders,getReceivedOrders };
+  const getPendingOrders   = async (req, res) => {
+    try {
+        const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        const formattedDate = today.toFormat("yyyy-MM-dd");
+      const sql = `SELECT * FROM orders WHERE status = '2' AND DATE(order_date)='${formattedDate}'`
+  
+      const result = await connect.query(sql);
+  
+      const confirmedOrders = result.rows;
+      return res.status(200).json({ message: 'Lấy danh sách đơn hàng đã nhận xác nhận thành công', orders: confirmedOrders });
+    } catch (error) {
+      return res.status(500).json({ message: 'Lỗi API', error: error.message });
+    }
+  }
+module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay,ListOrderInWeek,GetOrderForAdmin ,getPlacedOrders,getReceivedOrders,getPendingOrders };
