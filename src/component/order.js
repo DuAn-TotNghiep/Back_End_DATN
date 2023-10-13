@@ -205,7 +205,7 @@ const ListOrderInWeek = (req, res) => {
       for (let i = 0; i < 7; i++) { // Lấy dữ liệu cho 7 ngày
         const endOfDay = today.minus({ days: i }); // Để lấy ngày cuối của tháng
         const startOfDay = endOfDay.startOf('day'); // Để lấy ngày đầu của tháng
-        const dayName = startOfDay.setLocale('vi').toFormat('dd/MM/yyyy'); // Lấy tên ngày với định dạng "dd/MM/yyyy"
+        const dayName = startOfDay.setLocale('vi').toFormat('dd/MM'); // Lấy tên ngày với định dạng "dd/MM/yyyy"
         const sql = `
           SELECT COUNT(*) AS total_products
           FROM orders
