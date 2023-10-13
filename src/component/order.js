@@ -229,5 +229,22 @@ const ListOrderInWeek = (req, res) => {
       return res.status(500).json({ message: "Lỗi API", err });
     }
   };
-  
-module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay,ListOrderInWeek };
+  const GetOrderForAdmin = async( req, res)=>{
+    try {
+        const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        const formattedDate = today.toFormat("yyyy-MM-dd");
+
+        const sql = `SELECT * FROM orders WHERE DATE(order_date) = $1`;
+
+        connect.query(sql, [formattedDate], (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Không lấy được danh sách đơn hàng' });
+            }
+            const orders = result.rows;
+            return res.status(200).json({ message: "Lấy danh sách đơn hàng theo ngày hiện tại thành công", orders });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+  }
+module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay,ListOrderInWeek,GetOrderForAdmin };
