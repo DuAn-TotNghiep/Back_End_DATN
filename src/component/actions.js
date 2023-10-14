@@ -4,7 +4,7 @@ const actions = (req, res, next) => {
     try {
         const { user_id, action, old_data, new_data } = req.body
         const order_date = DateTime.local().setZone('Asia/Ho_Chi_Minh');
-        const sql = `INSERT INTO actions (user_id, action, old_data, new_data, action_date) VALUES (${user_id}, '${action}', '${old_data}', '${new_data}','${order_date}' ) RETURNING *`;
+        const sql = `INSERT INTO actions (user_id, action, old_data, new_data, action_date) VALUES (${user_id}, '${action}', '${JSON.stringify(old_data)}', '${JSON.stringify(new_data)}','${order_date}' ) RETURNING *`;
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: "Them hanh dong that bai", err })
