@@ -360,9 +360,11 @@ const SumProductDay = (req, res) => {
             let totalProductIds = 0;
             const data = result.rows
             data?.map((data) => {
-                data?.product.map((data) => {
-                    totalProductIds++;
-                })
+                if (data && data.product) {
+                    data?.product.map((data) => {
+                        totalProductIds++;
+                    })
+                }
             })
             return res.status(200).json({ totalProductIds });
         })

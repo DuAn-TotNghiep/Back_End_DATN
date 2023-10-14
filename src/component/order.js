@@ -35,7 +35,8 @@ ORDER BY CASE
     WHEN status = '2' THEN 2
      WHEN status = '3' THEN 3
       WHEN status = '0' THEN 4
-END`
+END,
+order_date DESC`
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: 'Không lấy được danh sách order' });
@@ -199,37 +200,37 @@ const GetOrderDoneDay = (req, res) => {
 }
 const ListOrderInWeek = (req, res) => {
     const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
-  
+
     try {
-      const dailyTotals = [];
-      for (let i = 0; i < 7; i++) { // Lấy dữ liệu cho 7 ngày
-        const endOfDay = today.minus({ days: i }); // Để lấy ngày cuối của tháng
-        const startOfDay = endOfDay.startOf('day'); // Để lấy ngày đầu của tháng
-        const dayName = startOfDay.setLocale('vi').toFormat('dd/MM'); // Lấy tên ngày với định dạng "dd/MM/yyyy"
-        const sql = `
+        const dailyTotals = [];
+        for (let i = 0; i < 7; i++) { // Lấy dữ liệu cho 7 ngày
+            const endOfDay = today.minus({ days: i }); // Để lấy ngày cuối của tháng
+            const startOfDay = endOfDay.startOf('day'); // Để lấy ngày đầu của tháng
+            const dayName = startOfDay.setLocale('vi').toFormat('dd/MM'); // Lấy tên ngày với định dạng "dd/MM/yyyy"
+            const sql = `
           SELECT COUNT(*) AS total_products
           FROM orders
           WHERE DATE(order_date) = '${startOfDay.toISODate()}'
         `;
-  
-        connect.query(sql, (err, results) => {
-          if (err) {
-            return res.status(500).json({ message: "Không lấy được sản phẩm trong ngày", err });
-          }
-          const data = results.rows[0];
-          data.date = dayName; // Thêm tên ngày vào dữ liệu
-          dailyTotals.push(data);
-          if (dailyTotals.length === 7) {
-            // Tất cả các ngày đã được lấy, trả về kết quả
-            return res.status(200).json({ message: "Lấy thành công sản phẩm từng ngày", data: dailyTotals });
-          }
-        });
-      }
+
+            connect.query(sql, (err, results) => {
+                if (err) {
+                    return res.status(500).json({ message: "Không lấy được sản phẩm trong ngày", err });
+                }
+                const data = results.rows[0];
+                data.date = dayName; // Thêm tên ngày vào dữ liệu
+                dailyTotals.push(data);
+                if (dailyTotals.length === 7) {
+                    // Tất cả các ngày đã được lấy, trả về kết quả
+                    return res.status(200).json({ message: "Lấy thành công sản phẩm từng ngày", data: dailyTotals });
+                }
+            });
+        }
     } catch (err) {
-      return res.status(500).json({ message: "Lỗi API", err });
+        return res.status(500).json({ message: "Lỗi API", err });
     }
-  };
-  const GetOrderForAdmin = async( req, res)=>{
+};
+const GetOrderForAdmin = async (req, res) => {
     try {
         const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
         const formattedDate = today.toFormat("yyyy-MM-dd");
@@ -246,47 +247,47 @@ const ListOrderInWeek = (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: 'Lỗi API' });
     }
-  }
-  const getPlacedOrders = async (req, res) => {
+}
+const getPlacedOrders = async (req, res) => {
     try {
         const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
         const formattedDate = today.toFormat("yyyy-MM-dd");
-      const sql = `SELECT * FROM orders WHERE status = '1' AND DATE(order_date)='${formattedDate}'`
-  
-      const result = await connect.query(sql);
-  
-      const confirmedOrders = result.rows;
-      return res.status(200).json({ message: 'Lấy danh sách đơn hàng chờ xác nhận thành công', orders: confirmedOrders });
+        const sql = `SELECT * FROM orders WHERE status = '1' AND DATE(order_date)='${formattedDate}'`
+
+        const result = await connect.query(sql);
+
+        const confirmedOrders = result.rows;
+        return res.status(200).json({ message: 'Lấy danh sách đơn hàng chờ xác nhận thành công', orders: confirmedOrders });
     } catch (error) {
-      return res.status(500).json({ message: 'Lỗi API', error: error.message });
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
-  };
-  const getReceivedOrders  = async (req, res) => {
+};
+const getReceivedOrders = async (req, res) => {
     try {
         const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
         const formattedDate = today.toFormat("yyyy-MM-dd");
-      const sql = `SELECT * FROM orders WHERE status = '3' AND DATE(order_date)='${formattedDate}'`
-  
-      const result = await connect.query(sql);
-  
-      const confirmedOrders = result.rows;
-      return res.status(200).json({ message: 'Lấy danh sách đơn hàng đã nhận thành công', orders: confirmedOrders });
+        const sql = `SELECT * FROM orders WHERE status = '3' AND DATE(order_date)='${formattedDate}'`
+
+        const result = await connect.query(sql);
+
+        const confirmedOrders = result.rows;
+        return res.status(200).json({ message: 'Lấy danh sách đơn hàng đã nhận thành công', orders: confirmedOrders });
     } catch (error) {
-      return res.status(500).json({ message: 'Lỗi API', error: error.message });
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
-  };
-  const getPendingOrders   = async (req, res) => {
+};
+const getPendingOrders = async (req, res) => {
     try {
         const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
         const formattedDate = today.toFormat("yyyy-MM-dd");
-      const sql = `SELECT * FROM orders WHERE status = '2' AND DATE(order_date)='${formattedDate}'`
-  
-      const result = await connect.query(sql);
-  
-      const confirmedOrders = result.rows;
-      return res.status(200).json({ message: 'Lấy danh sách đơn hàng đã nhận xác nhận thành công', orders: confirmedOrders });
+        const sql = `SELECT * FROM orders WHERE status = '2' AND DATE(order_date)='${formattedDate}'`
+
+        const result = await connect.query(sql);
+
+        const confirmedOrders = result.rows;
+        return res.status(200).json({ message: 'Lấy danh sách đơn hàng đã nhận xác nhận thành công', orders: confirmedOrders });
     } catch (error) {
-      return res.status(500).json({ message: 'Lỗi API', error: error.message });
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
-  }
-module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay,ListOrderInWeek,GetOrderForAdmin ,getPlacedOrders,getReceivedOrders,getPendingOrders };
+}
+module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders };
