@@ -40,7 +40,39 @@ WHERE user_id = ${user_id}`
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
+const checkoutnotoken = (req, res) => {
+    try {
+        const { product, province, district, ward, address, payment, user_id, total } = req.body
+        const productJSON = JSON.stringify(product);
+        const order_date = DateTime.local().setZone('Asia/Ho_Chi_Minh');
+        const sql = `
+  INSERT INTO checkout (user_id, province, district, ward, payment, address, product, total,checkout_date)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  RETURNING *;
+`;
+        const values = [
+            user_id,
+            province,
+            district,
+            ward,
+            payment,
+            address,
+            productJSON, // Sử dụng giá trị đã chuẩn bị ở trên
+            total,
+            order_date
+        ];
+        connect.query(sql, values, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: "Khong them duoc check out", err })
+            }
+            const data = result.rows[0]
 
+            return res.status(200).json({ message: "Them thanh cong", data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi API', err })
+    }
+}
 
 const getOneheckout = (req, res) => {
     try {
@@ -57,4 +89,4 @@ const getOneheckout = (req, res) => {
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
-module.exports = { checkout, getOneheckout };
+module.exports = { checkout, getOneheckout, checkoutnotoken };
