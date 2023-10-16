@@ -123,27 +123,15 @@ const searchProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     try {
-        const { page, perPage } = req.query; // Lấy thông tin trang và số mục trên mỗi trang từ query parameters
-        const pageNumber = parseInt(page) || 1; // Chuyển đổi page thành số nguyên, mặc định là 1 nếu không có hoặc không hợp lệ
-        const itemsPerPage = parseInt(perPage) || 2; // Chuyển đổi perPage thành số nguyên, mặc định là 3 nếu không có hoặc không hợp lệ
-
-        const offset = (pageNumber - 1) * itemsPerPage; // Tính toán offset dựa trên trang hiện tại và số mục trên mỗi trang
-
-        let sqlTotal = `SELECT COUNT(*) FROM product`; // Đếm tổng số dòng trong bảng product
-        let sql = `SELECT * FROM product ORDER BY product_id LIMIT $1 OFFSET $2`; // Sử dụng LIMIT và OFFSET để thực hiện phân trang
-
-        const totalResults = await connect.query(sqlTotal);
-        const totalProducts = parseInt(totalResults.rows[0].count);
-
-        const totalPages = Math.ceil(totalProducts / itemsPerPage);
-
-        const results = await connect.query(sql, [itemsPerPage, offset]);
-
+        const sql = `SELECT * FROM product`;
+        const results = await connect.query(sql);
+        if (!results || !results.rows || results.rows.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy san pham nào.' });
+        }
+        const data = results.rows;
         return res.status(200).json({
-            message: 'Lấy sản phẩm trang ' + pageNumber + ' thành công',
-            data: results.rows,
-            totalPages,
-            currentPage: pageNumber,
+            message: 'Lấy tất cả san pham thành công',
+            data,
         });
     } catch (err) {
         return res.status(500).json({ message: 'Lỗi API' });
