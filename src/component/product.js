@@ -7,11 +7,11 @@ const { DateTime } = require('luxon')
 const AddProduct = async (req, res, next) => {
     try {
         const { color_id, size_id, category_id, name, image, desc, price } = req.body
-        const { error } = addProduct.validate(req.body, { abortEarly: false });
-        if (error) {
-            const errs = error.details.map(err => err.message)
-            return res.status(400).json(errs)
-        }
+        // const { error } = addProduct.validate(req.body, { abortEarly: false });
+        // if (error) {
+        //     const errs = error.details.map(err => err.message)
+        //     return res.status(400).json(errs)
+        // }
         const sql4 = `SELECT * FROM product WHERE product_name='${name}'`
         connect.query(sql4, (err, resolve) => {
             if (resolve.rows.length > 0) {
