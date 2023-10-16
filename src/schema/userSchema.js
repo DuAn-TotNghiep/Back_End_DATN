@@ -11,7 +11,7 @@ const userSignup = Joi.object({
     
     }),
 
-    user_email: Joi.string().trim().email().required().messages({
+    email: Joi.string().trim().email().required().messages({
         "string.empty": "Không được để trống email",
         "any.required": "Email là trường bắt buộc",
         "string.email": "Email không hợp lệ",
