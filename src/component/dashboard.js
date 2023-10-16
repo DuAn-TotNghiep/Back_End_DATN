@@ -375,7 +375,7 @@ const getTotalPerDay = (req, res) => {
     for (let i = 0; i < 7; i++) { // Lấy dữ liệu cho 7 ngày
       const endOfDay = today.minus({ days: i }).endOf('day');
       const startOfDay = endOfDay.startOf('day');
-      const dayDate = startOfDay.setLocale('vi').toFormat('dd/MM/yyyy'); // Lấy ngày tháng
+      const dayDate = startOfDay.setLocale('vi').toFormat('dd/MM'); // Lấy ngày tháng
 
       const sql = `
         SELECT SUM(order_total) AS total_amount_day
