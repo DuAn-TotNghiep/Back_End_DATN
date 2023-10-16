@@ -367,8 +367,44 @@ const getTotalPerMonth = (req, res) => {
 
 };
 
+const getTotalPerDay = (req, res) => {
+  const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+
+  try {
+    const dailyTotals = [];
+    for (let i = 0; i < 7; i++) { // Lấy dữ liệu cho 7 ngày
+      const endOfDay = today.minus({ days: i }).endOf('day');
+      const startOfDay = endOfDay.startOf('day');
+      const dayDate = startOfDay.setLocale('vi').toFormat('dd/MM/yyyy'); // Lấy ngày tháng
+
+      const sql = `
+        SELECT SUM(order_total) AS total_amount_day
+        FROM orders 
+        WHERE 
+        DATE(order_date) BETWEEN '${startOfDay.toISODate()}' AND '${endOfDay.toISODate()}'
+      `;
+
+      connect.query(sql, (err, results) => {
+        if (err) {
+          console.error("Lỗi khi lấy doanh thu cho ngày", err);
+          return res.status(500).json({ message: "Lỗi API", err });
+        }
+        const data = results.rows[0];
+        data.date = dayDate; // Thêm ngày tháng vào dữ liệu
+        dailyTotals.push(data);
+        if (dailyTotals.length === 7) {
+          // Tất cả các ngày đã được lấy, trả về kết quả
+          return res.status(200).json({ message: "Lấy thành công doanh thu trong 7 ngày", data: dailyTotals });
+        }
+      });
+    }
+  } catch (err) {
+    console.error("Lỗi API", err);
+    return res.status(500).json({ message: "Lỗi API", err });
+  }
+};
 
 
 
 
-module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff, getTotalPerMonth };
+module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff, getTotalPerMonth,getTotalPerDay };

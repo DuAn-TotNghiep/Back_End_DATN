@@ -1,5 +1,5 @@
 const express = require("express");
-const { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, TopRevenueProductFromStartOfLastMonth, CountPaymentOff, getTotalPerMonth } = require("../component/dashboard");
+const { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, TopRevenueProductFromStartOfLastMonth, CountPaymentOff, getTotalPerMonth, getTotalPerDay } = require("../component/dashboard");
 
 const router = express.Router();
 
@@ -10,6 +10,7 @@ router.get("/topproduct", TopProductToday)
 router.get("/topproductweek", TopProductWeek)
 router.get("/topproductmonth", TopProductMonth)
 router.get("/topproductpermonth", getTotalPerMonth)
+router.get("/topproductperday", getTotalPerDay)
 router.get("/topProductRevenueDay", TopRevenueProductToday)
 router.get("/topProductRevenueWeek", TopRevenueProductThisWeek)
 router.get("/topProductRevenueMonth", TopRevenueProductThisMonth)
