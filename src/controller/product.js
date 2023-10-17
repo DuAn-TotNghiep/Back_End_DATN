@@ -396,7 +396,31 @@ const FilterProductsByColor = (req, res) => {
     }
 }
 
+const FilterProductsBySize = (req, res) => {
+    try {
+        const { id } = req.params;
+        const sizeId = parseInt(id); // Chuyển đổi id thành kiểu integer
 
-module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor };
+        if (isNaN(sizeId)) {
+            return res.status(400).json({ message: 'Id không hợp lệ' });
+        }
+
+        const sql = `SELECT * FROM product WHERE $1 = ANY(size_id)`;
+        const values = [sizeId];
+
+        connect.query(sql, values, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Không lấy được sản phẩm của size này', err });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: "Lấy thành công", data });
+        });
+    } catch (err) {
+        return res.status(404).json({ message: 'Lỗi API', err });
+    }
+}
+
+
+module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize };
 
 
