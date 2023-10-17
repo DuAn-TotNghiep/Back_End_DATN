@@ -372,7 +372,31 @@ const SumProductDay = (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: err.message });
     }
 }
+const FilterProductsByColor = (req, res) => {
+    try {
+        const { id } = req.params;
+        const colorId = parseInt(id); // Chuyển đổi id thành kiểu integer
 
-module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay };
+        if (isNaN(colorId)) {
+            return res.status(400).json({ message: 'Id không hợp lệ' });
+        }
+
+        const sql = `SELECT * FROM product WHERE $1 = ANY(color_id)`;
+        const values = [colorId];
+
+        connect.query(sql, values, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Không lấy được sản phẩm của màu này', err });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: "Lấy thành công", data });
+        });
+    } catch (err) {
+        return res.status(404).json({ message: 'Lỗi API', err });
+    }
+}
+
+
+module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor };
 
 
