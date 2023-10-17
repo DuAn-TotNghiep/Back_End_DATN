@@ -420,7 +420,23 @@ const FilterProductsBySize = (req, res) => {
     }
 }
 
+const FilterProductsByCategory = (req, res) => {
+    try {
+        const { id } = req.params
+        const sql = `SELECT * FROM product WHERE category_id=${id}`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'không lấy được sản phẩm thuộc danh mục này', err })
+            }
+            const data = result.rows
+            return res.status(200).json({ message: "lấy thành công", data })
+        })
+    } catch (err) {
+        return res.status(404).json({ message: 'Loi api' });
+    }
+}
 
-module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize };
+
+module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory };
 
 

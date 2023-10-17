@@ -1,5 +1,5 @@
 const express = require("express");
-const { getAllProducts, AddProduct, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, UpdateProduct, SumProductDay, FilterProductsByColor, FilterProductsBySize } = require("../controller/product");
+const { getAllProducts, AddProduct, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, UpdateProduct, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory } = require("../controller/product");
 const router = express.Router();
 router.post("/product/add", AddProduct);
 router.get("/product", getAllProducts);
@@ -16,6 +16,8 @@ router.patch("/product/:id/update", UpdateProduct);
 router.get("/product/sumproductday", SumProductDay);
 router.get("/product/:id/colorFillter", FilterProductsByColor);
 router.get("/product/:id/sizeFillter", FilterProductsBySize);
+router.get("/product/:id/categoryFillter", FilterProductsByCategory);
+
 
 
 module.exports = router;
