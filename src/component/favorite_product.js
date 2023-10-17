@@ -19,5 +19,20 @@ const addFavoriteProduct = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 }
+const getAllFavorite = async (req, res) => {
+    try {
+        let sql = "SELECT * FROM favorite_product";
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy sản phẩm yêu thích thất bại' });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: "Lấy tất cả sản phẩm yêu thích thành công", data })
+        })
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
 
-module.exports = { addFavoriteProduct };
+    }
+}
+
+module.exports = { addFavoriteProduct, getAllFavorite };
