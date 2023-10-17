@@ -1,5 +1,5 @@
 const express = require("express");
-const { addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination, getOneCat, updateCategory, ProductinCategory } = require("../component/category")
+const { addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination, getOneCat, updateCategory, ProductinCategory } = require("../controller/category")
 const router = express.Router();
 router.post("/category/add", addCategory);
 router.get('/category', getAllCategory);

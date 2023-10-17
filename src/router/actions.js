@@ -1,5 +1,5 @@
 const express = require("express");
-const { actions } = require("../component/actions");
+const { actions } = require("../controller/actions");
 const router = express.Router();
 router.post("/action", actions);
 

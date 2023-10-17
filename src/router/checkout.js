@@ -1,5 +1,5 @@
 const express = require("express");
-const { checkout, getOneheckout, checkoutnotoken } = require("../component/checkout");
+const { checkout, getOneheckout, checkoutnotoken } = require("../controller/checkout");
 
 const router = express.Router();
 router.post("/checkout/add", checkout);

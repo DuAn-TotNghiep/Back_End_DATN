@@ -2,7 +2,7 @@
 
 
 const express = require("express");
-const { getAllSale } = require("../component/sale");
+const { getAllSale } = require("../controller/sale");
 const router = express.Router();
 
 router.get("/sale", getAllSale);
