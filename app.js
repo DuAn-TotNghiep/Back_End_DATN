@@ -25,7 +25,7 @@ const routerDashBoard = require("./src/router/dashboard");
 const routerBill = require('./src/router/bill')
 const routerAction = require('./src/router/actions')
 const routerRecyclebin = require('./src/router/recyclebin')
-
+const routerFavorite = require('./src/router/favorite_product')
 const corsOptions = {
   origin: "*",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -62,6 +62,7 @@ app.use("/api", routerDashBoard);
 app.use("/api", routerBill);
 app.use("/api", routerAction);
 app.use("/api", routerRecyclebin);
+app.use("/api", routerFavorite);
 
 
 connect.connect((err) => {
