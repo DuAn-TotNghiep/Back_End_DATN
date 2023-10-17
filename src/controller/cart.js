@@ -71,4 +71,20 @@ const GetOneCart = (req, res) => {
         return res.status(500).json({ message: "Loi api", err })
     }
 }
-module.exports = { AddToCart, GetOneCart };
+
+const deleteCart = (req, res) => {
+    try {
+        const id = req.params.id;
+        const sql = `DELETE FROM cart WHERE id=${id}`;
+        connect.query(sql, (err) => {
+            if (err) {
+                return res.status(500).json({ message: 'Xóa thất bại' });
+            }
+            return res.status(200).json({ message: "Xoá thành công" })
+
+        })
+    } catch (error) {
+        return res.status(500).json({ message: "Loi api", err })
+    }
+}
+module.exports = { AddToCart, GetOneCart, deleteCart };
