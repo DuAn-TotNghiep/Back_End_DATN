@@ -436,7 +436,28 @@ const FilterProductsByCategory = (req, res) => {
     }
 }
 
+const FilterProductsByPrice = (req, res) => {
+    try {
+        const { minPrice, maxPrice } = req.params;
 
-module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory };
+        // Thực hiện truy vấn SQL để lọc sản phẩm theo giá
+        const sql = `SELECT * FROM product WHERE product_price >= $1 AND product_price <= $2`;
+        const values = [minPrice, maxPrice];
+
+        connect.query(sql, values, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lọc sản phẩm theo giá thất bại', err });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: "Lọc sản phẩm theo giá thành công", data });
+        });
+    } catch (err) {
+        return res.status(404).json({ message: 'Loi api' });
+    }
+}
+
+
+
+module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory, FilterProductsByPrice };
 
 
