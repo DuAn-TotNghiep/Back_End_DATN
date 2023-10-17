@@ -2,7 +2,7 @@
 
 
 const express = require("express");
-const { addSize, getAllSize, GetOneSize } = require("../component/size");
+const { addSize, getAllSize, GetOneSize } = require("../controller/size");
 const router = express.Router();
 router.post("/size/add", addSize);
 router.get("/size", getAllSize);

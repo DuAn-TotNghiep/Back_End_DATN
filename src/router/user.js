@@ -1,5 +1,5 @@
 const express = require("express");
-const { Signup, Signin, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, verifyOTPRoute } = require("../component/user");
+const { Signup, Signin, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, verifyOTPRoute } = require("../controller/user");
 const { verifyOTPMiddleware } = require("../middleware/verify");
 
 const router = express.Router();

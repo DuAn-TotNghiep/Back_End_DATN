@@ -1,5 +1,9 @@
 const express = require("express");
+
 const { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, TopRevenueProductFromStartOfLastMonth, CountPaymentOff, getTotalPerMonth, getTotalPerDay } = require("../component/dashboard");
+
+// const { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, TopRevenueProductFromStartOfLastMonth, CountPaymentOff, getTotalPerMonth } = require("../controller/dashboard");
+
 
 const router = express.Router();
 

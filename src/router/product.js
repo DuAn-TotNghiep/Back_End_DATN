@@ -1,5 +1,5 @@
 const express = require("express");
-const { getAllProducts, AddProduct, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, UpdateProduct, SumProductDay, } = require("../component/product");
+const { getAllProducts, AddProduct, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, UpdateProduct, SumProductDay, } = require("../controller/product");
 const router = express.Router();
 router.post("/product/add", AddProduct);
 router.get("/product", getAllProducts);

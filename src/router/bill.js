@@ -2,7 +2,7 @@
 
 
 const express = require("express");
-const { bill, getBill, getOneBill, getOneBillInCheckOut } = require("../component/bill");
+const { bill, getBill, getOneBill, getOneBillInCheckOut } = require("../controller/bill");
 const router = express.Router();
 router.post('/bill/add', bill)
 router.get('/bill', getBill)
