@@ -34,5 +34,18 @@ const getAllFavorite = async (req, res) => {
 
     }
 }
-
-module.exports = { addFavoriteProduct, getAllFavorite };
+const deleteFavoriteProduct = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const sql = `DELETE FROM favorite_product WHERE favorite_product_id = ${id}`;
+        connect.query(sql, (err) => {
+            if (err) {
+                return res.status(500).json({ message: 'Xóa thất bại' });
+            }
+            return res.status(200).json({ message: "Xoá thành công" })
+        })
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
+    }
+}
+module.exports = { addFavoriteProduct, getAllFavorite, deleteFavoriteProduct };
