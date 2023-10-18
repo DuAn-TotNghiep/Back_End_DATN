@@ -89,4 +89,25 @@ const getOneheckout = (req, res) => {
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
-module.exports = { checkout, getOneheckout, checkoutnotoken };
+const getOneCheckOutProduct = (req, res) => {
+    try {
+        const { id } = req.params;
+        const sql = `
+  SELECT * FROM checkout
+  WHERE exists (
+    SELECT 1 FROM jsonb_array_elements(product) AS elem
+    WHERE (elem->>'product_id')::integer = ${id}
+  )
+`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'loi', err })
+            }
+            const data = result.rows
+            return res.status(200).json({ message: 'Thanh cong', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi API', err })
+    }
+}
+module.exports = { checkout, getOneheckout, checkoutnotoken, getOneCheckOutProduct };
