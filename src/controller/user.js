@@ -68,11 +68,11 @@ const verifyOTP = (email, otpToCheck) => {
 // Hàm tạo và gửi OTP
 const generateAndSendOTPRoute = (req, res) => {
   // Lấy email từ request
-  const email = req.body.email;
+  const user_email = req.body.user_email;
 
   // Kiểm tra email hợp lệ và gửi OTP
-  if (email) {
-    const otp = generateAndSendOTP(email);
+  if (user_email) {
+    const otp = generateAndSendOTP(user_email);
     res.status(200).json({ message: "Mã OTP đã được gửi thành công", otp });
   } else {
     res.status(400).json({ message: "Email không hợp lệ" });
@@ -98,8 +98,7 @@ const verifyOTPRoute = (req, res, next) => {
 };
 
 const someFunctionInController = (req, res) => {
-  // Lấy dữ liệu email và otp từ yêu cầu hoặc bất kỳ nguồn nào khác
-  const email = req.body.email;
+  // Lấy dữ liệu email và otp từ yêu cầu hoặc bất kỳ nguồn nào khácconst email = req.body.email;
   const otp = req.body.otp;
   // Gọi middleware và truyền dữ liệu
   verifyOTPMiddleware(req, res, email, otp);
@@ -150,7 +149,7 @@ const Signup = async (req, res) => {
         `;
     connect.query(createUserQuery, (err, resolve) => {
       if (err) {
-        return res.status(500).json({ message: "loi", err })
+        return res.status(500).json({ message: "Tài khoản đã tồn tại", err })
       }
       const data = resolve.rows[0]
       console.log(data);
@@ -193,9 +192,7 @@ const Signup = async (req, res) => {
 //       user_password,
 //       user_phone,
 //       otp
-//     } = value;
-
-//     // Kiểm tra xem tài khoản đã tồn tại hay chưa
+//     } = value;//     // Kiểm tra xem tài khoản đã tồn tại hay chưa
 //     const checkUserQuery = "SELECT * FROM users WHERE user_email = $1";
 //     const { rows } = await connect.query(checkUserQuery, [email]);
 
@@ -282,8 +279,7 @@ const Signin = async (req, res) => {
         user_lastname: user.user_lastname,
         user_firstname: user.user_firstname,
         user_province: user.user_province,
-        user_district: user.user_district,
-        user_ward: user.user_ward,
+        user_district: user.user_district,user_ward: user.user_ward,
         user_address: user.user_address,
         user_image: user.user_image,
         user_email: user.user_email,
