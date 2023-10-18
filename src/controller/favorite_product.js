@@ -34,6 +34,25 @@ const getAllFavorite = async (req, res) => {
 
     }
 }
+const getOneFavorite = async (req, res) => {
+    try {
+        // Lấy user_id từ req.params hoặc req.query tùy thuộc vào cách bạn thiết kế API của mình.
+        const id = req.params.id; // Đây là một ví dụ, bạn cần điều chỉnh để lấy user_id theo cách bạn đang sử dụng.
+
+        let sql = `SELECT * FROM favorite_product WHERE user_id = ${id}`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy sản phẩm yêu thích thất bại', error: err.message });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: "Lấy sản phẩm yêu thích thành công", data });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
+    }
+}
+
+
 const deleteFavoriteProduct = async (req, res) => {
     try {
         const id = req.params.id;
@@ -48,4 +67,4 @@ const deleteFavoriteProduct = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 }
-module.exports = { addFavoriteProduct, getAllFavorite, deleteFavoriteProduct };
+module.exports = { addFavoriteProduct, getAllFavorite, deleteFavoriteProduct, getOneFavorite };
