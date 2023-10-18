@@ -5,8 +5,8 @@ const connect = new Client({
   // password: "admin",
   // password: 'admin',
   // password: "admin",
-  // password: 'ADMIN',
-  password: "admin",
+  password: 'ADMIN',
+  // password: "admin",
   // password: 'ADMIN',
 
 
@@ -16,13 +16,13 @@ const connect = new Client({
 
   host: "localhost",
   port: 5432, // Cổng mặc định của PostgreSQL là 5432
-  port: 3001, // Cổng mặc định của PostgreSQL là 5432
+  // port: 3001, // Cổng mặc định của PostgreSQL là 5432
   // port: 3001, // Cổng mặc định của PostgreSQL là 5432
   // database: 'DU_AN_TOT_NGHIEP',
 
-  // database: 'DUANTN',
+  database: 'DUANTN',
 
-  database: "DATN1",
+  // database: "DATN1",
 
 
   // database: "DATN_2023_MAIN",
