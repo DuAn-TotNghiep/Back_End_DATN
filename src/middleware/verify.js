@@ -24,6 +24,7 @@ const verifyOTPMiddleware = (req, res, next) => {
     } else if (req.path === "/signup") {
         // Nếu yêu cầu là để xác minh OTP
         if (email && otpToCheck) {
+            console.log(email);
             const isOTPValid = verifyOTP(email, otpToCheck);
             console.log(isOTPValid);
             if (isOTPValid) {
