@@ -7,11 +7,6 @@ const { DateTime } = require('luxon')
 const AddProduct = async (req, res, next) => {
     try {
         const { color_id, size_id, category_id, name, image, desc, price } = req.body
-        // const { error } = addProduct.validate(req.body, { abortEarly: false });
-        // if (error) {
-        //     const errs = error.details.map(err => err.message)
-        //     return res.status(400).json(errs)
-        // }
         const sql4 = `SELECT * FROM product WHERE product_name='${name}'`
         connect.query(sql4, (err, resolve) => {
             if (resolve.rows.length > 0) {
@@ -137,7 +132,20 @@ const getAllProducts = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
-
+const GetAllProductOff = (req, res) => {
+    try {
+        const sql = `SELECT * FROM product`;
+        connect.query(sql, (err, resolve) => {
+            const data = resolve.rows
+            return res.status(200).json({
+                message: 'Lấy tất cả san pham thành công',
+                data,
+            });
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
 const RemoveProduct = async (req, res) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
@@ -458,6 +466,6 @@ const FilterProductsByPrice = (req, res) => {
 
 
 
-module.exports = { AddProduct, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory, FilterProductsByPrice };
+module.exports = { AddProduct, GetAllProductOff,UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory, FilterProductsByPrice };
 
 

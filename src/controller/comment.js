@@ -20,7 +20,7 @@ const AddComment = (req, res) => {
 const GetAllCommentProduct = (req, res) => {
     try {
         const { id } = req.params
-        const sql = `SELECT * FROM comment WHERE product_id=${id}`;
+        const sql = `SELECT * FROM comment WHERE product_id=${id} ORDER BY comment_date DESC`;
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: 'Khong lay duoc comment cua san pham', err })
