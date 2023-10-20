@@ -42,21 +42,27 @@ WHERE user_id = ${user_id}`
 }
 const checkoutoff = (req, res) => {
     try {
-        const { product, total ,checkout_off} = req.body
+        const { product, total, checkout_off, payment, province, district, ward, address } = req.body
+        console.log(checkout_off);
         const productJSON = JSON.stringify(product);
         const order_date = DateTime.local().setZone('Asia/Ho_Chi_Minh');
         const sql = `
-  INSERT INTO checkout (product, total,checkout_date,checkout_off)
-  VALUES ($1, $2, $3, $4)
+  INSERT INTO checkout (product, total,checkout_date,checkout_off, payment,province,district,ward,address)
+  VALUES ($1, $2, $3, $4,$5,$6,$7,$8,$9)
   RETURNING *;
 `;
         const values = [
-            productJSON, 
+            productJSON,
             total,
-            order_date, 
-            checkout_off
+            order_date,
+            checkout_off,
+            payment,
+            province,
+            district,
+            ward,
+            address,
         ];
-    
+
         connect.query(sql, values, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: "Khong them duoc check out off", err })
@@ -138,4 +144,5 @@ const getOneCheckOutProduct = (req, res) => {
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
+
 module.exports = { checkout, getOneheckout, checkoutnotoken, getOneCheckOutProduct, checkoutoff };
