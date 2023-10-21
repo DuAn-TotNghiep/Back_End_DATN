@@ -378,7 +378,7 @@ const updateProfile = async(req, res)=>{
             user_ward ='${user_ward}',
             user_district ='${user_district}',
             user_address ='${user_address}',
-            user_image = Array['${user_image}'],
+            user_image = '${user_image}',
             user_phone='${user_phone}'
             WHERE id=${userId}
             RETURNING *`;
