@@ -1,5 +1,5 @@
 const express = require("express");
-const { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getReceivedOrders, getPlacedOrders, getPendingOrders } = require("../controller/order");
+const { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getReceivedOrders, getPlacedOrders, getPendingOrders, getOneOrderinUser } = require("../controller/order");
 const router = express.Router();
 router.post("/order/add", order);
 router.get("/order", getAllOrder);
@@ -17,4 +17,5 @@ router.get('/order/getorderadmin',GetOrderForAdmin)
 router.get('/order/orderplace',getPlacedOrders)
 router.get('/order/orderrevice',getReceivedOrders)
 router.get('/order/orderpending',getPendingOrders)
+router.get('/order/:id/getorderuser', getOneOrderinUser)
 module.exports = router;
