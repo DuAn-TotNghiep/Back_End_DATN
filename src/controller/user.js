@@ -355,7 +355,7 @@ const getAllUser = async (req, res) => {
 const updateProfile = async(req, res)=>{
   try {
     const userId = req.params.id;
-    const { user_lastname,user_firstname,user_province, user_district, user_ward, user_address, user_image ,user_phone } = req.body;
+    const { user_lastname,user_firstname,user_province,user_ward,user_district,user_address , user_image ,user_phone } = req.body;
 
     // Kiểm tra xem sản phẩm có tồn tại không
     const sql1 = `SELECT * FROM users WHERE id = ${userId}`;
@@ -374,9 +374,9 @@ const updateProfile = async(req, res)=>{
             SET
             user_lastname='${user_lastname}',
             user_firstname='${user_firstname}',
-            user_province='${user_province}',
-            user_district='${user_district}',
-            user_ward='${user_ward}',
+            user_province ='${user_province}',
+            user_ward ='${user_ward}',
+            user_district ='${user_district}',
             user_address ='${user_address}',
             user_image = Array['${user_image}'],
             user_phone='${user_phone}'
