@@ -48,6 +48,21 @@ order_date DESC`
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+const getOneOrderinUser = async (req, res) => {
+    try {
+        const { id } = req.params
+        let sql = `SELECT * FROM orders WHERE user_id =${id} `;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Không lấy được danh sách order' });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: "lấy danh sách order thành công", data });
+        })
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
 const getOneOrder = async (req, res) => {
     try {
         const { id } = req.params
@@ -122,6 +137,7 @@ const UpdateCancell = (req, res) => {
 const UpdateConfirm = (req, res) => {
     try {
         const { id } = req.body
+        console.log(id);
         const sql = `UPDATE orders SET status=2 WHERE order_id=${id} RETURNING*`
         connect.query(sql, (err, result) => {
             if (err) {
@@ -290,4 +306,4 @@ const getPendingOrders = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 }
-module.exports = { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders };
+module.exports = { order, getAllOrder, getOneOrderinUser, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders };
