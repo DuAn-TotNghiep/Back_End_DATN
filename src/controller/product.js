@@ -30,7 +30,7 @@ const AddProduct = async (req, res, next) => {
 const UpdateProduct = async (req, res, next) => {
     try {
         const productId = req.params.id;
-        const { color_id, size_id, category_id, name, image, desc, price } = req.body;
+        const { color_id, size_id, category_id, name, image, desc, price, outstan } = req.body;
 
         // Kiểm tra xem sản phẩm có tồn tại không
         const sql1 = `SELECT * FROM product WHERE product_id = ${productId}`;
@@ -53,7 +53,8 @@ const UpdateProduct = async (req, res, next) => {
                     category_id = ${category_id},
                     product_name = '${name}',
                     product_description = '${desc}',
-                    product_price = ${price}
+                    product_price = ${price},
+                    outstan=${outstan}
                 WHERE product_id = ${productId}
                 RETURNING *`;
 
@@ -70,6 +71,7 @@ const UpdateProduct = async (req, res, next) => {
         return res.status(500).json({ message: 'Lỗi API', err });
     }
 }
+
 
 
 
