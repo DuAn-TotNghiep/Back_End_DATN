@@ -118,13 +118,16 @@ const searchProduct = async (req, res) => {
     }
 }
 
-// getProductByCategory
+// getProductSearchCategory
 
-const getProductByCategory = async (req, res) => {
+const getProductSearchCategory = async (req, res) => {
     try {
-        const id = req.params.id;
-        let sql = 'SELECT p.* FROM product p INNER JOIN category c ON p.category_id = c.category_id WHERE c.category_id = $1';
-        const result = await connect.query(sql, [id]);
+
+        let category_name = req.body.category_name;
+        category_name = category_name.trim();
+        let regex = `%${category_name}%`
+        let sql = `SELECT * FROM category WHERE category_name ILIKE $1`;
+        const result = await connect.query(sql, [regex]);
         if (result.rows.length == 0) {
             return res.json({
                 message: "Không tìm thấy sản phẩm của danh mục bạn đã chọn"
@@ -489,6 +492,6 @@ const FilterProductsByPrice = (req, res) => {
 
 
 
-module.exports = { getProductByCategory, AddProduct, GetAllProductOff, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory, FilterProductsByPrice };
+module.exports = { getProductSearchCategory, AddProduct, GetAllProductOff, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory, FilterProductsByPrice };
 
 
