@@ -334,7 +334,7 @@ const getTotalPerMonth = (req, res) => {
 
   try {
     const monthlyTotals = [];
-    for (let i = 0; i < 6; i++) { // Lấy dữ liệu cho 6 tháng
+    for (let i = 0; i < 13; i++) { // Lấy dữ liệu cho 6 tháng
       const endOfMonth = today.minus({ months: i }).endOf('month');
       const startOfMonth = endOfMonth.startOf('month');
       const monthName = startOfMonth.setLocale('vi').toFormat('M/yyyy'); // Lấy tên tháng
@@ -353,7 +353,7 @@ const getTotalPerMonth = (req, res) => {
         const data = results.rows[0];
         data.month = monthName; // Thêm tên tháng vào dữ liệu
         monthlyTotals.push(data);
-        if (monthlyTotals.length === 6) {
+        if (monthlyTotals.length === 12) {
           // Tất cả các tháng đã được lấy, trả về kết quả
           return res.status(200).json({ message: "Lấy thành công tổng tiền từng tháng", data: monthlyTotals });
         }
