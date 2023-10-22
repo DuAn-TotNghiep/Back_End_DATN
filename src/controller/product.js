@@ -81,7 +81,7 @@ const UpdateProduct = async (req, res, next) => {
 
 const searchProduct = async (req, res) => {
     try {
-        let product_name = req.query.product_name;
+        let product_name = req.body.product_name;
         product_name = product_name.trim();
         let regex = `%${product_name}%`;
 
