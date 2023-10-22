@@ -212,7 +212,7 @@ const RemoveProduct = async (req, res) => {
 }
 const GetOutstan = async (req, res) => {
     try {
-        const sql = `SELECT * FROM product WHERE outstan IS NOT NULL AND outstan = true LIMIT 8`
+        const sql = `SELECT * FROM product WHERE outstan IS NOT NULL AND outstan = true LIMIT 4`
         connect.query(sql, (err, results) => {
             if (err) {
                 return res.status(500).json({ message: 'Lay outstan that bai', err })
@@ -229,7 +229,7 @@ const GetSale = async (req, res) => {
         const sql = `SELECT product.*, sale.sale_distcount FROM product
         JOIN sale ON product.sale_id = sale.sale_id
         WHERE sale.sale_distcount > 0
-        LIMIT 8;
+        LIMIT 4;
         `
         connect.query(sql, (err, results) => {
             if (err) {
@@ -245,7 +245,7 @@ const GetSale = async (req, res) => {
 
 const getNewProduct = async (req, res) => {
     try {
-        let sqlQuery = `SELECT * FROM product ORDER BY product_id DESC LIMIT 8;`;
+        let sqlQuery = `SELECT * FROM product ORDER BY product_id DESC LIMIT 4;`;
         connect.query(sqlQuery, (err, result) => {
             if (err) {
                 return res.status(500).json({
