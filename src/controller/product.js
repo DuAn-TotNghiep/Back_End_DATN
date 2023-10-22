@@ -122,25 +122,36 @@ const searchProduct = async (req, res) => {
 
 const getProductSearchCategory = async (req, res) => {
     try {
-
         let category_name = req.body.category_name;
         category_name = category_name.trim();
-        let regex = `%${category_name}%`
-        let sql = `SELECT * FROM category WHERE category_name ILIKE $1`;
+        let regex = `%${category_name}%`;
+
+        // Truy vấn để lấy tất cả sản phẩm có tên chứa category_name
+        let sql = `
+            SELECT product.* 
+            FROM product 
+            WHERE product.product_name ILIKE $1
+        `;
+
         const result = await connect.query(sql, [regex]);
+
         if (result.rows.length == 0) {
             return res.json({
                 message: "Không tìm thấy sản phẩm của danh mục bạn đã chọn"
             });
         }
+
         return res.json({
-            message: "Tìm thấy sản phẩm trong danh mục ",
+            message: "Tìm thấy sản phẩm trong danh mục",
             data: result.rows,
-        })
+        });
     } catch (error) {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+
+
+
 
 const getAllProducts = async (req, res) => {
     try {
