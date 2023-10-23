@@ -1,6 +1,6 @@
 
 const connect = require("../../database");
-
+const io = require('../../app')
 const getAllSale = async (req, res) => {
     try {
 
@@ -19,14 +19,14 @@ const getAllSale = async (req, res) => {
 }
 const updateSaleProduct = async (req, res) => {
     try {
-        const { sale_id } = req.body;
-        const { id } = req.params
+        const { sale_id, id } = req.body;
         let sql = `UPDATE product SET sale_id= ${sale_id} WHERE product_id=${id}`;
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: 'Update sale that bai', err });
             }
             const data = result.rows;
+            io.emit('updatesale', { message: 'update sale thanh cong', data });
             return res.status(200).json({ message: 'Update sale thành công', data });
         });
     } catch (error) {
