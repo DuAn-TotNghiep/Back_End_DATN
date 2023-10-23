@@ -1,9 +1,10 @@
 const express = require("express");
-const { Signup, Signin, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, verifyOTPRoute, updateProfile } = require("../controller/user");
+const { Signup, Signin, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, verifyOTPRoute, updateProfile, SigninProfile } = require("../controller/user");
 const { verifyOTPMiddleware } = require("../middleware/verify");
 
 const router = express.Router();
 router.post("/signin", Signin);
+router.post("/signinprofile", SigninProfile);
 router.get("/topuser", TopUser)
 router.get('/user', getAllUser)
 router.get("/user/:id/getone", GetOneUser)
