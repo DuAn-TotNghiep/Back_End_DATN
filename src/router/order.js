@@ -1,5 +1,5 @@
 const express = require("express");
-const { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getReceivedOrders, getPlacedOrders, getPendingOrders, getOneOrderinUser, UpdateShiping, UpdateShipDone, UpdateComplete, getPending, getShiping } = require("../controller/order");
+const { order, getAllOrder, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getReceivedOrders, getPlacedOrders, getPendingOrders, getOneOrderinUser, UpdateShiping, UpdateShipDone, UpdateComplete, getShipingOrders, getConfirmOrders, getDeleveredOrders, getCompleteOrders, getCancelledOrders } = require("../controller/order");
 const router = express.Router();
 router.post("/order/add", order);
 router.get("/order", getAllOrder);
@@ -15,12 +15,16 @@ router.patch('/order/shiping', UpdateShiping)
 router.patch('/order/shipdone', UpdateShipDone)
 router.patch('/order/done', UpdateDone)
 router.patch('/order/complate', UpdateComplete)
-router.get('/order/orderinweek',ListOrderInWeek)
-router.get('/order/getorderadmin',GetOrderForAdmin)
-router.get('/order/orderplace',getPlacedOrders)
-router.get('/order/orderrevice',getReceivedOrders)
-router.get('/order/orderpending',getPendingOrders)
+router.get('/order/orderinweek', ListOrderInWeek)
+router.get('/order/getorderadmin', GetOrderForAdmin)
+router.get('/order/orderplace', getPlacedOrders)
+router.get('/order/orderrevice', getReceivedOrders)
+router.get('/order/orderpending', getPendingOrders)
+router.get('/order/ordershiping', getShipingOrders)
+router.get('/order/orderconfirm', getConfirmOrders)
+router.get('/order/orderdelivered', getDeleveredOrders)
+router.get('/order/ordercomplete', getCompleteOrders)
+router.get('/order/ordercancell', getCancelledOrders)
+
 router.get('/order/:id/getorderuser', getOneOrderinUser)
-router.get('/order/pending', getPending)
-router.get('/order/shiping', getShiping)
 module.exports = router;

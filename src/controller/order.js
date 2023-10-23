@@ -171,21 +171,15 @@ const UpdateShiping = (req, res) => {
 const UpdateShipDone = (req, res) => {
     try {
         const { id } = req.body
-        let responseSent = false;
+        console.log(id);
         const sql = `UPDATE orders SET status=4 WHERE order_id=${id} RETURNING*`
         connect.query(sql, (err, result) => {
             if (err) {
-                responseSent = true;
                 return res.status(500).json({ message: 'khong sua duoc trang thai shipdone', err })
             }
             const data = result.rows[0]
-            io.emit('shiping', { message: 'Đơn hàng đã được giao', data });
-            setTimeout(() => {
-                if (!responseSent) {
-                    const completeReq = { body: { id } };
-                    UpdateComplete(completeReq, res);
-                }
-            }, 20000);
+            io.emit('confirm', { message: 'Đơn hàng đã được xác nhận', data });
+            return res.status(200).json({ message: 'sua thanh cong trang thai shipdone', data })
         })
     } catch (err) {
         return res.status(500).json({ message: 'Loi API', err })
@@ -194,21 +188,13 @@ const UpdateShipDone = (req, res) => {
 const UpdateDone = (req, res) => {
     try {
         const { id } = req.body
-        let responseSent = false;
         const sql = `UPDATE orders SET status=5 WHERE order_id=${id}`
         connect.query(sql, (err, result) => {
             if (err) {
-                responseSent = true;
                 return res.status(500).json({ message: 'khong sua duoc trang thai done order', err })
             }
             const data = result.rows[0]
-            io.emit('statusdone', { message: 'Đã Nhận Hàng', data });
-            setTimeout(() => {
-                if (!responseSent) {
-                    const completeReq = { body: { id } };
-                    UpdateComplete(completeReq, res);
-                }
-            }, 10000);
+            return res.status(200).json({ message: 'sua thanh cong trang thai done order', data })
         })
     } catch (err) {
         return res.status(500).json({ message: 'Loi API', err })
@@ -223,7 +209,6 @@ const UpdateComplete = (req, res) => {
                 return res.status(500).json({ message: 'khong sua duoc trang thai complete order', err })
             }
             const data = result.rows[0]
-            io.emit('complete', { message: 'Đơn hàng đã hoàn thành', data });
             return res.status(200).json({ message: 'sua thanh cong trang thai complete order', data })
         })
     } catch (err) {
@@ -344,9 +329,9 @@ const getPlacedOrders = async (req, res) => {
 };
 const getReceivedOrders = async (req, res) => {
     try {
-        const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
-        const formattedDate = today.toFormat("yyyy-MM-dd");
-        const sql = `SELECT * FROM orders WHERE status = '3' AND DATE(order_date)='${formattedDate}'`
+        // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        // const formattedDate = today.toFormat("yyyy-MM-dd");
+        const sql = `SELECT * FROM orders WHERE status = '5'`
 
         const result = await connect.query(sql);
 
@@ -356,22 +341,24 @@ const getReceivedOrders = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 };
-const getPendingOrders = async (req, res) => {
+const getConfirmOrders = async (req, res) => {
     try {
-        const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
-        const formattedDate = today.toFormat("yyyy-MM-dd");
-        const sql = `SELECT * FROM orders WHERE status = '2' AND DATE(order_date)='${formattedDate}'`
+        // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        // const formattedDate = today.toFormat("yyyy-MM-dd");
+        const sql = `SELECT * FROM orders WHERE status = '1'`
 
         const result = await connect.query(sql);
 
         const confirmedOrders = result.rows;
-        return res.status(200).json({ message: 'Lấy danh sách đơn hàng đã nhận xác nhận thành công', orders: confirmedOrders });
+        return res.status(200).json({ message: 'Lấy danh sách đơn hàng chờ xác nhận thành công', orders: confirmedOrders });
     } catch (error) {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 }
-const getPending = async (req, res) => {
+const getPendingOrders = async (req, res) => {
     try {
+        // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        // const formattedDate = today.toFormat("yyyy-MM-dd");
         const sql = `SELECT * FROM orders WHERE status = '2'`
 
         const result = await connect.query(sql);
@@ -382,17 +369,63 @@ const getPending = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 }
-const getShiping = async (req, res) => {
+const getShipingOrders = async (req, res) => {
     try {
-
+        // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        // const formattedDate = today.toFormat("yyyy-MM-dd");
         const sql = `SELECT * FROM orders WHERE status = '3'`
 
         const result = await connect.query(sql);
 
         const confirmedOrders = result.rows;
-        return res.status(200).json({ message: 'Lấy danh sách đơn hàng dang giao', orders: confirmedOrders });
+        return res.status(200).json({ message: 'Lấy danh sách đơn hàng đang giao thành công', orders: confirmedOrders });
     } catch (error) {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 }
-module.exports = { order, UpdateComplete, getPending, getShiping, UpdateShipDone, getAllOrder, getOneOrderinUser, UpdateShiping, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders };
+const getDeleveredOrders = async (req, res) => {
+    try {
+        // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        // const formattedDate = today.toFormat("yyyy-MM-dd");
+        const sql = `SELECT * FROM orders WHERE status = '4'`
+
+        const result = await connect.query(sql);
+
+        const confirmedOrders = result.rows;
+        return res.status(200).json({ message: 'Lấy danh sách đơn hàng đã giao thành công', orders: confirmedOrders });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
+    }
+}
+const getCompleteOrders = async (req, res) => {
+    try {
+        // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        // const formattedDate = today.toFormat("yyyy-MM-dd");
+        const sql = `SELECT * FROM orders WHERE status = '6'`
+
+        const result = await connect.query(sql);
+
+        const confirmedOrders = result.rows;
+        return res.status(200).json({ message: 'Lấy danh sách đơn hàng hoàn thành thành công', orders: confirmedOrders });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
+    }
+}
+const getCancelledOrders = async (req, res) => {
+    try {
+        const sql = `
+            SELECT * FROM orders
+            WHERE status NOT IN ('1', '2', '3', '4', '5', '6')
+        `;
+
+        const result = await connect.query(sql);
+
+        const cancelledOrders = result.rows;
+        return res.status(200).json({ message: 'Lấy danh sách đơn hàng đã huỷ thành công', orders: cancelledOrders });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
+    }
+}
+
+
+module.exports = { order, UpdateComplete, UpdateShipDone, getAllOrder, getOneOrderinUser, UpdateShiping, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders, getShipingOrders, getConfirmOrders, getDeleveredOrders, getCompleteOrders, getCancelledOrders };
