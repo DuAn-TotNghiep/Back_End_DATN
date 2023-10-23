@@ -85,9 +85,6 @@ const searchProduct = async (req, res) => {
         product_name = product_name.trim();
         let regex = `%${product_name}%`;
 
-        // Trang hiện tại và số sản phẩm trên mỗi trang
-        const page = req.query.page || 1;  // Trang mặc định là 1
-        const perPage = 3;  // Số sản phẩm trên mỗi trang
 
         let sql = `SELECT * FROM product WHERE product_name ILIKE $1`;
         const result = await connect.query(sql, [regex]);
@@ -98,20 +95,19 @@ const searchProduct = async (req, res) => {
             });
         }
 
-        // Tính toán số lượng trang
-        const totalProducts = result.rows.length;
-        const totalPages = Math.ceil(totalProducts / perPage);
+        // // Tính toán số lượng trang
+        // const totalProducts = result.rows.length;
+        // const totalPages = Math.ceil(totalProducts / perPage);
 
-        // Lọc kết quả để lấy sản phẩm trên trang hiện tại
-        const startIndex = (page - 1) * perPage;
-        const endIndex = startIndex + perPage;
-        const productsOnPage = result.rows.slice(startIndex, endIndex);
+        // // Lọc kết quả để lấy sản phẩm trên trang hiện tại
+        // const startIndex = (page - 1) * perPage;
+        // const endIndex = startIndex + perPage;
+        // const productsOnPage = result.rows.slice(startIndex, endIndex);
 
         return res.json({
             message: "Tìm thấy sản phẩm",
-            data: productsOnPage,
-            totalPages,
-            currentPage: page,
+            data: result.rows,
+
         });
     } catch (error) {
         return res.status(500).json({ message: 'Lỗi API' });
