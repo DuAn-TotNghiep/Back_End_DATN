@@ -279,13 +279,55 @@ const Signin = async (req, res) => {
         user_lastname: user.user_lastname,
         user_firstname: user.user_firstname,
         user_province: user.user_province,
-        user_district: user.user_district,user_ward: user.user_ward,
+        user_district: user.user_district, user_ward: user.user_ward,
         user_address: user.user_address,
         user_image: user.user_image,
         user_email: user.user_email,
         user_phone: user.user_phone,
         role: user.role,
         otp: user.otp
+      },
+      accessToken: accessToken,
+    });
+  } catch (error) {
+    console.error("Lỗi khi đăng nhập:", error);
+    res.status(500).json({ message: "Đã xảy ra lỗi" });
+  }
+};
+const SigninProfile = async (req, res) => {
+  try {
+    const { user_email, user_password } = req.body;
+
+
+
+    // Kiểm tra xem tài khoản tồn tại
+    const checkUserQuery = "SELECT * FROM users WHERE user_email = $1";
+    const { rows } = await connect.query(checkUserQuery, [user_email]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Tài khoản không tồn tại" });
+    }
+
+    const user = rows[0];
+
+    // Tạo AccessToken
+    const accessToken = jwt.sign({ user_id: user.id }, "datn", {
+      expiresIn: "1d",
+    });
+
+    res.status(200).json({
+      message: "Đăng nhập thành công",
+      user: {
+        id: user.id,
+        user_lastname: user.user_lastname,
+        user_firstname: user.user_firstname,
+        user_province: user.user_province,
+        user_district: user.user_district, user_ward: user.user_ward,
+        user_address: user.user_address,
+        user_image: user.user_image,
+        user_email: user.user_email,
+        user_phone: user.user_phone,
+        role: user.role,
       },
       accessToken: accessToken,
     });
@@ -352,24 +394,24 @@ const getAllUser = async (req, res) => {
     return res.status(500).json({ message: 'Lỗi API' });
   }
 }
-const updateProfile = async(req, res)=>{
+const updateProfile = async (req, res) => {
   try {
     const userId = req.params.id;
-    const { user_lastname,user_firstname,user_province,user_ward,user_district,user_address , user_image ,user_phone } = req.body;
+    const { user_lastname, user_firstname, user_province, user_ward, user_district, user_address, user_image, user_phone } = req.body;
 
     // Kiểm tra xem sản phẩm có tồn tại không
     const sql1 = `SELECT * FROM users WHERE id = ${userId}`;
     connect.query(sql1, (err, result) => {
-        if (err) {
-            return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu', err });
-        }
+      if (err) {
+        return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu', err });
+      }
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Tài khoản không tồn tại' });
-        }
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Tài khoản không tồn tại' });
+      }
 
-        // Sản phẩm tồn tại, tiến hành cập nhật
-        const sql2 = `
+      // Sản phẩm tồn tại, tiến hành cập nhật
+      const sql2 = `
             UPDATE users
             SET
             user_lastname='${user_lastname}',
@@ -383,17 +425,17 @@ const updateProfile = async(req, res)=>{
             WHERE id=${userId}
             RETURNING *`;
 
-        connect.query(sql2, (err, result) => {
-            if (err) {
-                return res.status(500).json({ message: 'Lỗi không thể cập nhật thông tin', err });
-            }
+      connect.query(sql2, (err, result) => {
+        if (err) {
+          return res.status(500).json({ message: 'Lỗi không thể cập nhật thông tin', err });
+        }
 
-            const data = result.rows[0];
-            return res.status(200).json({ message: 'Sửa thông tin thành công', data });
-        });
+        const data = result.rows[0];
+        return res.status(200).json({ message: 'Sửa thông tin thành công', data });
+      });
     });
-} catch (err) {
+  } catch (err) {
     return res.status(500).json({ message: 'Lỗi API', err });
+  }
 }
-}
-module.exports = { Signup, Signin, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute,updateProfile };
+module.exports = { Signup, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile };
