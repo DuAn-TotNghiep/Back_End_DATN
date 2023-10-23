@@ -35,5 +35,64 @@ const AddVoucher = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', err });
     }
 }
+//delete voucher
+const DeleteVoucher = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const sql = `DELETE FROM voucher WHERE voucher_id=${id}`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(404).json({ message: "Xóa mã giảm giá thất bại!" });
+            }
+            if (result.rowCount === 0) {
+                return res.status(404).json({ message: "Xóa mã giảm giá thất bại, ID không tồn tại!" });
+            }
+            return res.status(200).json({ message: "Xóa mã giảm giá thành công!" })
+        })
 
-module.exports = { voucher, AddVoucher };
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', err });
+    }
+}
+//update voucher
+
+const UpdateVoucher = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { voucher_code, voucher_amount, voucher_status } = req.body;
+
+        // Kiểm tra xem mã giảm giá có tồn tại
+        const sql1 = `SELECT * FROM voucher WHERE voucher_id = $1`;
+        connect.query(sql1, [id], (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu!', error: err });
+            }
+            if (result.rows.length === 0) {
+                return res.status(404).json({ message: 'Mã giảm giá không tồn tại!' });
+            }
+
+            // Nếu tồn tại, tiến hành cập nhật
+            const sql2 = `
+                UPDATE voucher 
+                SET 
+                    voucher_code = $1,
+                    voucher_status = $2,
+                    voucher_amount = $3
+                WHERE voucher_id = $4
+                RETURNING *;
+            `;
+            connect.query(sql2, [voucher_code, voucher_status, voucher_amount, id], (err, result) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Lỗi không thể cập nhật mã giảm giá!', error: err });
+                }
+                const data = result.rows[0];
+                return res.status(200).json({ message: "Cập nhật thành công mã giảm giá!", data });
+            });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', error: err });
+    }
+}
+
+
+module.exports = { voucher, AddVoucher, DeleteVoucher, UpdateVoucher };
