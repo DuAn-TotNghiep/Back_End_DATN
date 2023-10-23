@@ -171,15 +171,21 @@ const UpdateShiping = (req, res) => {
 const UpdateShipDone = (req, res) => {
     try {
         const { id } = req.body
-        console.log(id);
+        let responseSent = false;
         const sql = `UPDATE orders SET status=4 WHERE order_id=${id} RETURNING*`
         connect.query(sql, (err, result) => {
             if (err) {
+                responseSent = true;
                 return res.status(500).json({ message: 'khong sua duoc trang thai shipdone', err })
             }
             const data = result.rows[0]
-            io.emit('confirm', { message: 'Đơn hàng đã được xác nhận', data });
-            return res.status(200).json({ message: 'sua thanh cong trang thai shipdone', data })
+            io.emit('shiping', { message: 'Đơn hàng đã được giao', data });
+            setTimeout(() => {
+                if (!responseSent) {
+                    const completeReq = { body: { id } };
+                    UpdateComplete(completeReq, res);
+                }
+            }, 20000);
         })
     } catch (err) {
         return res.status(500).json({ message: 'Loi API', err })
@@ -188,13 +194,21 @@ const UpdateShipDone = (req, res) => {
 const UpdateDone = (req, res) => {
     try {
         const { id } = req.body
+        let responseSent = false;
         const sql = `UPDATE orders SET status=5 WHERE order_id=${id}`
         connect.query(sql, (err, result) => {
             if (err) {
+                responseSent = true;
                 return res.status(500).json({ message: 'khong sua duoc trang thai done order', err })
             }
             const data = result.rows[0]
-            return res.status(200).json({ message: 'sua thanh cong trang thai done order', data })
+            io.emit('statusdone', { message: 'Đã Nhận Hàng', data });
+            setTimeout(() => {
+                if (!responseSent) {
+                    const completeReq = { body: { id } };
+                    UpdateComplete(completeReq, res);
+                }
+            }, 10000);
         })
     } catch (err) {
         return res.status(500).json({ message: 'Loi API', err })
@@ -209,6 +223,7 @@ const UpdateComplete = (req, res) => {
                 return res.status(500).json({ message: 'khong sua duoc trang thai complete order', err })
             }
             const data = result.rows[0]
+            io.emit('complete', { message: 'Đơn hàng đã hoàn thành', data });
             return res.status(200).json({ message: 'sua thanh cong trang thai complete order', data })
         })
     } catch (err) {
@@ -355,4 +370,29 @@ const getPendingOrders = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 }
-module.exports = { order, UpdateComplete, UpdateShipDone, getAllOrder, getOneOrderinUser, UpdateShiping,TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders };
+const getPending = async (req, res) => {
+    try {
+        const sql = `SELECT * FROM orders WHERE status = '2'`
+
+        const result = await connect.query(sql);
+
+        const confirmedOrders = result.rows;
+        return res.status(200).json({ message: 'Lấy danh sách đơn hàng đã nhận xác nhận thành công', orders: confirmedOrders });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
+    }
+}
+const getShiping = async (req, res) => {
+    try {
+
+        const sql = `SELECT * FROM orders WHERE status = '3'`
+
+        const result = await connect.query(sql);
+
+        const confirmedOrders = result.rows;
+        return res.status(200).json({ message: 'Lấy danh sách đơn hàng dang giao', orders: confirmedOrders });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', error: error.message });
+    }
+}
+module.exports = { order, UpdateComplete, getPending, getShiping, UpdateShipDone, getAllOrder, getOneOrderinUser, UpdateShiping, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders };

@@ -87,7 +87,7 @@ const searchProduct = async (req, res) => {
 
         // Trang hiện tại và số sản phẩm trên mỗi trang
         const page = req.query.page || 1;  // Trang mặc định là 1
-        const perPage = 3;  // Số sản phẩm trên mỗi trang
+        const perPage = 9;  // Số sản phẩm trên mỗi trang
 
         let sql = `SELECT * FROM product WHERE product_name ILIKE $1`;
         const result = await connect.query(sql, [regex]);
