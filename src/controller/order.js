@@ -151,16 +151,65 @@ const UpdateConfirm = (req, res) => {
         return res.status(500).json({ message: 'Loi API', err })
     }
 }
+const UpdateShiping = (req, res) => {
+    try {
+        const { id } = req.body
+        console.log(id);
+        const sql = `UPDATE orders SET status=3 WHERE order_id=${id} RETURNING*`
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'khong sua duoc trang thai shiping', err })
+            }
+            const data = result.rows[0]
+            io.emit('confirm', { message: 'Đơn hàng đã được xác nhận', data });
+            return res.status(200).json({ message: 'sua thanh cong trang thai shipingr', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi API', err })
+    }
+}
+const UpdateShipDone = (req, res) => {
+    try {
+        const { id } = req.body
+        console.log(id);
+        const sql = `UPDATE orders SET status=4 WHERE order_id=${id} RETURNING*`
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'khong sua duoc trang thai shipdone', err })
+            }
+            const data = result.rows[0]
+            io.emit('confirm', { message: 'Đơn hàng đã được xác nhận', data });
+            return res.status(200).json({ message: 'sua thanh cong trang thai shipdone', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi API', err })
+    }
+}
 const UpdateDone = (req, res) => {
     try {
         const { id } = req.body
-        const sql = `UPDATE orders SET status=3 WHERE order_id=${id}`
+        const sql = `UPDATE orders SET status=5 WHERE order_id=${id}`
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: 'khong sua duoc trang thai done order', err })
             }
             const data = result.rows[0]
             return res.status(200).json({ message: 'sua thanh cong trang thai done order', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Loi API', err })
+    }
+}
+const UpdateComplete = (req, res) => {
+    try {
+        const { id } = req.body
+        const sql = `UPDATE orders SET status=6 WHERE order_id=${id}`
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'khong sua duoc trang thai complete order', err })
+            }
+            const data = result.rows[0]
+            return res.status(200).json({ message: 'sua thanh cong trang thai complete order', data })
         })
     } catch (err) {
         return res.status(500).json({ message: 'Loi API', err })
@@ -306,4 +355,4 @@ const getPendingOrders = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 }
-module.exports = { order, getAllOrder, getOneOrderinUser, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders };
+module.exports = { order, UpdateComplete, UpdateShipDone, getAllOrder, getOneOrderinUser, UpdateShiping,TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders };
