@@ -403,8 +403,36 @@ const getTotalPerDay = (req, res) => {
     return res.status(500).json({ message: "Lỗi API", err });
   }
 };
+const getDailyEarnings = (req, res) => {
+  const { order_date } = req.body; // Lấy ngày từ URL
+  const startOfDay = DateTime.fromISO(order_date, { zone: "Asia/Ho_Chi_Minh" });
+  const endOfDay = startOfDay.endOf("day");
+
+  try {
+    const sql = `
+      SELECT SUM(order_total) AS total_amount
+      FROM orders
+      WHERE 
+        DATE(order_date) BETWEEN '${startOfDay.toISODate()}' AND '${endOfDay.toISODate()}';
+    `;
+
+    connect.query(sql, (err, results) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Không thể lấy số tiền cho ngày được chọn", err });
+      }
+      const data = results.rows[0];
+      return res
+        .status(200)
+        .json({ message: "Lấy thành công tổng số tiền cho ngày được chọn", data });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Lỗi API", err });
+  }
+
+};
 
 
 
-
-module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff, getTotalPerMonth,getTotalPerDay };
+module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff, getTotalPerMonth,getTotalPerDay , getDailyEarnings};
