@@ -16,4 +16,18 @@ const actions = (req, res, next) => {
 
     }
 }
-module.exports = { actions };
+const getAllactions = (req, res, next) => {
+    try {
+        const sql = `SELECT * FROM actions WHERE user_id IS NOT NULL`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: "Lay hanh dong that bai", err })
+            }
+            const data = result.rows
+            return res.status(200).json({ message: "Lay hanh dong thanh cong", data })
+        })
+    } catch (err) {
+
+    }
+}
+module.exports = { actions, getAllactions };
