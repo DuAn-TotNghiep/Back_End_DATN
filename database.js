@@ -4,7 +4,6 @@ const connect = new Client({
 
   // password: "admin",
   // password: 'admin',
-  password: "admin",
   // password: 'ADMIN',
   // password: "admin",
   // password: "admin",
@@ -25,7 +24,7 @@ const connect = new Client({
 
   // database: 'DUANTN',
 
-  database: "DATN1",
+  database: "DATN",
 
 
   // database: "DATN_2023_MAIN",
