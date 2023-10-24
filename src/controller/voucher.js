@@ -18,6 +18,21 @@ const getAllVoucher = async (req, res) => {
 
     }
 }
+const getOneVoucher = async (req, res) => {
+    try {
+        const { id } = req.params
+        const sql = `SELECT * FROM voucher WHERE voucher_id = ${id}`
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy 1 voucher thất bại', err })
+            }
+            const data = results.rows
+            return res.status(200).json({ message: 'Lấy 1 voucher thành công', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', err })
+    }
+}
 
 const voucher = async (req, res) => {
     try {
@@ -114,4 +129,4 @@ const UpdateVoucher = async (req, res) => {
 }
 
 
-module.exports = { getAllVoucher, voucher, AddVoucher, DeleteVoucher, UpdateVoucher };
+module.exports = { getOneVoucher, getAllVoucher, voucher, AddVoucher, DeleteVoucher, UpdateVoucher };
