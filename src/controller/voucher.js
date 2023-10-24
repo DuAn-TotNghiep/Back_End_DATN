@@ -1,5 +1,24 @@
 const connect = require("../../database");
 
+
+
+const getAllVoucher = async (req, res) => {
+    try {
+        const sql = 'SELECT * FROM voucher';
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy tất cả voucher thất bại!' });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: 'Lấy tất cả voucher thành công!', data });
+
+        })
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', err });
+
+    }
+}
+
 const voucher = async (req, res) => {
     try {
         const { voucher_code } = req.body;
@@ -95,4 +114,4 @@ const UpdateVoucher = async (req, res) => {
 }
 
 
-module.exports = { voucher, AddVoucher, DeleteVoucher, UpdateVoucher };
+module.exports = { getAllVoucher, voucher, AddVoucher, DeleteVoucher, UpdateVoucher };
