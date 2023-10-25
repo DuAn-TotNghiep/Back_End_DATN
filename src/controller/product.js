@@ -4,6 +4,7 @@ const connect = require('../../database');
 const jwt = require('jsonwebtoken');
 const { addProduct, updateProduct } = require('../schema/productSchema');
 const { DateTime } = require('luxon')
+const io = require('../../app')
 const AddProduct = async (req, res, next) => {
     try {
         const { color_id, size_id, category_id, name, image, desc, price } = req.body
@@ -235,6 +236,23 @@ const GetOutstan = async (req, res) => {
         })
     } catch (err) {
         return res.status(500).json({ message: 'Loi api', err })
+    }
+}
+const updateOutstanProduct = async (req, res) => {
+    try {
+        const { outstan, id } = req.body;
+        let sql = `UPDATE product SET outstan= ${outstan} WHERE product_id=${id} RETURNING *`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Update outstan that bai', err });
+            }
+            const data = result.rows[0];
+            console.log(data);
+            io.emit('updatesale', { message: 'update sale thanh cong', data });
+            return res.status(200).json({ message: 'Update sale thành công', data });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
     }
 }
 const GetSale = async (req, res) => {
@@ -502,6 +520,6 @@ const FilterProductsByPrice = (req, res) => {
 
 
 
-module.exports = { getProductSearchCategory, AddProduct, GetAllProductOff, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory, FilterProductsByPrice };
+module.exports = { getProductSearchCategory, AddProduct, GetAllProductOff, UpdateProduct, getAllProducts, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory, FilterProductsByPrice,updateOutstanProduct };
 
 
