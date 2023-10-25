@@ -426,6 +426,157 @@ const getCancelledOrders = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 }
+const generateStatus = (req, res) => {
+    const { id } = req.params
+    const sql = `SELECT * FROM orders WHERE order_id=${id}`
+    connect.query(sql, (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: 'Khong lay duoc order', err })
+        }
+        const data = result.rows[0]
+        console.log(data);
+    })
+};
+const generateAndSendStatusOrder = (email) => {
+    const otp = generateOTP();
+    otps[email] = {
+        otp,
+        createdTime: Date.now(), // Sử dụng Date.now() để lưu thời gian tạo mã OTP
+    };
+    sendOTPByEmail(email, otp);
+    return otp;
+};
+const nodemailer = require('nodemailer');
+const numberFormatter = require('number-formatter');
+const sendStatusByEmail = (req, res) => {
+    try {
+        const { id } = req.body
+        const sql = `SELECT * FROM orders WHERE order_id=${id}`
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Khong lay duoc order', err })
+            }
+            const data = result.rows[0]
+            const sql1 = `SELECT * FROM checkout WHERE id=${data?.checkout_id}`
+            connect.query(sql1, (err, result) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Khong lay duoc checkout', err })
+                }
+                const data1 = result.rows[0]
+                let status = ""
+                console.log(data1);
+                if (data?.user_id === null) {
+                    const formattedAmount = numberFormatter('#,###', data.order_total);
+                    const checkoutData = JSON.parse(data1.checkout_off);
+                    const transporter = nodemailer.createTransport({
+                        service: 'Gmail',
+                        auth: {
+                            user: process.env.USER_EMAIL,
+                            pass: process.env.USER_PASSWORD,
+                        }
+                    });
+                    if (data.status == 2) {
+                        status = "Đã xác nhận đơn hàng"
+                    }
+                    if (data.status == 1) {
+                        status = "Đã đặt hàng"
+                    }
+                    if (data.status == 3) {
+                        status = "Đang vận chuyển"
+                    }
+                    if (data.status == 4) {
+                        status = "Đã vận chuyển thành công"
+                    }
+                    if (data.status == 5) {
+                        status = "Đã nhận hàng"
+                    }
+                    if (data.status == 6) {
+                        status = "Đơn hàng hoàn thành"
+                    }
+                    if (data.status == 0) {
+                        status = "Đơn hàng đã bị hủy"
+                    }
 
+                    const mailOptions = {
+                        from: process.env.USER_EMAIL,
+                        to: checkoutData.email,
+                        subject: `Thông báo tình trạng đơn hàng #${data?.order_id}`,
+                        html: `
+                        <p>Tình trạng đơn hàng của bạn: ${status}</p>
+                        Ngày đặt hàng: ${data.order_date}</p>
+                         <p>Tổng tiền: <h3>${formattedAmount}VND</h3></p>
+                        `
+                    };
+                    transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            return res.status(200).json({ message: 'Lỗi khi gửi email: ' + error });
+                        } else {
+                            return res.status(200).json({ message: 'Email đã được gửi: ' + info.response });
+                        }
+                    });
+                } else {
+                    const sql2 = `SELECT * FROM users WHERE id=${data?.user_id}`
+                    connect.query(sql2, (err, result) => {
+                        if (err) {
+                            return res.status(500).json({ message: 'Khong lay duoc checkout', err })
+                        }
+                        const data2 = result.rows[0]
+                        const formattedAmount = numberFormatter('#,###', data.order_total);
+                        const transporter = nodemailer.createTransport({
+                            service: 'Gmail',
+                            auth: {
+                                user: process.env.USER_EMAIL,
+                                pass: process.env.USER_PASSWORD,
+                            }
+                        });
+                        if (data.status == 2) {
+                            status = "Đã xác nhận đơn hàng"
+                        }
+                        if (data.status == 1) {
+                            status = "Đã đặt hàng"
+                        }
+                        if (data.status == 3) {
+                            status = "Đang vận chuyển"
+                        }
+                        if (data.status == 4) {
+                            status = "Đã vận chuyển thành công"
+                        }
+                        if (data.status == 5) {
+                            status = "Đã nhận hàng"
+                        }
+                        if (data.status == 6) {
+                            status = "Đơn hàng hoàn thành"
+                        }
+                        if (data.status == 0) {
+                            status = "Đơn hàng đã bị hủy"
+                        }
 
-module.exports = { order, UpdateComplete, UpdateShipDone, getAllOrder, getOneOrderinUser, UpdateShiping, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders, getShipingOrders, getConfirmOrders, getDeleveredOrders, getCompleteOrders, getCancelledOrders };
+                        const mailOptions = {
+                            from: process.env.USER_EMAIL,
+                            to: data2.user_email,
+                            subject: `Thông báo tình trạng đơn hàng #${data?.order_id}`,
+                            html: `
+                        <p>Tình trạng đơn hàng của bạn: ${status}</p>
+                        Ngày đặt hàng: ${data.order_date}</p>
+                         <p>Tổng tiền: <h3>${formattedAmount}VND</h3></p>
+                        `
+                        };
+                        transporter.sendMail(mailOptions, (error, info) => {
+                            if (error) {
+                                return res.status(200).json({ message: 'Lỗi khi gửi email: ' + error });
+                            } else {
+                                return res.status(200).json({ message: 'Email đã được gửi: ' + info.response });
+                            }
+                        });
+                    })
+
+                }
+            })
+        })
+
+    } catch (err) {
+        return res.status(500).json({ message: "Loi API" })
+    }
+};
+
+module.exports = { order, UpdateComplete, sendStatusByEmail, UpdateShipDone, getAllOrder, getOneOrderinUser, UpdateShiping, TotalAmountAllProductOrder, getOneOrder, CountOrderOnline, UpdateCancell, UpdateConfirm, UpdateDone, GetOrderPlacedDay, GetOrderAwaitingDay, GetOrderDoneDay, ListOrderInWeek, GetOrderForAdmin, getPlacedOrders, getReceivedOrders, getPendingOrders, getShipingOrders, getConfirmOrders, getDeleveredOrders, getCompleteOrders, getCancelledOrders };
