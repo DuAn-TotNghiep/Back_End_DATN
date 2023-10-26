@@ -44,4 +44,20 @@ const GetAllCommentProduct = (req, res) => {
         return res.status(404).json({ message: 'Loi api' });
     }
 }
-module.exports = { AddComment, GetAllCommentProduct }
+
+const getAllComment = (req, res) => {
+    try {
+        const sql = 'SELECT * FROM comment'
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy tất cả comment thất bại!' });
+            }
+            const data = result.rows;
+            return res.status(200).json({ message: 'Lấy tất cả comment thành công!', data });
+
+        })
+    } catch (error) {
+        return res.status(404).json({ message: 'Loi api' });
+    }
+}
+module.exports = { AddComment, GetAllCommentProduct, getAllComment }
