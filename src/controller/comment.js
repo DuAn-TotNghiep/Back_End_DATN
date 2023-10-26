@@ -60,4 +60,23 @@ const getAllComment = (req, res) => {
         return res.status(404).json({ message: 'Loi api' });
     }
 }
-module.exports = { AddComment, GetAllCommentProduct, getAllComment }
+
+const deleteComment = (req, res) => {
+    try {
+        const id = req.params.id;
+        const sql = `DELETE FROM comment WHERE id=${id}`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(404).json({ message: "Xóa comment thất bại!" });
+            }
+            if (result.rowCount === 0) {
+                return res.status(404).json({ message: "Xóa comment thất bại, ID không tồn tại!" });
+            }
+            return res.status(200).json({ message: "Xóa comment thành công!" })
+
+        })
+    } catch (error) {
+        return res.status(404).json({ message: 'Lỗi API' });
+    }
+}
+module.exports = { AddComment, GetAllCommentProduct, getAllComment, deleteComment }
