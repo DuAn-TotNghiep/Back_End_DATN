@@ -1,5 +1,5 @@
 const express = require("express");
-const { getAllProducts, AddProduct, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, UpdateProduct, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory, FilterProductsByPrice, GetAllProductOff, getProductSearchCategory, updateOutstanProduct } = require("../controller/product");
+const { getAllProducts, AddProduct, RemoveProduct, GetOutstan, GetSale, getNewProduct, searchProduct, GetOneProduct, GetTopSaleProduct, CountOrdersToday, CountOrdersMonth, UpdateProduct, SumProductDay, FilterProductsByColor, FilterProductsBySize, FilterProductsByCategory, FilterProductsByPrice, GetAllProductOff, getProductSearchCategory, updateOutstanProduct, UpdateKho, getAllKho } = require("../controller/product");
 const router = express.Router();
 router.post("/product/add", AddProduct);
 router.get("/product", getAllProducts);
@@ -15,6 +15,8 @@ router.get("/product/topproductsale", GetTopSaleProduct);
 router.get("/product/countproductoday", CountOrdersToday)
 router.get("/product/countproductmonth", CountOrdersMonth);
 router.patch("/product/:id/update", UpdateProduct);
+router.patch("/product/:id/updatekho",UpdateKho)
+router.get("/product/kho", getAllKho)
 router.get("/product/sumproductday", SumProductDay);
 router.get("/product/:id/colorFillter", FilterProductsByColor);
 router.get("/product/:id/sizeFillter", FilterProductsBySize);
