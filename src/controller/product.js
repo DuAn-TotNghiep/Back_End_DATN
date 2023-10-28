@@ -672,6 +672,32 @@ const CountProductOrder = (req, res) => {
     return res.status(404).json({ message: "Loi api" });
   }
 };
+const getOneKho = (req, res) => {
+    try {
+        const productId = req.params.id; // Lấy ID sản phẩm từ tham số đường dẫn (route parameter)
+
+        const sql = `SELECT kho FROM product WHERE product_id = ${productId}`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu', err });
+            }
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({ message: 'Sản phẩm không tồn tại' });
+            }
+
+            const kho = result.rows[0].kho; // Lấy số lượng trong kho của sản phẩm
+
+            return res.status(200).json({
+                message: 'Lấy số lượng trong kho của sản phẩm thành công',
+                kho,
+            });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+
 module.exports = {
   getProductSearchCategory,
   AddProduct,
@@ -696,4 +722,5 @@ module.exports = {
   UpdateKho,
   getAllKho,
   CountProductOrder,
+  getOneKho
 };

@@ -23,6 +23,7 @@ const {
   UpdateKho,
   getAllKho,
   CountProductOrder,
+  getOneKho,
 } = require("../controller/product");
 
 const router = express.Router();
@@ -42,6 +43,7 @@ router.get("/product/countproductmonth", CountOrdersMonth);
 router.patch("/product/:id/update", UpdateProduct);
 router.patch("/product/:id/updatekho", UpdateKho);
 router.get("/product/kho", getAllKho);
+router.get("/product/:id/kho", getOneKho);
 router.get("/product/sumproductday", SumProductDay);
 router.get("/product/:id/colorFillter", FilterProductsByColor);
 router.get("/product/:id/countproductorder", CountProductOrder);
