@@ -227,7 +227,7 @@ const UpdateShipDone = (req, res) => {
           const completeReq = { body: { id } };
           UpdateComplete(completeReq, res);
         }
-      }, 20000);
+      }, 60000);
     });
   } catch (err) {
     return res.status(500).json({ message: "Loi API", err });
