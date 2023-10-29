@@ -24,6 +24,9 @@ const {
   getAllKho,
   CountProductOrder,
   getOneKho,
+  HideProduct,
+  getAllProductsNoBlock,
+  CancellHideProduct
 } = require("../controller/product");
 
 const router = express.Router();
@@ -32,7 +35,8 @@ router.get("/product", getAllProducts);
 router.get("/productnew", getNewProduct);
 router.post("/product/search", searchProduct);
 router.post("/product/category/search", getProductSearchCategory);
-router.delete("/product/:id/remove", RemoveProduct);
+router.patch("/product/:id/hide", HideProduct);
+router.patch("/product/:id/cancellHide", CancellHideProduct);
 router.get("/product/outstan", GetOutstan);
 router.patch("/product/updateoutstanproduct", updateOutstanProduct);
 router.get("/product/sale", GetSale);
@@ -51,5 +55,7 @@ router.get("/product/:id/sizeFillter", FilterProductsBySize);
 router.get("/product/:id/categoryFillter", FilterProductsByCategory);
 router.get("/product/priceFillter/:minPrice/:maxPrice", FilterProductsByPrice);
 router.get("/product/getalloff", GetAllProductOff);
+router.get("/product/noblock", getAllProductsNoBlock);
+
 
 module.exports = router;
