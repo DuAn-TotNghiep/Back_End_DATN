@@ -192,55 +192,83 @@ const GetAllProductOff = (req, res) => {
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
-const RemoveProduct = async (req, res) => {
+const getAllProductsNoBlock = async (req, res) => {
+  try {
+    const sql = `SELECT * FROM product WHERE isbblock = false`;
+    const results = await connect.query(sql);
+    if (!results || !results.rows || results.rows.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy san pham nào." });
+    }
+    const data = results.rows;
+    return res.status(200).json({
+      message: "Lấy tất cả sản phẩm thành công",
+      data,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
+const HideProduct = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     const decoded = jwt.verify(token, "datn");
     const userId = decoded.user_id;
     const { id } = req.params;
-    const now = DateTime.now().setZone("Asia/Ho_Chi_Minh");
     const sql1 = `SELECT * FROM product WHERE product_id=${id}`;
     connect.query(sql1, (err, resolve) => {
       if (err) {
         return res
           .status(500)
-          .json({ message: "Khong lay duoc san pham", err });
+          .json({ message: "Không lấy được sản phẩm", err });
       }
       const product = resolve.rows[0];
-      const sql2 = `DELETE FROM product WHERE product_id = ${id}`;
+      const sql2 = `UPDATE product SET isbblock = true WHERE product_id = ${id}`;
       connect.query(sql2, (err, result) => {
         if (err) {
           return res
             .status(500)
-            .json({ message: "xoa product tai bang product that bai", err });
+            .json({ message: "Ẩn sản phẩm thất bại", err });
         }
-      });
-      const time = now.toString();
-      const imageStrings = product.image.map((image) => `"${image}"`);
-      const updatedProduct = {
-        ...product,
-        image: imageStrings,
-      };
-      const colorIdJSON = JSON.stringify(product.color_id);
-      const sizeIdJSON = JSON.stringify(product.size_id);
-      const sqlbin = `INSERT INTO recycle_bin_product (product, deleted_at, user_id ) VALUES('{"product_id": ${id} , "product_name": "${product.product_name}", "product_description":"${product.product_description}", "product_price":${product.product_price} , "category_id":${product.category_id}, "image":${updatedProduct.image}, "size_id":${sizeIdJSON},"color_id":${colorIdJSON} , "sale_id":${product.sale_id}, "outstan":${product.outstan}}',
-'${time}', ${userId}) RETURNING *`;
-      connect.query(sqlbin, (err, result) => {
-        if (err) {
-          return res
-            .status(500)
-            .json({ message: "Loi khi them vao thung rac", err });
-        }
-        const data = result.rows[0];
         return res
           .status(200)
-          .json({ message: "Them vao thung rac thanh cong", data });
+          .json({ message: "Ẩn sản phẩm thành công" });
       });
     });
   } catch (error) {
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
+const CancellHideProduct = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    const decoded = jwt.verify(token, "datn");
+    const userId = decoded.user_id;
+    const { id } = req.params;
+    const sql1 = `SELECT * FROM product WHERE product_id=${id}`;
+    connect.query(sql1, (err, resolve) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Không lấy được sản phẩm", err });
+      }
+      const product = resolve.rows[0];
+      const sql2 = `UPDATE product SET isbblock = false WHERE product_id = ${id}`;
+      connect.query(sql2, (err, result) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ message: "Bỏ Ẩn sản phẩm thất bại", err });
+        }
+        return res
+          .status(200)
+          .json({ message: "Bỏ Ẩn sản phẩm thành công" });
+      });
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
+
 const GetOutstan = async (req, res) => {
   try {
     const sql = `SELECT * FROM product WHERE outstan IS NOT NULL AND outstan = true LIMIT 4`;
@@ -673,29 +701,29 @@ const CountProductOrder = (req, res) => {
   }
 };
 const getOneKho = (req, res) => {
-    try {
-        const productId = req.params.id; // Lấy ID sản phẩm từ tham số đường dẫn (route parameter)
+  try {
+    const productId = req.params.id; // Lấy ID sản phẩm từ tham số đường dẫn (route parameter)
 
-        const sql = `SELECT kho FROM product WHERE product_id = ${productId}`;
-        connect.query(sql, (err, result) => {
-            if (err) {
-                return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu', err });
-            }
+    const sql = `SELECT kho FROM product WHERE product_id = ${productId}`;
+    connect.query(sql, (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu', err });
+      }
 
-            if (result.rows.length === 0) {
-                return res.status(404).json({ message: 'Sản phẩm không tồn tại' });
-            }
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Sản phẩm không tồn tại' });
+      }
 
-            const kho = result.rows[0].kho; // Lấy số lượng trong kho của sản phẩm
+      const kho = result.rows[0].kho; // Lấy số lượng trong kho của sản phẩm
 
-            return res.status(200).json({
-                message: 'Lấy số lượng trong kho của sản phẩm thành công',
-                kho,
-            });
-        });
-    } catch (error) {
-        return res.status(500).json({ message: 'Lỗi API' });
-    }
+      return res.status(200).json({
+        message: 'Lấy số lượng trong kho của sản phẩm thành công',
+        kho,
+      });
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Lỗi API' });
+  }
 }
 
 module.exports = {
@@ -704,7 +732,6 @@ module.exports = {
   GetAllProductOff,
   UpdateProduct,
   getAllProducts,
-  RemoveProduct,
   GetOutstan,
   GetSale,
   getNewProduct,
@@ -722,5 +749,8 @@ module.exports = {
   UpdateKho,
   getAllKho,
   CountProductOrder,
-  getOneKho
+  getOneKho,
+  HideProduct,
+  getAllProductsNoBlock,
+  CancellHideProduct
 };
