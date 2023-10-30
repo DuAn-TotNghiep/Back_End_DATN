@@ -1,6 +1,23 @@
 const connect = require("../../database");
 const { DateTime } = require('luxon');
 
+const getAllBlog = (req, res) => {
+    try {
+        const sql = 'SELECT * FROM blog';
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: "Lỗi không tìm được sản phẩm nào!", err })
+            }
+            const data = result.rows
+            console.log(data);
+            return res.status(200).json({ message: 'Tìm tất cả blog thành công!', data });
+        })
+    } catch (error) {
+        return res.status(404).json({ message: 'Lỗi API' });
+    }
+}
+
+
 const addBlog = (req, res) => {
     try {
         const { user_id, blog_title, blog_content } = req.body;
@@ -76,4 +93,4 @@ const updateBlog = (req, res) => {
     }
 }
 
-module.exports = { addBlog, deleteBlog, updateBlog };
+module.exports = { addBlog, deleteBlog, updateBlog, getAllBlog };
