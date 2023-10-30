@@ -458,7 +458,33 @@ const getDaily = (req, res)=>{
     return res.status(500).json({ message: "Lỗi API", err });
   }
 }
+const getActionDaily = (req, res)=>{
+  const { start_date, end_date } = req.body; // Lấy ngày từ URL
+  const startDate = DateTime.fromISO(start_date, { zone: "Asia/Ho_Chi_Minh" });
+  const endDate = DateTime.fromISO(end_date, { zone: "Asia/Ho_Chi_Minh" });
+  console.log(start_date,end_date);
+  try {
+    const sql = `
+    SELECT * FROM actions
+    WHERE DATE(action_date) BETWEEN '${startDate.toISODate()}' AND '${endDate.toISODate()}';
+    `;
+    connect.query(sql, (err, results) => {
+      if (err) {
+        return res.status(500).json({
+          message: "Không thể lấy hành động cho khoảng ngày được chọn",
+          err,
+        });
+      }
+      const data = results.rows
+      return res.status(200).json({
+        message: "Lấy thành công hành động cho khoảng được chọn",
+        data,
+      });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Lỗi API", err });
+  }
+}
 
 
-
-module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff, getTotalPerMonth,getTotalPerDay , getDailyEarnings,getDaily};
+module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff, getTotalPerMonth,getTotalPerDay , getDailyEarnings,getDaily,getActionDaily};
