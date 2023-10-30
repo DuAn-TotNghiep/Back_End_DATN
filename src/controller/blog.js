@@ -16,6 +16,21 @@ const getAllBlog = (req, res) => {
         return res.status(404).json({ message: 'Lỗi API' });
     }
 }
+const getOneBlog = async (req, res) => {
+    try {
+        const { id } = req.params
+        const sql = `SELECT * FROM blog WHERE blog_id = ${id}`
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lấy 1 blog thất bại', err })
+            }
+            const data = results.rows
+            return res.status(200).json({ message: 'Lấy 1 blog thành công', data })
+        })
+    } catch (err) {
+        return res.status(500).json({ message: 'Lỗi API', err })
+    }
+}
 
 
 const addBlog = (req, res) => {
@@ -93,4 +108,4 @@ const updateBlog = (req, res) => {
     }
 }
 
-module.exports = { addBlog, deleteBlog, updateBlog, getAllBlog };
+module.exports = { addBlog, deleteBlog, updateBlog, getAllBlog, getOneBlog };
