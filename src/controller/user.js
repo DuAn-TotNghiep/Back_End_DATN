@@ -343,7 +343,7 @@ const TopUser = async (req, res) => {
             FROM orders
             GROUP BY user_id
             ORDER BY order_count DESC
-            LIMIT 10
+            LIMIT 3
         `;
 
     connect.query(sql, (err, results) => {
