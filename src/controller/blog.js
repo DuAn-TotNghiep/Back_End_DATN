@@ -32,6 +32,28 @@ const getOneBlog = async (req, res) => {
     }
 }
 
+const searchBlog = async (req, res) => {
+    try {
+        let blog_title = req.body.blog_title;
+        blog_title = blog_title.trim();
+        let regex = `%${blog_title}%`;
+        let sql = `SELECT * FROM blog WHERE blog_title ILIKE $1`;
+        const result = await connect.query(sql, [regex]);
+
+        if (result.rows.length == 0) {
+            return res.json({
+                message: "Không tìm thấy tiêu đề",
+            });
+        }
+        return res.json({
+            message: "Tìm thấy tiêu đề",
+            data: result.rows,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Lỗi API" });
+
+    }
+}
 
 const addBlog = (req, res) => {
     try {
@@ -111,4 +133,6 @@ const updateBlog = (req, res) => {
     }
 }
 
-module.exports = { addBlog, deleteBlog, updateBlog, getAllBlog, getOneBlog };
+
+
+module.exports = { searchBlog, addBlog, deleteBlog, updateBlog, getAllBlog, getOneBlog };
