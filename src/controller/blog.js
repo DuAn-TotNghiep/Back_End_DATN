@@ -35,6 +35,7 @@ const getOneBlog = async (req, res) => {
 
 const addBlog = (req, res) => {
     try {
+        //api add image
         const { user_id, blog_title, blog_content, blog_image } = req.body;
         const blog_date = DateTime.local().setZone('Asia/Ho_Chi_Minh').toISO();
 
@@ -74,6 +75,7 @@ const deleteBlog = (req, res) => {
 const updateBlog = (req, res) => {
     try {
         const id = req.params.id;
+        //api update image
         const { blog_title, blog_content, blog_image } = req.body;
 
         // Kiểm tra xem blog có tồn tại
