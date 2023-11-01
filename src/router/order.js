@@ -28,6 +28,7 @@ const {
   generateStatus,
   sendStatusByEmail,
   getPendingOrdersAll,
+  getReceivedOrdersDay,
 } = require("../controller/order");
 const router = express.Router();
 router.post("/order/add", order);
@@ -48,6 +49,7 @@ router.get("/order/orderinweek", ListOrderInWeek);
 router.get("/order/getorderadmin", GetOrderForAdmin);
 router.get("/order/orderplace", getPlacedOrders);
 router.get("/order/orderrevice", getReceivedOrders);
+router.get("/order/orderreviceday", getReceivedOrdersDay);
 router.get("/order/orderpending", getPendingOrders);
 router.get("/order/ordershiping", getShipingOrders);
 router.get("/order/orderconfirm", getConfirmOrders);
