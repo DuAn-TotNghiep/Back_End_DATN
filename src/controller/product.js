@@ -214,6 +214,9 @@ const HideProduct = async (req, res) => {
     const decoded = jwt.verify(token, "datn");
     const userId = decoded.user_id;
     const { id } = req.params;
+    const now = DateTime.now().setZone("Asia/Ho_Chi_Minh");
+
+    // Step 1: Select the product
     const sql1 = `SELECT * FROM product WHERE product_id=${id}`;
     connect.query(sql1, (err, resolve) => {
       if (err) {
@@ -222,6 +225,8 @@ const HideProduct = async (req, res) => {
           .json({ message: "Không lấy được sản phẩm", err });
       }
       const product = resolve.rows[0];
+
+      // Step 2: Update product to hide it
       const sql2 = `UPDATE product SET isbblock = true WHERE product_id = ${id}`;
       connect.query(sql2, (err, result) => {
         if (err) {
@@ -229,15 +234,65 @@ const HideProduct = async (req, res) => {
             .status(500)
             .json({ message: "Ẩn sản phẩm thất bại", err });
         }
-        return res
-          .status(200)
-          .json({ message: "Ẩn sản phẩm thành công" });
+        const sqlDisableFK = "SET session_replication_role = replica;";
+        connect.query(sqlDisableFK, (err, result) => {
+          if (err) {
+            return res
+              .status(500)
+              .json({ message: "Lỗi khi tắt ràng buộc khóa ngoại", err });
+          }
+
+          // Proceed with deleting the product
+          const sqlDeleteProduct = `DELETE FROM product WHERE product_id = ${id}`;
+          connect.query(sqlDeleteProduct, (err, result) => {
+            if (err) {
+              return res
+                .status(500)
+                .json({ message: "Lỗi khi xóa sản phẩm", err });
+            }
+
+            // Re-enable foreign key constraints
+            const sqlEnableFK = "SET session_replication_role = DEFAULT;";
+            connect.query(sqlEnableFK, (err, result) => {
+              if (err) {
+                return res
+                  .status(500)
+                  .json({ message: "Lỗi khi bật lại ràng buộc khóa ngoại", err });
+              }
+              // Step 3: Move product to recycle bin
+              const time = now.toString();
+              const imageStrings = product.image.map((image) => `"${image}"`);
+              // Escape special characters, including newline characters, in product_description
+              const escapedProductDescription = product.product_description.replace(/\n/g, "\\n");
+              const updatedProduct = {
+                ...product,
+                image: imageStrings,
+                product_description: escapedProductDescription, // Replace the product_description
+              };
+              const colorIdJSON = JSON.stringify(product.color_id);
+              const sizeIdJSON = JSON.stringify(product.size_id);
+              const sqlbin = `INSERT INTO recycle_bin_product (product, deleted_at, user_id ) VALUES('{"product_id": ${id} , "product_name": "${product.product_name}", "product_description":"${escapedProductDescription}", "product_price":${product.product_price} , "category_id":${product.category_id}, "image":${updatedProduct.image}, "size_id":${sizeIdJSON},"color_id":${colorIdJSON} , "sale_id":${product.sale_id}, "outstan":${product.outstan}}',
+        '${time}', ${userId}) RETURNING *`;
+              connect.query(sqlbin, (err, result) => {
+                if (err) {
+                  return res
+                    .status(500)
+                    .json({ message: "Lỗi khi di chuyển sản phẩm vào thùng rác", err });
+                }
+                return res
+                  .status(200)
+                  .json({ message: "Ẩn sản phẩm thành công" });
+              });
+            });
+          });
+        });
       });
     });
   } catch (error) {
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
+
 const CancellHideProduct = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
