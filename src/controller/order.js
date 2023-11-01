@@ -718,9 +718,45 @@ const sendStatusByEmail = (req, res) => {
     return res.status(500).json({ message: "Loi API" });
   }
 };
+const searchOrdersByUserPhone = async (req, res) => {
+  try {
+    let user_phone = req.body.user_phone;
+    user_phone = user_phone.trim();
+
+    // Tìm user_id từ bảng users dựa trên user_phone
+    const userQuery = `SELECT id FROM users WHERE user_phone ILIKE $1`;
+    const userResult = await connect.query(userQuery, [`%${user_phone}%`]);
+
+    if (userResult.rows.length === 0) {
+      return res.json({
+        message: "Không tìm thấy người dùng với số điện thoại này",
+      });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    // Tìm đơn hàng từ bảng orders dựa trên user_id
+    const orderQuery = `SELECT * FROM orders WHERE user_id = $1`;
+    const orderResult = await connect.query(orderQuery, [userId]);
+
+    if (orderResult.rows.length === 0) {
+      return res.json({
+        message: "Không tìm thấy đơn hàng cho người dùng này",
+      });
+    }
+
+    return res.json({
+      message: "Tìm thấy đơn hàng",
+      data: orderResult.rows,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
 
 module.exports = {
   order,
+  searchOrdersByUserPhone,
   UpdateComplete,
   sendStatusByEmail,
   UpdateShipDone,

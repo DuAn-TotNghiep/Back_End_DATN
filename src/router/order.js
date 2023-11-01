@@ -29,6 +29,7 @@ const {
   sendStatusByEmail,
   getPendingOrdersAll,
   getReceivedOrdersDay,
+  searchOrdersByUserPhone,
 } = require("../controller/order");
 const router = express.Router();
 router.post("/order/add", order);
@@ -59,4 +60,5 @@ router.get("/order/ordercancell", getCancelledOrders);
 router.get("/order/orderpendingall", getPendingOrdersAll);
 router.get("/order/:id/getorderuser", getOneOrderinUser);
 router.post("/order/status", sendStatusByEmail);
+router.post("/order/search", searchOrdersByUserPhone );
 module.exports = router;
