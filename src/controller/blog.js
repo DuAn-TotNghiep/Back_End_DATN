@@ -35,10 +35,10 @@ const getOneBlog = async (req, res) => {
 
 const addBlog = (req, res) => {
     try {
-        const { user_id, blog_title, blog_content } = req.body;
+        const { user_id, blog_title, blog_content, blog_image } = req.body;
         const blog_date = DateTime.local().setZone('Asia/Ho_Chi_Minh').toISO();
 
-        const sql = `INSERT INTO blog(user_id, blog_title, blog_content, blog_date) VALUES ('${user_id}', '${blog_title}', '${blog_content}', '${blog_date}') RETURNING *`;
+        const sql = `INSERT INTO blog(user_id, blog_title, blog_content, blog_date,blog_image) VALUES ('${user_id}', '${blog_title}', '${blog_content}', '${blog_date}','${blog_image}') RETURNING *`;
 
         connect.query(sql, (err, result) => {
             if (err) {
@@ -74,7 +74,7 @@ const deleteBlog = (req, res) => {
 const updateBlog = (req, res) => {
     try {
         const id = req.params.id;
-        const { blog_title, blog_content } = req.body;
+        const { blog_title, blog_content, blog_image } = req.body;
 
         // Kiểm tra xem blog có tồn tại
         const sql1 = `SELECT * FROM blog WHERE blog_id = $1`;
@@ -91,11 +91,12 @@ const updateBlog = (req, res) => {
                 UPDATE blog 
                 SET 
                     blog_title = $1,
-                    blog_content = $2
-                WHERE blog_id = $3
+                    blog_content = $2,
+                    blog_image=$3
+                WHERE blog_id = $4
                 RETURNING *;
             `;
-            connect.query(sql2, [blog_title, blog_content, id], (err, result) => {
+            connect.query(sql2, [blog_title, blog_content, blog_image, id], (err, result) => {
                 if (err) {
                     return res.status(500).json({ message: 'Lỗi không thể cập nhật blog!', error: err });
                 }
