@@ -314,7 +314,7 @@ const GetOrderDoneDay = (req, res) => {
   try {
     const order_date = DateTime.local().setZone("Asia/Ho_Chi_Minh");
     const formattedDate = order_date.toFormat("yyyy-MM-dd");
-    const sql = `SELECT COUNT(*) as order_count FROM orders WHERE status = '3' AND DATE(order_date) = '${formattedDate}'`;
+    const sql = `SELECT COUNT(*) as order_count FROM orders WHERE status = '6' AND DATE(order_date) = '${formattedDate}'`;
     connect.query(sql, (err, result) => {
       if (err) {
         return res.status(500).json({ message: "Loi", err });
@@ -324,6 +324,23 @@ const GetOrderDoneDay = (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ message: "Loi API", err });
+  }
+};
+const getReceivedOrdersDay = async (req, res) => {
+  try {
+    const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+    const formattedDate = today.toFormat("yyyy-MM-dd");
+    const sql = `SELECT * FROM orders WHERE status = '6' AND DATE(order_date)='${formattedDate}'`;
+
+    const result = await connect.query(sql);
+
+    const confirmedOrders = result.rows;
+    return res.status(200).json({
+      message: "Lấy danh sách đơn hàng đã nhận thành công",
+      orders: confirmedOrders,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi API", error: error.message });
   }
 };
 const ListOrderInWeek = (req, res) => {
@@ -730,4 +747,5 @@ module.exports = {
   getCompleteOrders,
   getCancelledOrders,
   getPendingOrdersAll,
+  getReceivedOrdersDay
 };
