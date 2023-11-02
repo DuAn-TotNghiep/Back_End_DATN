@@ -728,8 +728,36 @@ const searchOrdersByUserPhone = async (req, res) => {
     const userResult = await connect.query(userQuery, [`%${user_phone}%`]);
 
     if (userResult.rows.length === 0) {
+      // Tìm thông qua bảng checkout nếu không tìm thấy trong bảng users
+      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' ILIKE $1`;
+      const checkoutResult = await connect.query(checkoutQuery, [`%${user_phone}%`]);
+
+
+      if (checkoutResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy người dùng với số điện thoại này",
+        });
+      }
+      console.log('Executing query:', checkoutQuery);
+      console.log('user_phone:', user_phone);
+
+
+      // Assuming that checkout result contains the user details, you can use this data to find orders.
+      const userId = checkoutResult.rows[0].id;
+
+      // Tìm đơn hàng từ bảng orders dựa trên user_id
+      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1`;
+      const orderResult = await connect.query(orderQuery, [userId]);
+
+      if (orderResult.rows.length == 0) {
+        return res.json({
+          message: "Không tìm thấy đơn hàng cho người dùng không đăng nhập này",
+        });
+      }
+
       return res.json({
-        message: "Không tìm thấy người dùng với số điện thoại này",
+        message: "Tìm thấy đơn hàng",
+        data: orderResult.rows,
       });
     }
 
@@ -750,6 +778,7 @@ const searchOrdersByUserPhone = async (req, res) => {
       data: orderResult.rows,
     });
   } catch (error) {
+    console.error(error)
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
