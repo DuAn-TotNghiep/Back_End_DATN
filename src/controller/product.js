@@ -780,8 +780,39 @@ const getOneKho = (req, res) => {
     return res.status(500).json({ message: 'Lỗi API' });
   }
 }
+const RelatedProduct = (req, res)=>{
+  try {
+    const { id } = req.params;
 
+    const productSql = `SELECT * FROM product WHERE product_id = ${id}`;
+    const relatedProductsSql = `
+    SELECT * FROM product
+    WHERE category_id = (SELECT category_id FROM product WHERE product_id = ${id})
+      AND product_id <> ${id}
+    LIMIT 4
+  `;
+    connect.query(productSql, (err, productResults) => {
+      if (err) {
+        return res.status(500).json({ message: "Lay one that bai", err });
+      }
+      connect.query(relatedProductsSql, (err, relatedProductsResults) => {
+ 
+        if (err) {
+          return res.status(500).json({ message: "Lay related products that bai", err });
+        }
+
+        const product = productResults[0];
+        const relatedProducts = relatedProductsResults.rows;
+
+        return res.status(200).json({ message: "Lay one thanh cong", data: { product, relatedProducts } });
+      });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Loi api", err });
+  }
+}
 module.exports = {
+  RelatedProduct,
   getProductSearchCategory,
   AddProduct,
   GetAllProductOff,
