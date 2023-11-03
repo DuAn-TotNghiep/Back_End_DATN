@@ -30,6 +30,13 @@ const {
   getPendingOrdersAll,
   getReceivedOrdersDay,
   searchOrdersByUserPhone,
+  searchOrdersByUserPhoneCancell,
+  searchOrdersByUserPhoneConfirm,
+  searchOrdersByUserPhoneAwaitShipper,
+  searchOrdersByUserPhoneShipping,
+  searchOrdersByUserPhoneShipDone,
+  searchOrdersByUserPhoneDone,
+  searchOrdersByUserPhoneComplete
 } = require("../controller/order");
 const router = express.Router();
 router.post("/order/add", order);
@@ -60,5 +67,14 @@ router.get("/order/ordercancell", getCancelledOrders);
 router.get("/order/orderpendingall", getPendingOrdersAll);
 router.get("/order/:id/getorderuser", getOneOrderinUser);
 router.post("/order/status", sendStatusByEmail);
-router.post("/order/search", searchOrdersByUserPhone );
+router.post("/order/search", searchOrdersByUserPhone);
+router.post("/order/searchcancell", searchOrdersByUserPhoneCancell);
+router.post("/order/searchconfirm", searchOrdersByUserPhoneConfirm);
+router.post("/order/searchawaitshipper", searchOrdersByUserPhoneAwaitShipper);
+router.post("/order/searchshipping", searchOrdersByUserPhoneShipping);
+router.post("/order/searchshipdone", searchOrdersByUserPhoneShipDone);
+router.post("/order/searchdone", searchOrdersByUserPhoneDone);
+router.post("/order/searchcomplete", searchOrdersByUserPhoneComplete);
+
+
 module.exports = router;
