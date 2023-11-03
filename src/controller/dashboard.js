@@ -50,6 +50,8 @@ WHERE
     return res.status(500).json({ message: "Loi API", err });
   }
 };
+
+
 const getTotalMonth = (req, res) => {
   const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
   const targetDate = today.minus({ days: 30 });
@@ -99,9 +101,10 @@ const TopProductToday = async (req, res) => {
     }
 
     // Lấy thông tin sản phẩm được đặt hàng nhiều nhất
-    const topProduct = result.rows;
-
-    return res.status(200).json(topProduct);
+    const data = result.rows;
+    return res
+      .status(200)
+      .json({ message: "Lấy thành công sản phẩm bán chạy trong ngay", data });
   } catch (err) {
     return res.status(500).json({ message: 'Lỗi API', error: err.message });
   }
@@ -165,6 +168,9 @@ const TopProductMonth = async (req, res) => {
     return res.status(500).json({ message: 'Lỗi API', error: error.message });
   }
 }
+
+
+
 const TopRevenueProductToday = async (req, res) => {
   try {
     const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
@@ -432,11 +438,11 @@ const getDailyEarnings = (req, res) => {
   }
 
 };
-const getDaily = (req, res)=>{
+const getDaily = (req, res) => {
   const { start_date, end_date } = req.body; // Lấy ngày từ URL
   const startDate = DateTime.fromISO(start_date, { zone: "Asia/Ho_Chi_Minh" });
   const endDate = DateTime.fromISO(end_date, { zone: "Asia/Ho_Chi_Minh" });
-  console.log(start_date,end_date);
+  console.log(start_date, end_date);
   try {
     const sql = `
       SELECT SUM(order_total) AS total_amount
@@ -458,11 +464,11 @@ const getDaily = (req, res)=>{
     return res.status(500).json({ message: "Lỗi API", err });
   }
 }
-const getActionDaily = (req, res)=>{
+const getActionDaily = (req, res) => {
   const { start_date, end_date } = req.body; // Lấy ngày từ URL
   const startDate = DateTime.fromISO(start_date, { zone: "Asia/Ho_Chi_Minh" });
   const endDate = DateTime.fromISO(end_date, { zone: "Asia/Ho_Chi_Minh" });
-  console.log(start_date,end_date);
+  console.log(start_date, end_date);
   try {
     const sql = `
     SELECT * FROM actions
@@ -487,4 +493,4 @@ const getActionDaily = (req, res)=>{
 }
 
 
-module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff, getTotalPerMonth,getTotalPerDay , getDailyEarnings,getDaily,getActionDaily};
+module.exports = { getTotalDay, getTotalWeek, TopProductToday, TopProductWeek, TopProductMonth, getTotalMonth, TopRevenueProductToday, TopRevenueProductThisWeek, TopRevenueProductThisMonth, CountPaymentOff, getTotalPerMonth, getTotalPerDay, getDailyEarnings, getDaily, getActionDaily };
