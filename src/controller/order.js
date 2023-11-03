@@ -782,7 +782,454 @@ const searchOrdersByUserPhone = async (req, res) => {
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
+const searchOrdersByUserPhoneCancell = async (req, res) => {
+  try {
+    let user_phone = req.body.user_phone;
+    user_phone = user_phone.trim();
 
+    // Kiểm tra xem chuỗi chỉ chứa chữ số
+    if (!/^\d+$/.test(user_phone)) {
+      return res.json({
+        message: "Số điện thoại phải chỉ chứa chữ số.",
+      });
+    }
+
+    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
+    const userResult = await connect.query(userQuery, [user_phone]);
+
+    if (userResult.rows.length === 0) {
+      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
+      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
+
+      if (checkoutResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy người dùng với số điện thoại này",
+        });
+      }
+
+      const userId = checkoutResult.rows[0].id;
+
+      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '0'`;
+      const orderResult = await connect.query(orderQuery, [userId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy đơn hàng có status = 0 cho người dùng không đăng nhập này",
+        });
+      }
+
+      return res.json({
+        message: "Tìm thấy đơn hàng có status = 0",
+        data: orderResult.rows,
+      });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '0'`;
+    const orderResult = await connect.query(orderQuery, [userId]);
+
+    if (orderResult.rows.length === 0) {
+      return res.json({
+        message: "Không tìm thấy đơn hàng có status = 0 cho người dùng này",
+      });
+    }
+
+    return res.json({
+      message: "Tìm thấy đơn hàng có status = 0",
+      data: orderResult.rows,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
+
+const searchOrdersByUserPhoneConfirm = async (req, res) => {
+  try {
+    let user_phone = req.body.user_phone;
+    user_phone = user_phone.trim();
+
+    // Kiểm tra xem chuỗi chỉ chứa chữ số
+    if (!/^\d+$/.test(user_phone)) {
+      return res.json({
+        message: "Số điện thoại phải chỉ chứa chữ số.",
+      });
+    }
+
+    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
+    const userResult = await connect.query(userQuery, [user_phone]);
+
+    if (userResult.rows.length === 0) {
+      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
+      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
+
+      if (checkoutResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy người dùng với số điện thoại này",
+        });
+      }
+
+      const userId = checkoutResult.rows[0].id;
+
+      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '1'`;
+      const orderResult = await connect.query(orderQuery, [userId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy đơn hàng có status = 0 cho người dùng không đăng nhập này",
+        });
+      }
+
+      return res.json({
+        message: "Tìm thấy đơn hàng có status = 0",
+        data: orderResult.rows,
+      });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '1'`;
+    const orderResult = await connect.query(orderQuery, [userId]);
+
+    if (orderResult.rows.length === 0) {
+      return res.json({
+        message: "Không tìm thấy đơn hàng có status = 0 cho người dùng này",
+      });
+    }
+
+    return res.json({
+      message: "Tìm thấy đơn hàng có status = 0",
+      data: orderResult.rows,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
+const searchOrdersByUserPhoneAwaitShipper = async (req, res) => {
+  try {
+    let user_phone = req.body.user_phone;
+    user_phone = user_phone.trim();
+
+    // Kiểm tra xem chuỗi chỉ chứa chữ số
+    if (!/^\d+$/.test(user_phone)) {
+      return res.json({
+        message: "Số điện thoại phải chỉ chứa chữ số.",
+      });
+    }
+
+    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
+    const userResult = await connect.query(userQuery, [user_phone]);
+
+    if (userResult.rows.length === 0) {
+      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
+      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
+
+      if (checkoutResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy người dùng với số điện thoại này",
+        });
+      }
+
+      const userId = checkoutResult.rows[0].id;
+
+      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '2'`;
+      const orderResult = await connect.query(orderQuery, [userId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy đơn hàng có status = 2 cho người dùng không đăng nhập này",
+        });
+      }
+
+      return res.json({
+        message: "Tìm thấy đơn hàng có status = 2",
+        data: orderResult.rows,
+      });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '2'`;
+    const orderResult = await connect.query(orderQuery, [userId]);
+
+    if (orderResult.rows.length === 0) {
+      return res.json({
+        message: "Không tìm thấy đơn hàng có status = 2 cho người dùng này",
+      });
+    }
+
+    return res.json({
+      message: "Tìm thấy đơn hàng có status = 2",
+      data: orderResult.rows,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
+
+const searchOrdersByUserPhoneShipping = async (req, res) => {
+  try {
+    let user_phone = req.body.user_phone;
+    user_phone = user_phone.trim();
+
+    // Kiểm tra xem chuỗi chỉ chứa chữ số
+    if (!/^\d+$/.test(user_phone)) {
+      return res.json({
+        message: "Số điện thoại phải chỉ chứa chữ số.",
+      });
+    }
+
+    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
+    const userResult = await connect.query(userQuery, [user_phone]);
+
+    if (userResult.rows.length === 0) {
+      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
+      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
+
+      if (checkoutResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy người dùng với số điện thoại này",
+        });
+      }
+
+      const userId = checkoutResult.rows[0].id;
+
+      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '3'`;
+      const orderResult = await connect.query(orderQuery, [userId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy đơn hàng có status = 3 cho người dùng không đăng nhập này",
+        });
+      }
+
+      return res.json({
+        message: "Tìm thấy đơn hàng có status = 3",
+        data: orderResult.rows,
+      });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '3'`;
+    const orderResult = await connect.query(orderQuery, [userId]);
+
+    if (orderResult.rows.length === 0) {
+      return res.json({
+        message: "Không tìm thấy đơn hàng có status = 3 cho người dùng này",
+      });
+    }
+
+    return res.json({
+      message: "Tìm thấy đơn hàng có status = 3",
+      data: orderResult.rows,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
+const searchOrdersByUserPhoneShipDone = async (req, res) => {
+  try {
+    let user_phone = req.body.user_phone;
+    user_phone = user_phone.trim();
+
+    // Kiểm tra xem chuỗi chỉ chứa chữ số
+    if (!/^\d+$/.test(user_phone)) {
+      return res.json({
+        message: "Số điện thoại phải chỉ chứa chữ số.",
+      });
+    }
+
+    // Tìm user_id từ bảng users dựa trên user_phone
+    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
+    const userResult = await connect.query(userQuery, [user_phone]);
+
+    if (userResult.rows.length === 0) {
+      // Tìm thông qua bảng checkout nếu không tìm thấy trong bảng users
+      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
+      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
+
+      if (checkoutResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy người dùng với số điện thoại này",
+        });
+      }
+
+      const userId = checkoutResult.rows[0].id;
+
+      // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
+      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '4'`;
+      const orderResult = await connect.query(orderQuery, [userId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy đơn hàng có status = 4 cho người dùng không đăng nhập này",
+        });
+      }
+
+      return res.json({
+        message: "Tìm thấy đơn hàng có status = 4",
+        data: orderResult.rows,
+      });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
+    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '4'`;
+    const orderResult = await connect.query(orderQuery, [userId]);
+
+    if (orderResult.rows.length === 0) {
+      return res.json({
+        message: "Không tìm thấy đơn hàng có status = 4 cho người dùng này",
+      });
+    }
+
+    return res.json({
+      message: "Tìm thấy đơn hàng có status = 4",
+      data: orderResult.rows,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
+const searchOrdersByUserPhoneDone = async (req, res) => {
+  try {
+    let user_phone = req.body.user_phone;
+    user_phone = user_phone.trim();
+
+    // Kiểm tra xem chuỗi chỉ chứa chữ số
+    if (!/^\d+$/.test(user_phone)) {
+      return res.json({
+        message: "Số điện thoại phải chỉ chứa chữ số.",
+      });
+    }
+
+    // Tìm user_id từ bảng users dựa trên user_phone
+    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
+    const userResult = await connect.query(userQuery, [user_phone]);
+
+    if (userResult.rows.length === 0) {
+      // Tìm thông qua bảng checkout nếu không tìm thấy trong bảng users
+      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
+      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
+
+      if (checkoutResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy người dùng với số điện thoại này",
+        });
+      }
+
+      const userId = checkoutResult.rows[0].id;
+
+      // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
+      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '5'`;
+      const orderResult = await connect.query(orderQuery, [userId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy đơn hàng có status = 5 cho người dùng không đăng nhập này",
+        });
+      }
+
+      return res.json({
+        message: "Tìm thấy đơn hàng có status = 5",
+        data: orderResult.rows,
+      });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
+    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '5'`;
+    const orderResult = await connect.query(orderQuery, [userId]);
+
+    if (orderResult.rows.length === 0) {
+      return res.json({
+        message: "Không tìm thấy đơn hàng có status = 5 cho người dùng này",
+      });
+    }
+
+    return res.json({
+      message: "Tìm thấy đơn hàng có status = 5",
+      data: orderResult.rows,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
+const searchOrdersByUserPhoneComplete = async (req, res) => {
+  try {
+    let user_phone = req.body.user_phone;
+    user_phone = user_phone.trim();
+
+    // Kiểm tra xem chuỗi chỉ chứa chữ số
+    if (!/^\d+$/.test(user_phone)) {
+      return res.json({
+        message: "Số điện thoại phải chỉ chứa chữ số.",
+      });
+    }
+
+    // Tìm user_id từ bảng users dựa trên user_phone
+    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
+    const userResult = await connect.query(userQuery, [user_phone]);
+
+    if (userResult.rows.length === 0) {
+      // Tìm thông qua bảng checkout nếu không tìm thấy trong bảng users
+      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
+      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
+
+      if (checkoutResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy người dùng với số điện thoại này",
+        });
+      }
+
+      const userId = checkoutResult.rows[0].id;
+
+      // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
+      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '6'`;
+      const orderResult = await connect.query(orderQuery, [userId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.json({
+          message: "Không tìm thấy đơn hàng có status = 6 cho người dùng không đăng nhập này",
+        });
+      }
+
+      return res.json({
+        message: "Tìm thấy đơn hàng có status = 6",
+        data: orderResult.rows,
+      });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
+    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '6'`;
+    const orderResult = await connect.query(orderQuery, [userId]);
+
+    if (orderResult.rows.length === 0) {
+      return res.json({
+        message: "Không tìm thấy đơn hàng có status = 6 cho người dùng này",
+      });
+    }
+
+    return res.json({
+      message: "Tìm thấy đơn hàng có status = 6",
+      data: orderResult.rows,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
 module.exports = {
   order,
   searchOrdersByUserPhone,
@@ -812,5 +1259,12 @@ module.exports = {
   getCompleteOrders,
   getCancelledOrders,
   getPendingOrdersAll,
-  getReceivedOrdersDay
+  getReceivedOrdersDay,
+  searchOrdersByUserPhoneCancell,
+  searchOrdersByUserPhoneConfirm,
+  searchOrdersByUserPhoneAwaitShipper,
+  searchOrdersByUserPhoneShipping,
+  searchOrdersByUserPhoneShipDone,
+  searchOrdersByUserPhoneDone,
+  searchOrdersByUserPhoneComplete
 };
