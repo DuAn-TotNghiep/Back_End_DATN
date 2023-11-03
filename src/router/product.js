@@ -26,7 +26,8 @@ const {
   getOneKho,
   HideProduct,
   getAllProductsNoBlock,
-  CancellHideProduct
+  CancellHideProduct,
+  RelatedProduct
 } = require("../controller/product");
 
 const router = express.Router();
@@ -56,6 +57,6 @@ router.get("/product/:id/categoryFillter", FilterProductsByCategory);
 router.get("/product/priceFillter/:minPrice/:maxPrice", FilterProductsByPrice);
 router.get("/product/getalloff", GetAllProductOff);
 router.get("/product/noblock", getAllProductsNoBlock);
-
+router.get("/product/:id/related", RelatedProduct);
 
 module.exports = router;
