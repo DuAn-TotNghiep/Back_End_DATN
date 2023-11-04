@@ -27,7 +27,9 @@ const {
   HideProduct,
   getAllProductsNoBlock,
   CancellHideProduct,
-  RelatedProduct
+  RelatedProduct,
+  SortProductsByNameZA,
+  SortProductsByNameAZ
 } = require("../controller/product");
 
 const router = express.Router();
@@ -58,5 +60,7 @@ router.get("/product/priceFillter/:minPrice/:maxPrice", FilterProductsByPrice);
 router.get("/product/getalloff", GetAllProductOff);
 router.get("/product/noblock", getAllProductsNoBlock);
 router.get("/product/:id/related", RelatedProduct);
+router.get("/product/sortAtoZ", SortProductsByNameAZ)
+router.get("/product/sortZtoA", SortProductsByNameZA)
 
 module.exports = router;

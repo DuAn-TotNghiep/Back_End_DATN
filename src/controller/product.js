@@ -780,7 +780,7 @@ const getOneKho = (req, res) => {
     return res.status(500).json({ message: 'Lỗi API' });
   }
 }
-const RelatedProduct = (req, res)=>{
+const RelatedProduct = (req, res) => {
   try {
     const { id } = req.params;
 
@@ -796,7 +796,7 @@ const RelatedProduct = (req, res)=>{
         return res.status(500).json({ message: "Lay one that bai", err });
       }
       connect.query(relatedProductsSql, (err, relatedProductsResults) => {
- 
+
         if (err) {
           return res.status(500).json({ message: "Lay related products that bai", err });
         }
@@ -810,7 +810,40 @@ const RelatedProduct = (req, res)=>{
   } catch (err) {
     return res.status(500).json({ message: "Loi api", err });
   }
-}
+};
+const SortProductsByNameAZ = (req, res) => {
+  try {
+    const sql = 'SELECT * FROM product ORDER BY product_name ASC';
+
+    connect.query(sql, (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: "Không lấy được sản phẩm theo tên A-Z", err });
+      }
+
+      const data = result.rows;
+      return res.status(200).json({ message: "Lấy thành công", data });
+    });
+  } catch (err) {
+    return res.status(404).json({ message: "Lỗi API" });
+  }
+};
+const SortProductsByNameZA = (req, res) => {
+  try {
+    const sql = 'SELECT * FROM product ORDER BY product_name DESC';
+
+    connect.query(sql, (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: "Không lấy được sản phẩm theo tên Z-A", err });
+      }
+
+      const data = result.rows;
+      return res.status(200).json({ message: "Lấy thành công", data });
+    });
+  } catch (err) {
+    return res.status(404).json({ message: "Lỗi API" });
+  }
+};
+
 module.exports = {
   RelatedProduct,
   getProductSearchCategory,
@@ -838,5 +871,7 @@ module.exports = {
   getOneKho,
   HideProduct,
   getAllProductsNoBlock,
-  CancellHideProduct
+  CancellHideProduct,
+  SortProductsByNameZA,
+  SortProductsByNameAZ
 };
