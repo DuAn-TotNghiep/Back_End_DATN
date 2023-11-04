@@ -29,7 +29,9 @@ const {
   CancellHideProduct,
   RelatedProduct,
   SortProductsByNameZA,
-  SortProductsByNameAZ
+  SortProductsByNameAZ,
+  sortProductsByPrice,
+  sortProductsByPriceAscending
 } = require("../controller/product");
 
 const router = express.Router();
@@ -48,7 +50,7 @@ router.get("/product/topproductsale", GetTopSaleProduct);
 router.get("/product/countproductoday", CountOrdersToday);
 router.get("/product/countproductmonth", CountOrdersMonth);
 router.patch("/product/:id/update", UpdateProduct);
-router.patch("/product/:id/updatekho", UpdateKho);
+router.patch("/product/updatekho", UpdateKho);
 router.get("/product/kho", getAllKho);
 router.get("/product/:id/kho", getOneKho);
 router.get("/product/sumproductday", SumProductDay);
@@ -62,5 +64,6 @@ router.get("/product/noblock", getAllProductsNoBlock);
 router.get("/product/:id/related", RelatedProduct);
 router.get("/product/sortAtoZ", SortProductsByNameAZ)
 router.get("/product/sortZtoA", SortProductsByNameZA)
-
+router.get("/product/filtermax", sortProductsByPrice)
+router.get("/product/filtermin", sortProductsByPriceAscending)
 module.exports = router;

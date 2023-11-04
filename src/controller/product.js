@@ -637,8 +637,8 @@ const FilterProductsByPrice = (req, res) => {
 };
 const UpdateKho = (req, res) => {
   try {
-    const productId = req.params.id;
-    const { quantity } = req.body;
+    // const productId = req.params.id;
+    const { quantity , productId} = req.body;
 
     const sql1 = `SELECT * FROM product WHERE product_id = ${productId}`;
 
@@ -843,8 +843,49 @@ const SortProductsByNameZA = (req, res) => {
     return res.status(404).json({ message: "Lỗi API" });
   }
 };
+const sortProductsByPrice = (req, res) => {
+  try {
+    // Câu truy vấn SQL để sắp xếp sản phẩm
+    const sql = `SELECT * FROM product ORDER BY product_price DESC`;
 
+    connect.query(sql, (err, result) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Sắp xếp sản phẩm thất bại", err });
+      }
+      const data = result.rows;
+      return res
+        .status(200)
+        .json({ message: "Sắp xếp sản phẩm thành công", data });
+    });
+  } catch (err) {
+    return res.status(404).json({ message: "Lỗi API" });
+  }
+};
+const sortProductsByPriceAscending = (req, res) => {
+  try {
+    // Câu truy vấn SQL để sắp xếp sản phẩm
+    const sql = `SELECT * FROM product ORDER BY product_price ASC`;
+
+    connect.query(sql, (err, result) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Sắp xếp sản phẩm thất bại", err });
+      }
+      const data = result.rows;
+      return res
+        .status(200)
+        .json({ message: "Sắp xếp sản phẩm thành công", data });
+    });
+  } catch (err) {
+    return res.status(404).json({ message: "Lỗi API" });
+  }
+};
 module.exports = {
+  sortProductsByPrice,
+  sortProductsByPriceAscending,
   RelatedProduct,
   getProductSearchCategory,
   AddProduct,
