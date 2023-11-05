@@ -12,9 +12,15 @@ const addFavoriteProduct = async (req, res) => {
         }
         const checkResult = await connect.query(checkSql);
 
+        // Nếu người dùng đã yêu thích sản phẩm này, xóa nó khỏi danh sách yêu thích
         if (checkResult.rowCount > 0) {
-            // Người dùng đã yêu thích sản phẩm này, không thực hiện thêm nữa
-            return res.status(400).json({ message: "Người dùng đã yêu thích sản phẩm này" });
+            const deleteSql = {
+                text: "DELETE FROM favorite_product WHERE user_id = $1 AND product_id = $2",
+                values: [user_id, product_id]
+            }
+            await connect.query(deleteSql);
+
+            return res.status(200).json({ message: "Xóa sản phẩm yêu thích thành công" });
         }
 
         // Nếu người dùng chưa yêu thích sản phẩm này, thêm vào danh sách yêu thích
@@ -34,6 +40,7 @@ const addFavoriteProduct = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', error: error.message });
     }
 }
+
 
 const getAllFavorite = async (req, res) => {
     try {
@@ -72,7 +79,7 @@ const getOneFavorite = async (req, res) => {
 const deleteFavoriteProduct = async (req, res) => {
     try {
         const id = req.params.id;
-        const sql = `DELETE FROM favorite_product WHERE favorite_product_id = ${id}`;
+        const sql = `DELETE FROM favorite_product WHERE product_id = ${id}`;
         connect.query(sql, (err) => {
             if (err) {
                 return res.status(500).json({ message: 'Xóa thất bại' });
