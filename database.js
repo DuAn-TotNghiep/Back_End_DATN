@@ -8,8 +8,8 @@ const connect = new Client({
   // password: "admin",
   // password: "admin",
   // password: "ADMIN",
-  // password: "admin",
-  password: 'ADMIN',
+  password: "admin",
+  // password: 'ADMIN',
 
   // password: "jajaja1234z",
 
@@ -28,8 +28,8 @@ const connect = new Client({
   // database: "DATN_2023_MAIN",
   // database: "DATN",
 
-  // database: "DATN_2023_MAIN"
+  database: "DATN_2023_MAIN"
 
-  database: "DUANTN",
+  // database: "DUANTN",
 });
 module.exports = connect;
