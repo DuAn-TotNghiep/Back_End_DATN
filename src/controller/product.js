@@ -5,30 +5,29 @@ const { DateTime } = require("luxon");
 const io = require("../../app");
 const AddProduct = async (req, res, next) => {
   try {
-    const { color_id, size_id, category_id, name, image, desc, price } =
-      req.body;
+    const { color_id, size_id, category_id, name, image, desc, price } = req.body;
+    const isbblock = false;
+
     const sql4 = `SELECT * FROM product WHERE product_name='${name}'`;
     connect.query(sql4, (err, resolve) => {
       if (resolve.rows.length > 0) {
-        return res.status(500).json({ message: "san pham da ton tai" });
+        return res.status(500).json({ message: "Sản phẩm đã tồn tại" });
       }
-      const sql5 = `INSERT INTO product (size_id, color_id, image,category_id, product_name, product_description, product_price) VALUES (Array[${size_id}], Array[${color_id}], Array['${image}'], ${category_id},'${name}','${desc}', ${price}) RETURNING *`;
+
+      const sql5 = `INSERT INTO product (size_id, color_id, image, category_id, product_name, product_description, product_price, isbblock) VALUES (Array[${size_id}], Array[${color_id}], Array['${image}'], ${category_id},'${name}','${desc}', ${price}, ${isbblock}) RETURNING *`;
       connect.query(sql5, (err, resolve) => {
         if (err) {
-          return res
-            .status(500)
-            .json({ message: "Loi khong them duoc san pham", err });
+          return res.status(500).json({ message: "Lỗi không thêm được sản phẩm", err });
         }
         const data = resolve.rows[0];
-        return res
-          .status(200)
-          .json({ message: "Them san pham thanh cong", data });
+        return res.status(200).json({ message: "Thêm sản phẩm thành công", data });
       });
     });
   } catch (err) {
-    return res.status(500).json({ message: "Loi api", err });
+    return res.status(500).json({ message: "Lỗi API", err });
   }
 };
+
 //update product
 
 const UpdateProduct = async (req, res, next) => {
@@ -638,7 +637,7 @@ const FilterProductsByPrice = (req, res) => {
 const UpdateKho = (req, res) => {
   try {
     // const productId = req.params.id;
-    const { quantity , productId} = req.body;
+    const { quantity, productId } = req.body;
 
     const sql1 = `SELECT * FROM product WHERE product_id = ${productId}`;
 
