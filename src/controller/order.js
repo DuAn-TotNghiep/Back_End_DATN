@@ -824,21 +824,35 @@ const searchOrdersByUserPhoneCancell = async (req, res) => {
       });
     }
 
-    const userId = userResult.rows[0].id;
-
-    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '0'`;
-    const orderResult = await connect.query(orderQuery, [userId]);
-
-    if (orderResult.rows.length === 0) {
-      return res.json({
-        message: "Không tìm thấy đơn hàng có status = 0 cho người dùng này",
+    const userId = userResult.rows;
+    console.log("id: ", userId);
+    let put = [];
+    for (const data of userId) {
+      const orderQuery = `SELECT * FROM orders WHERE user_id = ${data.id} AND status = '0'`;
+      const result = await new Promise((resolve, reject) => {
+        connect.query(orderQuery, (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data.rows);
+          }
+        });
       });
+      put.push(result);
     }
+    put = put.flat();
 
     return res.json({
-      message: "Tìm thấy đơn hàng có status = 0",
-      data: orderResult.rows,
+      message: "Tìm thấy đơn hàng có status = 0 ok",
+      data: put,
     });
+    // if (orderResult.rows.length === 0) {
+    //   return res.json({
+    //     message: "Không tìm thấy đơn hàng có status = 0 cho người dùng này",
+    //   });
+    // }
+
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Lỗi API" });
