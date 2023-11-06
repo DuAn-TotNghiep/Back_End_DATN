@@ -9,7 +9,7 @@ const addCategory = async (req, res) => {
         if (error) {
             return res.status(400).json({ message: error.details[0].message });
         }
-        const { category_name } = value;
+        const { category_name,image } = value;
         const CategoryQuery = `SELECT * FROM category WHERE category_name = $1`;
         const CategoryValues = [category_name];
 
@@ -21,8 +21,8 @@ const addCategory = async (req, res) => {
             if (Result.rows.length > 0) {
                 return res.status(400).json({ message: 'category đã tồn tại' });
             }
-            const addQuery = `INSERT INTO category (category_name) VALUES ($1) RETURNING *`;
-            const addValues = [category_name];
+            const addQuery = `INSERT INTO category (category_name,image) VALUES ($1,$2) RETURNING *`;
+            const addValues = [category_name,image];
 
             connect.query(addQuery, addValues, (err, Result) => {
                 if (err) {
