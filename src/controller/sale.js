@@ -1,6 +1,7 @@
 
 const connect = require("../../database");
-const io = require('../../app')
+const io = require('../../app');
+const { SaleSchema } = require("../schema/SaleSchema");
 const getAllSale = async (req, res) => {
     try {
 
@@ -34,4 +35,40 @@ const updateSaleProduct = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
-module.exports = { getAllSale, updateSaleProduct };
+const addSale = async (req, res) => {
+    try {
+        const { error, value } = SaleSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+        const { sale_distcount, sale_name } = value; 
+        const CategoryQuery = `SELECT * FROM sale WHERE sale_name = $1`;
+        const CategoryValues = [sale_name]; 
+
+        connect.query(CategoryQuery, CategoryValues, (err, Result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lỗi khi kiểm tra sale' });
+            }
+
+            if (Result.rows.length > 0) {
+                return res.status(400).json({ message: 'sale đã tồn tại' });
+            }
+            const addQuery = `INSERT INTO sale (sale_name, sale_distcount) VALUES ($1, $2) RETURNING *`;
+            const addValues = [sale_name, sale_distcount];
+
+            connect.query(addQuery, addValues, (err, Result) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Thêm sale thất bại' });
+                }
+
+                const data = Result.rows[0];
+                return res.status(201).json({ message: 'Thêm sale thành công', data });
+            });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+
+
+module.exports = { getAllSale, updateSaleProduct ,addSale};
