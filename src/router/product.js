@@ -31,7 +31,8 @@ const {
   SortProductsByNameZA,
   SortProductsByNameAZ,
   sortProductsByPrice,
-  sortProductsByPriceAscending
+  sortProductsByPriceAscending,
+  GetAllSale
 } = require("../controller/product");
 
 const router = express.Router();
@@ -66,4 +67,6 @@ router.get("/product/sortAtoZ", SortProductsByNameAZ)
 router.get("/product/sortZtoA", SortProductsByNameZA)
 router.get("/product/filtermax", sortProductsByPrice)
 router.get("/product/filtermin", sortProductsByPriceAscending)
+router.get("/product/allsale", GetAllSale);
+
 module.exports = router;

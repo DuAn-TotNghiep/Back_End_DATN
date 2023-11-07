@@ -882,6 +882,21 @@ const sortProductsByPriceAscending = (req, res) => {
     return res.status(404).json({ message: "Lỗi API" });
   }
 };
+const GetAllSale = async (req, res) => {
+  try {
+    const sql = `SELECT * FROM product
+        WHERE sale_id is not null `;
+    connect.query(sql, (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: "Lay sale that bai", err });
+      }
+      const data = results.rows;
+      return res.status(200).json({ message: "Lay sale thanh cong", data });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Loi api", err });
+  }
+};
 module.exports = {
   sortProductsByPrice,
   sortProductsByPriceAscending,
@@ -913,5 +928,6 @@ module.exports = {
   getAllProductsNoBlock,
   CancellHideProduct,
   SortProductsByNameZA,
-  SortProductsByNameAZ
+  SortProductsByNameAZ,
+  GetAllSale
 };
