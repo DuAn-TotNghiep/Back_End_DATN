@@ -888,10 +888,25 @@ const GetAllSale = async (req, res) => {
         WHERE sale_id is not null `;
     connect.query(sql, (err, results) => {
       if (err) {
-        return res.status(500).json({ message: "Lay sale that bai", err });
+        return res.status(500).json({ message: "Lấy sản phẩm sale thất bại", err });
       }
       const data = results.rows;
-      return res.status(200).json({ message: "Lay sale thanh cong", data });
+      return res.status(200).json({ message: "Lấy sản phẩm sale thành công", data });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Loi api", err });
+  }
+};
+const GetAllOutstan = async (req, res) => {
+  try {
+    const sql = `SELECT * FROM product
+        WHERE outstan = true `;
+    connect.query(sql, (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: "Lấy sản phẩm nổi bật thất bại", err });
+      }
+      const data = results.rows;
+      return res.status(200).json({ message: "lấy sản phẩm nổi bật thành công", data });
     });
   } catch (err) {
     return res.status(500).json({ message: "Loi api", err });
@@ -929,5 +944,6 @@ module.exports = {
   CancellHideProduct,
   SortProductsByNameZA,
   SortProductsByNameAZ,
-  GetAllSale
+  GetAllSale,
+  GetAllOutstan
 };
