@@ -438,4 +438,30 @@ const updateProfile = async (req, res) => {
     return res.status(500).json({ message: 'Lỗi API', err });
   }
 }
-module.exports = { Signup, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile };
+const ForgotPassword =async (req, res)=>{
+  try {
+    const { email, new_password } = req.body;
+
+    // Kiểm tra xem tài khoản tồn tại
+    const checkUserQuery = "SELECT * FROM users WHERE user_email = $1";
+    const { rows } = await connect.query(checkUserQuery, [email]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Tài khoản không tồn tại" });
+    }
+
+    const user = rows[0];
+
+    // Cập nhật mật khẩu mới
+    const hashedNewPassword = await bcrypt.hash(new_password, 10);
+
+    const updatePasswordQuery = "UPDATE users SET user_password = $1 WHERE id = $2";
+    await connect.query(updatePasswordQuery, [hashedNewPassword, user.id]);
+
+    res.status(200).json({ message: "Cập nhật mật khẩu thành công" });
+  } catch (error) {
+    console.error("Lỗi khi cập nhật mật khẩu:", error);
+    res.status(500).json({ message: "Đã xảy ra lỗi" });
+  }
+}
+module.exports = {ForgotPassword,Signup, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile };
