@@ -241,8 +241,29 @@ const ProductinCategory = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API', err });
     }
 };
+const ProductinCategorys = async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      const relatedProductsSql = `
+        SELECT * FROM product
+        WHERE category_id = ${id}
+      `;
+  
+      connect.query(relatedProductsSql, (err, relatedProductsResults) => {
+        if (err) {
+          return res.status(500).json({ message: "Lấy sản phẩm trong danh mục thất bại", err });
+        }
+  
+        const relatedProducts = relatedProductsResults.rows;
+  
+        return res.status(200).json({ message: "Lấy sản phẩm thành công", data: relatedProducts });
+      });
+    } catch (err) {
+      return res.status(500).json({ message: "Lỗi API", err });
+    }
+  }
 
-
-module.exports = { updateCategory, getOneCat, addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination, ProductinCategory };
+module.exports = {ProductinCategorys, updateCategory, getOneCat, addCategory, getAllCategory, RemoveCategory, GetAllCat, getAllCategoryNoPagination, ProductinCategory };
 
 
