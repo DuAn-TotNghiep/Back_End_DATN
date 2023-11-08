@@ -21,7 +21,7 @@ const verifyOTPMiddleware = (req, res, next) => {
     if (req.path === "/sendOtp") {
         // Nếu yêu cầu là để gửi OTP, không kiểm tra OTP mà chấp nhận
         next();
-    } else if (req.path === "/signup") {
+    } else if (req.path === "/signup" || req.path === "/forgotpassword") {
         // Nếu yêu cầu là để xác minh OTP
         if (email && otpToCheck) {
             console.log(email);
