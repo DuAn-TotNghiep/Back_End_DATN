@@ -43,7 +43,7 @@ const addCategory = async (req, res) => {
 const updateCategory = (req, res) => {
     try {
         const categoryId = req.params.id;
-        const { category_name } = req.body;
+        const { category_name,image } = req.body;
         const sql1 = `SELECT * FROM category WHERE category_id = ${categoryId}`;
         connect.query(sql1, (err, selectResult) => {
             if (err) {
@@ -58,7 +58,8 @@ const updateCategory = (req, res) => {
             const sql2 = `
                 UPDATE category 
                 SET 
-                    category_name='${category_name}'
+                    category_name='${category_name}',
+                    image='${image}'
                 WHERE category_id = ${categoryId}
                 RETURNING *`;
 
