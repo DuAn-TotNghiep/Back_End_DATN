@@ -912,6 +912,28 @@ const GetAllOutstan = async (req, res) => {
     return res.status(500).json({ message: "Loi api", err });
   }
 };
+const GetNewProducts3Days = async (req, res) => {
+  try {
+    const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+    const targetDate = today.minus({ days: 3 });
+
+    const sqlQuery = `
+      SELECT *
+      FROM product
+      WHERE DATE(created_at) BETWEEN '${targetDate.toISODate()}' AND '${today.toISODate()}';
+    `;
+    connect.query(sqlQuery, (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: "Lấy sản phẩm mới trong 3 ngày thất bại", err });
+      }
+      const data = results.rows;
+      return res.status(200).json({ message: "lấy sản phẩm mới trong 3 ngày thành công", data });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Lỗi API", error: err.message });
+  }
+};
+
 module.exports = {
   sortProductsByPrice,
   sortProductsByPriceAscending,
@@ -945,5 +967,6 @@ module.exports = {
   SortProductsByNameZA,
   SortProductsByNameAZ,
   GetAllSale,
-  GetAllOutstan
+  GetAllOutstan,
+  GetNewProducts3Days
 };
