@@ -438,6 +438,47 @@ const updateProfile = async (req, res) => {
     return res.status(500).json({ message: 'Lỗi API', err });
   }
 }
+const updateAddress = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const {  user_province, user_ward, user_district, user_address } = req.body;
+
+    // Kiểm tra xem sản phẩm có tồn tại không
+    const sql1 = `SELECT * FROM users WHERE id = ${userId}`;
+    connect.query(sql1, (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu', err });
+      }
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Tài khoản không tồn tại' });
+      }
+
+      // Sản phẩm tồn tại, tiến hành cập nhật
+      const sql2 = `
+            UPDATE users
+            SET
+            user_province ='${user_province}',
+            user_ward ='${user_ward}',
+            user_district ='${user_district}',
+            user_address ='${user_address}'
+            WHERE id=${userId}
+            RETURNING *`;
+
+      connect.query(sql2, (err, result) => {
+        if (err) {
+          return res.status(500).json({ message: 'Lỗi không thể cập nhật thông tin', err });
+        }
+
+        const data = result.rows[0];
+        return res.status(200).json({ message: 'Sửa thông tin thành công', data });
+      });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: 'Lỗi API', err });
+  }
+}
 const ForgotPassword =async (req, res)=>{
   try {
     const { email, new_password } = req.body;
@@ -464,4 +505,4 @@ const ForgotPassword =async (req, res)=>{
     res.status(500).json({ message: "Đã xảy ra lỗi" });
   }
 }
-module.exports = {ForgotPassword,Signup, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile };
+module.exports = { ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile };
