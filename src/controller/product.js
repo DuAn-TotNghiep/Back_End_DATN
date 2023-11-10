@@ -6,6 +6,7 @@ const io = require("../../app");
 const AddProduct = async (req, res, next) => {
   try {
     const { color_id, size_id, category_id, name, image, desc, price } = req.body;
+    const now = DateTime.now().setZone("Asia/Ho_Chi_Minh");
     const isbblock = false;
 
     const sql4 = `SELECT * FROM product WHERE product_name='${name}'`;
@@ -13,8 +14,8 @@ const AddProduct = async (req, res, next) => {
       if (resolve.rows.length > 0) {
         return res.status(500).json({ message: "Sản phẩm đã tồn tại" });
       }
-
-      const sql5 = `INSERT INTO product (size_id, color_id, image, category_id, product_name, product_description, product_price, isbblock) VALUES (Array[${size_id}], Array[${color_id}], Array['${image}'], ${category_id},'${name}','${desc}', ${price}, ${isbblock}) RETURNING *`;
+      const time = now.toString();
+      const sql5 = `INSERT INTO product (size_id, color_id, image, category_id, product_name, product_description, product_price, isbblock,created_at) VALUES (Array[${size_id}], Array[${color_id}], Array['${image}'], ${category_id},'${name}','${desc}', ${price}, ${isbblock},'${time}') RETURNING *`;
       connect.query(sql5, (err, resolve) => {
         if (err) {
           return res.status(500).json({ message: "Lỗi không thêm được sản phẩm", err });
