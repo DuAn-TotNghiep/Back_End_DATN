@@ -720,62 +720,33 @@ const sendStatusByEmail = (req, res) => {
 };
 const searchOrdersByUserPhone = async (req, res) => {
   try {
-    let user_phone = req.body.user_phone;
-    user_phone = user_phone.trim();
-
-    // Tìm user_id từ bảng users dựa trên user_phone
-    const userQuery = `SELECT id FROM users WHERE user_phone ILIKE $1`;
-    const userResult = await connect.query(userQuery, [`%${user_phone}%`]);
-
-    if (userResult.rows.length === 0) {
-      // Tìm thông qua bảng checkout nếu không tìm thấy trong bảng users
-      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' ILIKE $1`;
-      const checkoutResult = await connect.query(checkoutQuery, [`%${user_phone}%`]);
-
-
-      if (checkoutResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy người dùng với số điện thoại này",
-        });
-      }
-      console.log('Executing query:', checkoutQuery);
-      console.log('user_phone:', user_phone);
-
-
-      // Assuming that checkout result contains the user details, you can use this data to find orders.
-      const userId = checkoutResult.rows[0].id;
-
-      // Tìm đơn hàng từ bảng orders dựa trên user_id
-      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1`;
-      const orderResult = await connect.query(orderQuery, [userId]);
-
-      if (orderResult.rows.length == 0) {
-        return res.json({
-          message: "Không tìm thấy đơn hàng cho người dùng không đăng nhập này",
-        });
-      }
-
-      return res.json({
-        message: "Tìm thấy đơn hàng",
-        data: orderResult.rows,
-      });
+    let order_id = req.body.order_id;
+    if (!order_id || isNaN(order_id)) {
+      return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
     }
 
-    const userId = userResult.rows[0].id;
-
-    // Tìm đơn hàng từ bảng orders dựa trên user_id
-    const orderQuery = `SELECT * FROM orders WHERE user_id = $1`;
-    const orderResult = await connect.query(orderQuery, [userId]);
+    // Tìm đơn hàng từ bảng orders dựa trên order_id (đây là một số nguyên)
+    const orderQuery = `SELECT * FROM orders WHERE order_id = $1`;
+    const orderResult = await connect.query(orderQuery, [order_id]);
 
     if (orderResult.rows.length === 0) {
       return res.json({
-        message: "Không tìm thấy đơn hàng cho người dùng này",
+        message: "Không tìm thấy đơn hàng cho order_id này",
       });
     }
+
+    const userId = orderResult.rows[0].user_id;
+
+    // (Optional) Nếu bạn muốn lấy thông tin người dùng từ bảng users, bạn có thể thêm truy vấn tương tự như sau:
+    // const userQuery = `SELECT * FROM users WHERE id = $1`;
+    // const userResult = await connect.query(userQuery, [userId]);
+    // const userData = userResult.rows[0];
 
     return res.json({
       message: "Tìm thấy đơn hàng",
       data: orderResult.rows,
+      // (Optional) Thêm thông tin người dùng nếu cần
+      // user: userData,
     });
   } catch (error) {
     console.error(error)
