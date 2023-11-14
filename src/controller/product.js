@@ -180,7 +180,7 @@ const getAllProducts = async (req, res) => {
 };
 const GetAllProductOff = (req, res) => {
   try {
-    const sql = `SELECT * FROM product`;
+    const sql = `SELECT * FROM product ORDER BY product_id ASC`;
     connect.query(sql, (err, resolve) => {
       const data = resolve.rows;
       return res.status(200).json({
@@ -341,17 +341,17 @@ const GetOutstan = async (req, res) => {
 const updateOutstanProduct = async (req, res) => {
   try {
     const { outstan, id } = req.body;
-    let sql = `UPDATE product SET outstan= ${outstan} WHERE product_id=${id} RETURNING *`;
+    let sql = `UPDATE product SET outstan= ${outstan} WHERE product_id=${id}  `;
     connect.query(sql, (err, result) => {
       if (err) {
         return res
           .status(500)
           .json({ message: "Update outstan that bai", err });
       }
-      const data = result.rows[0];
-      console.log(data);
-      io.emit("updatesale", { message: "update sale thanh cong", data });
-      return res.status(200).json({ message: "Update sale thành công", data });
+      // const data = result.rows[0];
+      // console.log(data);
+      io.emit("updatesale", { message: "update sale thanh cong" });
+      return res.status(200).json({ message: "Update sale thành công" });
     });
   } catch (error) {
     return res.status(500).json({ message: "Lỗi API" });
