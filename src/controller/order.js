@@ -425,7 +425,7 @@ const getReceivedOrders = async (req, res) => {
   try {
     // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
     // const formattedDate = today.toFormat("yyyy-MM-dd");
-    const sql = `SELECT * FROM orders WHERE status = '5'`;
+    const sql = `SELECT * FROM orders WHERE status = '5' ORDER BY order_date DESC`;
 
     const result = await connect.query(sql);
 
@@ -442,7 +442,7 @@ const getConfirmOrders = async (req, res) => {
   try {
     // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
     // const formattedDate = today.toFormat("yyyy-MM-dd");
-    const sql = `SELECT * FROM orders WHERE status = '1'`;
+    const sql = `SELECT * FROM orders WHERE status = '1' ORDER BY order_date DESC`;
 
     const result = await connect.query(sql);
 
@@ -474,7 +474,7 @@ const getPendingOrders = async (req, res) => {
 };
 const getPendingOrdersAll = async (req, res) => {
   try {
-    const sql = `SELECT * FROM orders WHERE status = '2'`;
+    const sql = `SELECT * FROM orders WHERE status = '2' ORDER BY order_date DESC`;
 
     const result = await connect.query(sql);
 
@@ -491,7 +491,7 @@ const getShipingOrders = async (req, res) => {
   try {
     // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
     // const formattedDate = today.toFormat("yyyy-MM-dd");
-    const sql = `SELECT * FROM orders WHERE status = '3'`;
+    const sql = `SELECT * FROM orders WHERE status = '3' ORDER BY order_date DESC`;
 
     const result = await connect.query(sql);
 
@@ -508,7 +508,7 @@ const getDeleveredOrders = async (req, res) => {
   try {
     // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
     // const formattedDate = today.toFormat("yyyy-MM-dd");
-    const sql = `SELECT * FROM orders WHERE status = '4'`;
+    const sql = `SELECT * FROM orders WHERE status = '4' ORDER BY order_date DESC`;
 
     const result = await connect.query(sql);
 
@@ -525,7 +525,7 @@ const getCompleteOrders = async (req, res) => {
   try {
     // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
     // const formattedDate = today.toFormat("yyyy-MM-dd");
-    const sql = `SELECT * FROM orders WHERE status = '6'`;
+    const sql = `SELECT * FROM orders WHERE status = '6' ORDER BY order_date DESC`;
 
     const result = await connect.query(sql);
 
@@ -542,7 +542,7 @@ const getCancelledOrders = async (req, res) => {
   try {
     const sql = `
             SELECT * FROM orders
-            WHERE status NOT IN ('1', '2', '3', '4', '5', '6')
+            WHERE status NOT IN ('1', '2', '3', '4', '5', '6') ORDER BY order_date DESC
         `;
 
     const result = await connect.query(sql);
@@ -755,463 +755,192 @@ const searchOrdersByUserPhone = async (req, res) => {
 };
 const searchOrdersByUserPhoneCancell = async (req, res) => {
   try {
-    let user_phone = req.body.user_phone;
-    user_phone = user_phone.trim();
+    let order_id = req.body.order_id;
+    if (!order_id || isNaN(order_id)) {
+      return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
+    }
 
-    // Kiểm tra xem chuỗi chỉ chứa chữ số
-    if (!/^\d+$/.test(user_phone)) {
+    const orderQuery = `SELECT * FROM orders WHERE order_id = $1 AND status= '0'`;
+    const orderResult = await connect.query(orderQuery, [order_id]);
+
+    if (orderResult.rows.length === 0) {
       return res.json({
-        message: "Số điện thoại phải chỉ chứa chữ số.",
+        message: "Không tìm thấy đơn hàng cho order_id này",
       });
     }
 
-    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
-    const userResult = await connect.query(userQuery, [user_phone]);
-
-    if (userResult.rows.length === 0) {
-      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
-      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
-
-      if (checkoutResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy người dùng với số điện thoại này",
-        });
-      }
-
-      const userId = checkoutResult.rows[0].id;
-
-      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '0'`;
-      const orderResult = await connect.query(orderQuery, [userId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy đơn hàng có status = 0 cho người dùng không đăng nhập này",
-        });
-      }
-
-      return res.json({
-        message: "Tìm thấy đơn hàng có status = 0",
-        data: orderResult.rows,
-      });
-    }
-
-    const userId = userResult.rows;
-    console.log("id: ", userId);
-    let put = [];
-    for (const data of userId) {
-      const orderQuery = `SELECT * FROM orders WHERE user_id = ${data.id} AND status = '0'`;
-      const result = await new Promise((resolve, reject) => {
-        connect.query(orderQuery, (err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(data.rows);
-          }
-        });
-      });
-      put.push(result);
-    }
-    put = put.flat();
+    const userId = orderResult.rows[0].user_id;
 
     return res.json({
-      message: "Tìm thấy đơn hàng có status = 0 ok",
-      data: put,
+      message: "Tìm thấy đơn hàng",
+      data: orderResult.rows,
     });
-    // if (orderResult.rows.length === 0) {
-    //   return res.json({
-    //     message: "Không tìm thấy đơn hàng có status = 0 cho người dùng này",
-    //   });
-    // }
-
-
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
 
 const searchOrdersByUserPhoneConfirm = async (req, res) => {
   try {
-    let user_phone = req.body.user_phone;
-    user_phone = user_phone.trim();
-
-    // Kiểm tra xem chuỗi chỉ chứa chữ số
-    if (!/^\d+$/.test(user_phone)) {
-      return res.json({
-        message: "Số điện thoại phải chỉ chứa chữ số.",
-      });
+    let order_id = req.body.order_id;
+    if (!order_id || isNaN(order_id)) {
+      return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
     }
 
-    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
-    const userResult = await connect.query(userQuery, [user_phone]);
-
-    if (userResult.rows.length === 0) {
-      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
-      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
-
-      if (checkoutResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy người dùng với số điện thoại này",
-        });
-      }
-
-      const userId = checkoutResult.rows[0].id;
-
-      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '1'`;
-      const orderResult = await connect.query(orderQuery, [userId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy đơn hàng có status = 0 cho người dùng không đăng nhập này",
-        });
-      }
-
-      return res.json({
-        message: "Tìm thấy đơn hàng có status = 0",
-        data: orderResult.rows,
-      });
-    }
-
-    const userId = userResult.rows[0].id;
-
-    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '1'`;
-    const orderResult = await connect.query(orderQuery, [userId]);
+    const orderQuery = `SELECT * FROM orders WHERE order_id = $1 AND status= '1'`;
+    const orderResult = await connect.query(orderQuery, [order_id]);
 
     if (orderResult.rows.length === 0) {
       return res.json({
-        message: "Không tìm thấy đơn hàng có status = 0 cho người dùng này",
+        message: "Không tìm thấy đơn hàng cho order_id này",
       });
     }
 
+    const userId = orderResult.rows[0].user_id;
+
     return res.json({
-      message: "Tìm thấy đơn hàng có status = 0",
+      message: "Tìm thấy đơn hàng",
       data: orderResult.rows,
     });
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
 const searchOrdersByUserPhoneAwaitShipper = async (req, res) => {
   try {
-    let user_phone = req.body.user_phone;
-    user_phone = user_phone.trim();
-
-    // Kiểm tra xem chuỗi chỉ chứa chữ số
-    if (!/^\d+$/.test(user_phone)) {
-      return res.json({
-        message: "Số điện thoại phải chỉ chứa chữ số.",
-      });
+    let order_id = req.body.order_id;
+    if (!order_id || isNaN(order_id)) {
+      return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
     }
 
-    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
-    const userResult = await connect.query(userQuery, [user_phone]);
-
-    if (userResult.rows.length === 0) {
-      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
-      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
-
-      if (checkoutResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy người dùng với số điện thoại này",
-        });
-      }
-
-      const userId = checkoutResult.rows[0].id;
-
-      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '2'`;
-      const orderResult = await connect.query(orderQuery, [userId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy đơn hàng có status = 2 cho người dùng không đăng nhập này",
-        });
-      }
-
-      return res.json({
-        message: "Tìm thấy đơn hàng có status = 2",
-        data: orderResult.rows,
-      });
-    }
-
-    const userId = userResult.rows[0].id;
-
-    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '2'`;
-    const orderResult = await connect.query(orderQuery, [userId]);
+    const orderQuery = `SELECT * FROM orders WHERE order_id = $1 AND status= '2'`;
+    const orderResult = await connect.query(orderQuery, [order_id]);
 
     if (orderResult.rows.length === 0) {
       return res.json({
-        message: "Không tìm thấy đơn hàng có status = 2 cho người dùng này",
+        message: "Không tìm thấy đơn hàng cho order_id này",
       });
     }
 
+    const userId = orderResult.rows[0].user_id;
+
     return res.json({
-      message: "Tìm thấy đơn hàng có status = 2",
+      message: "Tìm thấy đơn hàng",
       data: orderResult.rows,
     });
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
 
 const searchOrdersByUserPhoneShipping = async (req, res) => {
   try {
-    let user_phone = req.body.user_phone;
-    user_phone = user_phone.trim();
-
-    // Kiểm tra xem chuỗi chỉ chứa chữ số
-    if (!/^\d+$/.test(user_phone)) {
-      return res.json({
-        message: "Số điện thoại phải chỉ chứa chữ số.",
-      });
+    let order_id = req.body.order_id;
+    if (!order_id || isNaN(order_id)) {
+      return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
     }
 
-    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
-    const userResult = await connect.query(userQuery, [user_phone]);
-
-    if (userResult.rows.length === 0) {
-      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
-      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
-
-      if (checkoutResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy người dùng với số điện thoại này",
-        });
-      }
-
-      const userId = checkoutResult.rows[0].id;
-
-      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '3'`;
-      const orderResult = await connect.query(orderQuery, [userId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy đơn hàng có status = 3 cho người dùng không đăng nhập này",
-        });
-      }
-
-      return res.json({
-        message: "Tìm thấy đơn hàng có status = 3",
-        data: orderResult.rows,
-      });
-    }
-
-    const userId = userResult.rows[0].id;
-
-    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '3'`;
-    const orderResult = await connect.query(orderQuery, [userId]);
+    const orderQuery = `SELECT * FROM orders WHERE order_id = $1 AND status= '3'`;
+    const orderResult = await connect.query(orderQuery, [order_id]);
 
     if (orderResult.rows.length === 0) {
       return res.json({
-        message: "Không tìm thấy đơn hàng có status = 3 cho người dùng này",
+        message: "Không tìm thấy đơn hàng cho order_id này",
       });
     }
 
+    const userId = orderResult.rows[0].user_id;
+
     return res.json({
-      message: "Tìm thấy đơn hàng có status = 3",
+      message: "Tìm thấy đơn hàng",
       data: orderResult.rows,
     });
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
 const searchOrdersByUserPhoneShipDone = async (req, res) => {
   try {
-    let user_phone = req.body.user_phone;
-    user_phone = user_phone.trim();
-
-    // Kiểm tra xem chuỗi chỉ chứa chữ số
-    if (!/^\d+$/.test(user_phone)) {
-      return res.json({
-        message: "Số điện thoại phải chỉ chứa chữ số.",
-      });
+    let order_id = req.body.order_id;
+    if (!order_id || isNaN(order_id)) {
+      return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
     }
 
-    // Tìm user_id từ bảng users dựa trên user_phone
-    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
-    const userResult = await connect.query(userQuery, [user_phone]);
-
-    if (userResult.rows.length === 0) {
-      // Tìm thông qua bảng checkout nếu không tìm thấy trong bảng users
-      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
-      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
-
-      if (checkoutResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy người dùng với số điện thoại này",
-        });
-      }
-
-      const userId = checkoutResult.rows[0].id;
-
-      // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
-      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '4'`;
-      const orderResult = await connect.query(orderQuery, [userId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy đơn hàng có status = 4 cho người dùng không đăng nhập này",
-        });
-      }
-
-      return res.json({
-        message: "Tìm thấy đơn hàng có status = 4",
-        data: orderResult.rows,
-      });
-    }
-
-    const userId = userResult.rows[0].id;
-
-    // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
-    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '4'`;
-    const orderResult = await connect.query(orderQuery, [userId]);
+    const orderQuery = `SELECT * FROM orders WHERE order_id = $1 AND status= '4'`;
+    const orderResult = await connect.query(orderQuery, [order_id]);
 
     if (orderResult.rows.length === 0) {
       return res.json({
-        message: "Không tìm thấy đơn hàng có status = 4 cho người dùng này",
+        message: "Không tìm thấy đơn hàng cho order_id này",
       });
     }
 
+    const userId = orderResult.rows[0].user_id;
+
     return res.json({
-      message: "Tìm thấy đơn hàng có status = 4",
+      message: "Tìm thấy đơn hàng",
       data: orderResult.rows,
     });
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
 const searchOrdersByUserPhoneDone = async (req, res) => {
   try {
-    let user_phone = req.body.user_phone;
-    user_phone = user_phone.trim();
-
-    // Kiểm tra xem chuỗi chỉ chứa chữ số
-    if (!/^\d+$/.test(user_phone)) {
-      return res.json({
-        message: "Số điện thoại phải chỉ chứa chữ số.",
-      });
+    let order_id = req.body.order_id;
+    if (!order_id || isNaN(order_id)) {
+      return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
     }
 
-    // Tìm user_id từ bảng users dựa trên user_phone
-    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
-    const userResult = await connect.query(userQuery, [user_phone]);
-
-    if (userResult.rows.length === 0) {
-      // Tìm thông qua bảng checkout nếu không tìm thấy trong bảng users
-      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
-      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
-
-      if (checkoutResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy người dùng với số điện thoại này",
-        });
-      }
-
-      const userId = checkoutResult.rows[0].id;
-
-      // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
-      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '5'`;
-      const orderResult = await connect.query(orderQuery, [userId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy đơn hàng có status = 5 cho người dùng không đăng nhập này",
-        });
-      }
-
-      return res.json({
-        message: "Tìm thấy đơn hàng có status = 5",
-        data: orderResult.rows,
-      });
-    }
-
-    const userId = userResult.rows[0].id;
-
-    // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
-    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '5'`;
-    const orderResult = await connect.query(orderQuery, [userId]);
+    const orderQuery = `SELECT * FROM orders WHERE order_id = $1 AND status= '5'`;
+    const orderResult = await connect.query(orderQuery, [order_id]);
 
     if (orderResult.rows.length === 0) {
       return res.json({
-        message: "Không tìm thấy đơn hàng có status = 5 cho người dùng này",
+        message: "Không tìm thấy đơn hàng cho order_id này",
       });
     }
 
+    const userId = orderResult.rows[0].user_id;
+
     return res.json({
-      message: "Tìm thấy đơn hàng có status = 5",
+      message: "Tìm thấy đơn hàng",
       data: orderResult.rows,
     });
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
 const searchOrdersByUserPhoneComplete = async (req, res) => {
   try {
-    let user_phone = req.body.user_phone;
-    user_phone = user_phone.trim();
-
-    // Kiểm tra xem chuỗi chỉ chứa chữ số
-    if (!/^\d+$/.test(user_phone)) {
-      return res.json({
-        message: "Số điện thoại phải chỉ chứa chữ số.",
-      });
+    let order_id = req.body.order_id;
+    if (!order_id || isNaN(order_id)) {
+      return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
     }
 
-    // Tìm user_id từ bảng users dựa trên user_phone
-    const userQuery = `SELECT id FROM users WHERE user_phone = $1`;
-    const userResult = await connect.query(userQuery, [user_phone]);
-
-    if (userResult.rows.length === 0) {
-      // Tìm thông qua bảng checkout nếu không tìm thấy trong bảng users
-      const checkoutQuery = `SELECT * FROM checkout WHERE checkout_off::jsonb->>'phone' = $1`;
-      const checkoutResult = await connect.query(checkoutQuery, [user_phone]);
-
-      if (checkoutResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy người dùng với số điện thoại này",
-        });
-      }
-
-      const userId = checkoutResult.rows[0].id;
-
-      // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
-      const orderQuery = `SELECT * FROM orders WHERE checkout_id = $1 AND status = '6'`;
-      const orderResult = await connect.query(orderQuery, [userId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.json({
-          message: "Không tìm thấy đơn hàng có status = 6 cho người dùng không đăng nhập này",
-        });
-      }
-
-      return res.json({
-        message: "Tìm thấy đơn hàng có status = 6",
-        data: orderResult.rows,
-      });
-    }
-
-    const userId = userResult.rows[0].id;
-
-    // Tìm đơn hàng từ bảng orders dựa trên user_id và status = 0
-    const orderQuery = `SELECT * FROM orders WHERE user_id = $1 AND status = '6'`;
-    const orderResult = await connect.query(orderQuery, [userId]);
+    const orderQuery = `SELECT * FROM orders WHERE order_id = $1 AND status= '6'`;
+    const orderResult = await connect.query(orderQuery, [order_id]);
 
     if (orderResult.rows.length === 0) {
       return res.json({
-        message: "Không tìm thấy đơn hàng có status = 6 cho người dùng này",
+        message: "Không tìm thấy đơn hàng cho order_id này",
       });
     }
 
+    const userId = orderResult.rows[0].user_id;
+
     return res.json({
-      message: "Tìm thấy đơn hàng có status = 6",
+      message: "Tìm thấy đơn hàng",
       data: orderResult.rows,
     });
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
