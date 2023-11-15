@@ -34,7 +34,8 @@ const {
   sortProductsByPriceAscending,
   GetAllSale,
   GetAllOutstan,
-  GetNewProducts3Days
+  GetNewProducts3Days,
+  SumKho
 } = require("../controller/product");
 
 const router = express.Router();
@@ -54,6 +55,7 @@ router.get("/product/countproductoday", CountOrdersToday);
 router.get("/product/countproductmonth", CountOrdersMonth);
 router.patch("/product/:id/update", UpdateProduct);
 router.patch("/product/updatekho", UpdateKho);
+router.patch("/product/sumkho", SumKho);
 router.get("/product/kho", getAllKho);
 router.get("/product/:id/kho", getOneKho);
 router.get("/product/sumproductday", SumProductDay);

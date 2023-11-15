@@ -687,7 +687,58 @@ const UpdateKho = (req, res) => {
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
+const SumKho = (req, res) => {
+  try {
+    // const productId = req.params.id;
+    const { quantity, productId } = req.body;
 
+    const sql1 = `SELECT * FROM product WHERE product_id = ${productId}`;
+
+    connect.query(sql1, (err, selectResult) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Lỗi truy vấn cơ sở dữ liệu", err });
+      }
+
+      if (selectResult.rows.length === 0) {
+        return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+      }
+
+      const currentKho = selectResult.rows[0].kho;
+      const newKho = currentKho + quantity;
+
+      if (newKho < 0) {
+        return res.status(400).json({ message: "Số lượng tồn kho không đủ" });
+      }
+
+      const sql2 = `
+                UPDATE product 
+                SET 
+                    kho = ${newKho}
+                WHERE product_id = ${productId}
+                RETURNING *`;
+
+      connect.query(sql2, (err, updateResult) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ message: "Lỗi không thể cập nhật sản phẩm", err });
+        }
+
+        const data = updateResult.rows[0];
+        return res
+          .status(200)
+          .json({
+            message: "Cập nhật số lượng sản phẩm trong kho thành công",
+            data,
+          });
+      });
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
 const getAllKho = (req, res) => {
   try {
     const sql = `SELECT product_id, kho FROM product`;
@@ -969,5 +1020,6 @@ module.exports = {
   SortProductsByNameAZ,
   GetAllSale,
   GetAllOutstan,
-  GetNewProducts3Days
+  GetNewProducts3Days,
+  SumKho
 };
