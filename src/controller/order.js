@@ -580,7 +580,7 @@ const nodemailer = require("nodemailer");
 const numberFormatter = require("number-formatter");
 const sendStatusByEmail = (req, res) => {
   try {
-    const { id } = req.body;
+    const { id, text } = req.body;
     const sql = `SELECT * FROM orders WHERE order_id=${id}`;
     connect.query(sql, (err, result) => {
       if (err) {
@@ -635,6 +635,7 @@ const sendStatusByEmail = (req, res) => {
             subject: `Thông báo tình trạng đơn hàng #${data?.order_id}`,
             html: `
                         <p>Tình trạng đơn hàng của bạn: ${status}</p>
+                        ${data.status == 0 && text ? `<p>Lý do hủy: ${text}</p>` : ""}
                         Ngày đặt hàng: ${data.order_date}</p>
                          <p>Tổng tiền: <h3>${formattedAmount}VND</h3></p>
                         `,
@@ -695,6 +696,7 @@ const sendStatusByEmail = (req, res) => {
               subject: `Thông báo tình trạng đơn hàng #${data?.order_id}`,
               html: `
                         <p>Tình trạng đơn hàng của bạn: ${status}</p>
+                        ${data.status == 0 && text ? `<p>Lý do hủy: ${text}</p>` : ""}
                         Ngày đặt hàng: ${data.order_date}</p>
                          <p>Tổng tiền: <h3>${formattedAmount}VND</h3></p>
                         `,
