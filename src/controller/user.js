@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { userSignup, userSignin } = require("../schema/userSchema"); // Đảm bảo bạn đã import schema của người dùng
 const verifyOTPMiddleware = require('../middleware/verify'); // Đảm bảo rằng bạn import middleware
-
+const io = require("../../app");
 const otps = require('../otp'); // Import biến otps từ tệp otps.js
 
 require('dotenv').config();
@@ -257,6 +257,9 @@ const Signin = async (req, res) => {
 
     const user = rows[0];
 
+    if (user.block) {
+      return res.status(403).json({ message: "Tài khoản của bạn đã bị chặn" });
+    }
     // Kiểm tra mật khẩu
     const isPasswordValid = await bcrypt.compare(
       user_password,
@@ -380,7 +383,7 @@ const GetOneUser = async (req, res) => {
 
 const getAllUser = async (req, res) => {
   try {
-    const sql = `SELECT * FROM users`;
+    const sql = `SELECT * FROM users ORDER BY id ASC`;
     const results = await connect.query(sql);
     if (!results || !results.rows || results.rows.length === 0) {
       return res.status(404).json({ message: 'Không tìm thấy user nào.' });
@@ -442,7 +445,7 @@ const updateAddress = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    const {  user_province, user_ward, user_district, user_address } = req.body;
+    const { user_province, user_ward, user_district, user_address } = req.body;
 
     // Kiểm tra xem sản phẩm có tồn tại không
     const sql1 = `SELECT * FROM users WHERE id = ${userId}`;
@@ -479,7 +482,7 @@ const updateAddress = async (req, res) => {
     return res.status(500).json({ message: 'Lỗi API', err });
   }
 }
-const ForgotPassword =async (req, res)=>{
+const ForgotPassword = async (req, res) => {
   try {
     const { email, new_password } = req.body;
 
@@ -505,4 +508,23 @@ const ForgotPassword =async (req, res)=>{
     res.status(500).json({ message: "Đã xảy ra lỗi" });
   }
 }
-module.exports = { ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile };
+const updateBlockUser = async (req, res) => {
+  try {
+    const { block, id } = req.body;
+    let sql = `UPDATE users SET block= ${block} WHERE id=${id}  `;
+    connect.query(sql, (err, result) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Block user thất bại", err });
+      }
+      // const data = result.rows[0];
+      // console.log(data);
+      io.emit("blockuser", { message: "Block user thanh cong" });
+      return res.status(200).json({ message: "Block user thành công" });
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
+module.exports = { ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile, updateBlockUser };
