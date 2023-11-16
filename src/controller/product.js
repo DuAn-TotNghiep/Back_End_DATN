@@ -782,14 +782,22 @@ const getAllKho = (req, res) => {
 const CountProductOrder = (req, res) => {
   try {
     const { id } = req.params;
-    const sql = `SELECT
-    SUM((item->>'quantity')::int) AS total_quantity
-  FROM
-    checkout,
+   const sql = `
+SELECT
+    COALESCE(SUM((item->>'quantity')::int), 0) AS total_quantity
+FROM
+    checkout
+INNER JOIN
+    orders ON checkout.id::int = CAST(orders.checkout_id AS INT)
+CROSS JOIN
     jsonb_array_elements(product) AS item
-  WHERE
-    (item->>'product_id')::int =${id} ;
-  `;
+WHERE
+    CAST(orders.status AS INT) = 6
+    AND (item->>'product_id') IS NOT NULL
+    AND (item->>'product_id')::int = ${id};
+
+`;
+
     connect.query(sql, (err, result) => {
       if (err) {
         return res
