@@ -18,7 +18,7 @@ const actions = (req, res, next) => {
 }
 const getAllactions = (req, res, next) => {
     try {
-        const sql = `SELECT * FROM actions WHERE user_id IS NOT NULL`;
+        const sql = `SELECT * FROM actions WHERE user_id IS NOT NULL ORDER BY action_date DESC`;
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(500).json({ message: "Lay hanh dong that bai", err })
