@@ -4,25 +4,33 @@ const { sizeSchema } = require("../schema/sizeSchema");
 
 const addSize = async (req, res) => {
     try {
-        const { size_name } = req.body;
-
-        // Kiểm tra dữ liệu sử dụng schema
-        const { error } = sizeSchema.validate({ size_name });
-
+        const { error, value } = sizeSchema.validate(req.body);
         if (error) {
             return res.status(400).json({ message: error.details[0].message });
         }
+        const { size_name } = value;
+        const SizeQuery = `SELECT * FROM size WHERE size_name = $1`;
+        const SizeValues = [size_name];
 
-        // Nếu dữ liệu hợp lệ, thực hiện truy vấn SQL
-        let sql = `INSERT INTO size(size_name)
-        VALUES('${size_name}') RETURNING *`;
-
-        connect.query(sql, (err, result) => {
+        connect.query(SizeQuery, SizeValues, (err, Result) => {
             if (err) {
-                return res.status(500).json({ message: 'Thêm size thất bại' });
+                return res.status(500).json({ message: 'Lỗi khi kiểm tra size' });
             }
-            const data = result.rows[0];
-            return res.status(200).json({ message: 'Thêm size thành công', data });
+
+            if (Result.rows.length > 0) {
+                return res.status(400).json({ message: 'size đã tồn tại' });
+            }
+            const addQuery = `INSERT INTO size (size_name) VALUES ($1) RETURNING *`;
+            const addValues = [size_name];
+
+            connect.query(addQuery, addValues, (err, Result) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Thêm size thất bại' });
+                }
+
+                const data = Result.rows[0];
+                return res.status(201).json({ message: 'Thêm size thành công', data });
+            });
         });
     } catch (error) {
         return res.status(500).json({ message: 'Lỗi API' });
