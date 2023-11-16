@@ -511,20 +511,29 @@ const ForgotPassword = async (req, res) => {
 const updateBlockUser = async (req, res) => {
   try {
     const { block, id } = req.body;
-    let sql = `UPDATE users SET block= ${block} WHERE id=${id}  `;
+
+    const checkAdminQuery = "SELECT role FROM users WHERE id = $1";
+    const { rows } = await connect.query(checkAdminQuery, [id]);
+
+    if (rows.length > 0 && rows[0].role === 0) {
+      return res.status(403).json({ message: "Không thể block admin" });
+    }
+
+    let sql = `UPDATE users SET block = ${block} WHERE id = ${id}`;
+
     connect.query(sql, (err, result) => {
       if (err) {
-        return res
-          .status(500)
-          .json({ message: "Block user thất bại", err });
+        return res.status(500).json({ message: "Block user thất bại", err });
       }
+
       // const data = result.rows[0];
       // console.log(data);
-      io.emit("blockuser", { message: "Block user thanh cong" });
-      return res.status(200).json({ message: "Block user thành công" });
+      io.emit("blockuser", { message: "Cập nhật trạng thái user thành công" });
+      return res.status(200).json({ message: "Cập nhật trạng thái user thành công" });
     });
   } catch (error) {
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
+
 module.exports = { ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile, updateBlockUser };
