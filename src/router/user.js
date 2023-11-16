@@ -1,5 +1,5 @@
 const express = require("express");
-const { Signup, Signin, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, verifyOTPRoute, updateProfile, SigninProfile, ForgotPassword, updateAddress } = require("../controller/user");
+const { Signup, Signin, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, verifyOTPRoute, updateProfile, SigninProfile, ForgotPassword, updateAddress, updateBlockUser } = require("../controller/user");
 const { verifyOTPMiddleware } = require("../middleware/verify");
 
 const router = express.Router();
@@ -14,5 +14,6 @@ router.post("/verifyOtp", verifyOTPMiddleware, verifyOTPRoute);
 router.patch('/user/:id/update', updateProfile)
 router.patch('/user/:id/updateaddress', updateAddress)
 router.post("/forgotpassword", verifyOTPMiddleware, verifyOTPRoute, ForgotPassword);
+router.patch("/user/blockuser", updateBlockUser);
 
 module.exports = router;
