@@ -69,6 +69,67 @@ const addSale = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+const updateSale = (req, res) => {
+    try {
+        const sale_id = req.params.id;
+        const { sale_name,sale_distcount } = req.body;
+        const sql1 = `SELECT * FROM sale WHERE sale_id = ${sale_id}`;
+        connect.query(sql1, (err, selectResult) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu', err });
+            }
 
+            if (selectResult.rows.length === 0) {
+                return res.status(404).json({ message: 'Category không tồn tại' });
+            }
 
-module.exports = { getAllSale, updateSaleProduct ,addSale};
+            // Category tồn tại, tiến hành cập nhật
+            const sql2 = `
+                UPDATE sale 
+                SET 
+                    sale_name='${sale_name}',
+                    sale_distcount='${sale_distcount}'
+                WHERE sale_id = ${sale_id}
+                RETURNING *`;
+
+            connect.query(sql2, (err, updateResult) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Lỗi không thể cập nhật gias sale', err });
+                }
+
+                const data = updateResult.rows[0];
+                return res.status(200).json({ message: 'Sửa sale thành công', data });
+            });
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+const RemoveSale = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Tìm và xóa sản phẩm có sale_id tương ứng
+        const sqlDeleteProducts = `DELETE FROM product WHERE sale_id = ${id}`;
+        connect.query(sqlDeleteProducts, (productErr) => {
+            if (productErr) {
+                return res.status(500).json({ message: 'Xoá sản phẩm của Sale thất bại', error: productErr });
+            }
+
+            // Sau khi xóa sản phẩm, tiến hành xóa Sale
+            const sqlDeleteSale = `DELETE FROM sale WHERE sale_id = ${id}`;
+            connect.query(sqlDeleteSale, (saleErr) => {
+                if (saleErr) {
+                    return res.status(500).json({ message: 'Xoá Sale thất bại', error: saleErr });
+                }
+                return res.status(200).json({ message: 'Xoá Sale và sản phẩm thành công' });
+            });
+        });
+    } catch (error) {
+        console.error('Lỗi API:', error);
+        return res.status(500).json({ message: 'Lỗi API.' });
+    }
+};
+
+module.exports = { updateSale,getAllSale, updateSaleProduct ,addSale, RemoveSale};
