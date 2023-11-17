@@ -52,23 +52,39 @@ const voucher = async (req, res) => {
 const AddVoucher = async (req, res) => {
     try {
         const { voucher_code, voucher_amount, voucher_status } = req.body;
-        // Thực hiện truy vấn SQL để thêm mã giảm giá vào cơ sở dữ liệu
-        let sql = `
-    INSERT INTO voucher (voucher_code, voucher_amount, voucher_status)
-    VALUES ($1, $2, $3)
-    RETURNING *;
-  `;
-        const values = [voucher_code, voucher_amount, voucher_status];
-        const result = await connect.query(sql, values);
+
+        // Kiểm tra xem mã giảm giá đã tồn tại hay chưa
+        const checkDuplicateSql = `
+            SELECT * FROM voucher
+            WHERE voucher_code = $1;
+        `;
+        const checkDuplicateValues = [voucher_code];
+        const duplicateResult = await connect.query(checkDuplicateSql, checkDuplicateValues);
+
+        if (duplicateResult.rows.length > 0) {
+            return res.status(400).json({ message: "Mã giảm giá đã tồn tại!" });
+        }
+
+        // Nếu không trùng, thực hiện truy vấn SQL để thêm mã giảm giá vào cơ sở dữ liệu
+        const insertSql = `
+            INSERT INTO voucher (voucher_code, voucher_amount, voucher_status)
+            VALUES ($1, $2, $3)
+            RETURNING *;
+        `;
+        const insertValues = [voucher_code, voucher_amount, voucher_status];
+        const result = await connect.query(insertSql, insertValues);
+
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Thêm mã giảm giá thất bại!" });
         }
+
         const data = result.rows[0];
-        return res.status(200).json({ message: "Thêm mã giảm giá thành công!", data })
+        return res.status(200).json({ message: "Thêm mã giảm giá thành công!", data });
     } catch (err) {
         return res.status(500).json({ message: 'Lỗi API', err });
     }
-}
+};
+
 //delete voucher
 const DeleteVoucher = async (req, res) => {
     try {
