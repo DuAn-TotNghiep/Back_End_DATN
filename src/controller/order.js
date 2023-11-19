@@ -724,7 +724,7 @@ const searchOrdersByUserPhone = async (req, res) => {
   try {
     let order_id = req.body.order_id;
     if (!order_id || isNaN(order_id)) {
-      return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
+      return res.status(500).json({ message: "Vui lòng cung cấp mã đơn hàng hợp lệ" });
     }
 
     // Tìm đơn hàng từ bảng orders dựa trên order_id (đây là một số nguyên)
@@ -732,8 +732,8 @@ const searchOrdersByUserPhone = async (req, res) => {
     const orderResult = await connect.query(orderQuery, [order_id]);
 
     if (orderResult.rows.length === 0) {
-      return res.json({
-        message: "Không tìm thấy đơn hàng cho order_id này",
+      return res.status(500).json({
+        message: "Không tìm thấy mã đơn hàng này",
       });
     }
 
