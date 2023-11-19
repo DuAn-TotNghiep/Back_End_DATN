@@ -5,7 +5,7 @@ const { DateTime } = require("luxon");
 const io = require("../../app");
 const AddProduct = async (req, res, next) => {
   try {
-    const { color_id, size_id, category_id, name, image, desc, price } = req.body;
+    const { color_id, size_id, category_id, name, image, desc, price, kho } = req.body;
     const now = DateTime.now().setZone("Asia/Ho_Chi_Minh");
     const isbblock = false;
 
@@ -15,7 +15,8 @@ const AddProduct = async (req, res, next) => {
         return res.status(500).json({ message: "Sản phẩm đã tồn tại" });
       }
       const time = now.toString();
-      const sql5 = `INSERT INTO product (size_id, color_id, image, category_id, product_name, product_description, product_price, isbblock,created_at) VALUES (Array[${size_id}], Array[${color_id}], Array['${image}'], ${category_id},'${name}','${desc}', ${price}, ${isbblock},'${time}') RETURNING *`;
+      const sql5 = `INSERT INTO product (size_id, color_id, image, category_id, product_name, product_description, product_price, isbblock,created_at,kho) VALUES (Array[${size_id}], Array[${color_id}], Array['${image}'], ${category_id},'${name}','${desc}', ${price}, ${isbblock},'${time}',${kho}) RETURNING *;
+      `;
       connect.query(sql5, (err, resolve) => {
         if (err) {
           return res.status(500).json({ message: "Lỗi không thêm được sản phẩm", err });
@@ -43,6 +44,7 @@ const UpdateProduct = async (req, res, next) => {
       desc,
       price,
       outstan,
+      kho
     } = req.body;
 
     // Kiểm tra xem sản phẩm có tồn tại không
@@ -69,7 +71,8 @@ const UpdateProduct = async (req, res, next) => {
                     product_name = '${name}',
                     product_description = '${desc}',
                     product_price = ${price},
-                    outstan=${outstan}
+                    outstan = ${outstan},
+                    kho = ${kho}
                 WHERE product_id = ${productId}
                 RETURNING *`;
 
@@ -164,7 +167,7 @@ const getProductSearchCategory = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const sql = `SELECT * FROM product`;
+    const sql = 'SELECT * FROM product ORDER BY product_id DESC';
     const results = await connect.query(sql);
     if (!results || !results.rows || results.rows.length === 0) {
       return res.status(404).json({ message: "Không tìm thấy san pham nào." });
@@ -782,7 +785,7 @@ const getAllKho = (req, res) => {
 const CountProductOrder = (req, res) => {
   try {
     const { id } = req.params;
-   const sql = `
+    const sql = `
 SELECT
     COALESCE(SUM((item->>'quantity')::int), 0) AS total_quantity
 FROM
