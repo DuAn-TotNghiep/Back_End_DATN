@@ -22,10 +22,10 @@ const connect = new Client({
 
   // database: "DATN_MAIN",
 
-  database: "DATN1",
+  // database: "DATN1",
   // database: "DATN2",
 
-  // database: "DATN_2023_MAIN",
+  database: "DATN_2023_MAIN",
   // database: "DATN",
 
   // database: "DATN_2023_MAIN"
