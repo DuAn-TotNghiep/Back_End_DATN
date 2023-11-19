@@ -43,8 +43,7 @@ const UpdateProduct = async (req, res, next) => {
       image,
       desc,
       price,
-      outstan,
-
+      kho
     } = req.body;
 
     // Kiểm tra xem sản phẩm có tồn tại không
@@ -70,9 +69,8 @@ const UpdateProduct = async (req, res, next) => {
                     category_id = ${category_id},
                     product_name = '${name}',
                     product_description = '${desc}',
-                    product_price = ${price},
-                    outstan = ${outstan},
-                   
+                    product_price = ${price},              
+                    kho = ${kho}
                 WHERE product_id = ${productId}
                 RETURNING *`;
 
