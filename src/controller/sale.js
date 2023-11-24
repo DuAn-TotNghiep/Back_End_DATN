@@ -2,6 +2,7 @@
 const connect = require("../../database");
 const io = require('../../app');
 const { SaleSchema } = require("../schema/SaleSchema");
+const schedule = require('node-schedule');
 const getAllSale = async (req, res) => {
     try {
 
@@ -57,9 +58,9 @@ const addSale = async (req, res) => {
         if (error) {
             return res.status(400).json({ message: error.details[0].message });
         }
-        const { sale_distcount, sale_name } = value; 
+        const { sale_distcount, sale_name } = value;
         const CategoryQuery = `SELECT * FROM sale WHERE sale_name = $1`;
-        const CategoryValues = [sale_name]; 
+        const CategoryValues = [sale_name];
 
         connect.query(CategoryQuery, CategoryValues, (err, Result) => {
             if (err) {
@@ -88,7 +89,7 @@ const addSale = async (req, res) => {
 const updateSale = (req, res) => {
     try {
         const sale_id = req.params.id;
-        const { sale_name,sale_distcount } = req.body;
+        const { sale_name, sale_distcount } = req.body;
         const sql1 = `SELECT * FROM sale WHERE sale_id = ${sale_id}`;
         connect.query(sql1, (err, selectResult) => {
             if (err) {
@@ -147,5 +148,62 @@ const RemoveSale = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API.' });
     }
 };
+const UpdateFlashSale = (req, res) => {
+    try {
+        const { startdate, enddate, id_cat, sale_id } = req.body
+        function runScheduledTask() {
+            const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND sale_id IS NULL`;
 
-module.exports = {getOneSale, updateSale,getAllSale, updateSaleProduct ,addSale, RemoveSale};
+            connect.query(selectQuery, (err, results) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Không lấy được sản phẩm', err });
+                }
+
+                const productsToUpdate = results.rows;
+
+                productsToUpdate.forEach(product => {
+                    const updateQuery = `UPDATE product SET sale_id = ${sale_id},  flashsale = true WHERE product_id = ${product.product_id}`;
+
+                    connect.query(updateQuery, (err) => {
+                        if (err) {
+                            return res.status(500).json({ message: 'Không sửa được flash sale' });
+                        }
+                    });
+                });
+                return res.status(200).json({ message: 'update flast sale thanh cong'})
+            });
+        }
+        function EndScheduledTask() {
+            const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND flashsale=true`;
+
+            connect.query(selectQuery, (err, results) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Không lấy được sản phẩm', err });
+                }
+
+                const productsToUpdate = results.rows;
+
+                productsToUpdate.forEach(product => {
+                    const updateQuery = `UPDATE product SET sale_id = null ,flashsale = false WHERE product_id = ${product.product_id}`;
+
+                    connect.query(updateQuery, (err) => {
+                        if (err) {
+                            return res.status(500).json({ message: 'Không sửa được flash sale' });
+                        }
+                    });
+                });
+               
+            });
+        }
+        schedule.scheduleJob('47 00 25 11 *', function () {
+            runScheduledTask();
+        });
+        schedule.scheduleJob('49 00 25 11 *', function () {
+            EndScheduledTask();
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+
+module.exports = { getOneSale, updateSale, getAllSale, updateSaleProduct, addSale, RemoveSale, UpdateFlashSale };
