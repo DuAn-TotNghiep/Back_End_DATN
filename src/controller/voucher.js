@@ -18,6 +18,73 @@ const getAllVoucher = async (req, res) => {
 
     }
 }
+const getAllVoucherRule = async (req, res) => {
+    try {
+        const { total, iduser } = req.query;
+        const sql = `
+        SELECT COUNT(*) AS quantity_order
+        FROM orders
+        WHERE user_id ='${iduser}';
+        `;
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res
+                    .status(500)
+                    .json({ message: "Lấy số đơn hàng thất bại", err });
+            }
+            const quantity_order = results.rows[0];
+            if (quantity_order.quantity_order > 10) {
+                if (total >= 3000000) {
+                    const sql = `SELECT * FROM voucher WHERE voucher_status='active'`;
+                    connect.query(sql, (err, result) => {
+                        if (err) {
+                            return res.status(500).json({ message: 'Lấy tất cả voucher thất bại!' });
+                        }
+                        const data = result.rows;
+                        return res.status(200).json({ message: 'Lấy tất cả voucher thành công!', data });
+
+                    })
+                } else {
+                    const sql = `SELECT * FROM voucher WHERE voucher_amount <= 100000 AND voucher_status='active'`;
+                    connect.query(sql, (err, result) => {
+                        if (err) {
+                            return res.status(500).json({ message: 'Lấy tất cả voucher thất bại!' });
+                        }
+                        const data = result.rows;
+                        return res.status(200).json({ message: 'Lấy tất cả voucher thành công!', data });
+
+                    })
+                }
+            } else {
+                if (total >= 3000000) {
+                    const sql = `SELECT * FROM voucher WHERE voucher_amount <= 100000 AND voucher_status='active'`;
+                    connect.query(sql, (err, result) => {
+                        if (err) {
+                            return res.status(500).json({ message: 'Lấy tất cả voucher thất bại!' });
+                        }
+                        const data = result.rows;
+                        return res.status(200).json({ message: 'Lấy tất cả voucher thành công!', data });
+
+                    })
+                } else {
+                    const sql = `SELECT * FROM voucher WHERE voucher_amount <= 50000 AND voucher_status='active'`;
+                    connect.query(sql, (err, result) => {
+                        if (err) {
+                            return res.status(500).json({ message: 'Lấy tất cả voucher thất bại!' });
+                        }
+                        const data = result.rows;
+                        return res.status(200).json({ message: 'Lấy tất cả voucher thành công!', data });
+
+                    })
+                }
+            }
+        })
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API', err });
+
+    }
+}
 const getOneVoucher = async (req, res) => {
     try {
         const { id } = req.params
@@ -145,4 +212,4 @@ const UpdateVoucher = async (req, res) => {
 }
 
 
-module.exports = { getOneVoucher, getAllVoucher, voucher, AddVoucher, DeleteVoucher, UpdateVoucher };
+module.exports = { getAllVoucherRule, getOneVoucher, getAllVoucher, voucher, AddVoucher, DeleteVoucher, UpdateVoucher };
