@@ -23,6 +23,7 @@
 		"jsonwebtoken": "^9.0.2",
 		"luxon": "^3.4.3",
 		"moment": "^2.29.4",
+		"node-schedule": "^2.1.1",
 		"nodemailer": "^6.9.6",
 		"nodemon": "^3.0.1",
 		"number-formatter": "^1.2.0",
