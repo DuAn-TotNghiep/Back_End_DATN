@@ -150,7 +150,9 @@ const RemoveSale = async (req, res) => {
 };
 const UpdateFlashSale = (req, res) => {
     try {
-        const { startdate, enddate, id_cat, sale_id } = req.body
+        const { giostart, phutstart, ngaystart, thangstart, gioend, phutend, ngayend, thangend, id_cat, sale_id } = req.body
+        let startJob;
+        let endJob;
         function runScheduledTask() {
             const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND sale_id IS NULL`;
 
@@ -170,7 +172,13 @@ const UpdateFlashSale = (req, res) => {
                         }
                     });
                 });
-                return res.status(200).json({ message: 'update flast sale thanh cong'})
+                const sql2 = `UPDATE flashsale SET status = true WHERE category_id = ${id_cat}`
+                connect.query(sql2, (err, results) => {
+                    if (err) {
+                        return res.status(500).json({ message: 'Loi update', err })
+                    }
+                })
+                return res.status(200).json({ message: 'update flast sale thanh cong' })
             });
         }
         function EndScheduledTask() {
@@ -190,20 +198,70 @@ const UpdateFlashSale = (req, res) => {
                         if (err) {
                             return res.status(500).json({ message: 'Không sửa được flash sale' });
                         }
+                        const sql = `DELETE FROM flashsale WHERE category_id = ${id_cat}`
+                        connect.query(sql, (err) => {
+                            if (err) {
+                                return res.status(500).json({ message: 'Loi khong xoa flash sale', err })
+                            }
+                        })
                     });
                 });
-               
+
             });
         }
-        schedule.scheduleJob('47 00 25 11 *', function () {
+        startJob = schedule.scheduleJob(`${phutstart} ${giostart} ${ngaystart} ${thangstart} *`, function () {
             runScheduledTask();
         });
-        schedule.scheduleJob('49 00 25 11 *', function () {
+        endJob = schedule.scheduleJob(`${phutend} ${gioend} ${ngayend} ${thangend} *`, function () {
             EndScheduledTask();
         });
     } catch (error) {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+const AddFlashSale = (req, res) => {
+    try {
+        const { starttime, endtime, category_id, sale_id } = req.body
+        const sql = `INSERT INTO flashsale (start_time, end_time, category_id, sale_id) VALUES ($1, $2, $3, $4) RETURNING *`;
+        const values = [starttime, endtime, category_id, sale_id];
+        connect.query(sql, values, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Loi them', err })
+            }
+            const data = results.rows
+            return res.json({ message: 'Them thanh cong', data })
+        })
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+const UpdateFlashSaleStatusOK = (req, res) => {
+    try {
+        const { category_id } = req.body
+        const sql = `UPDATE flashsale SET status = false WHERE category_id = ${category_id}`;
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Loi update', err })
+            }
+            return res.json({ message: 'thanh cong' })
+        })
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
+const getAllFashSale = (req, res) => {
+    try {
+        const sql = `SELECT * FROM flashsale`
+        connect.query(sql, (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: 'Lay flashsale that bai' })
+            }
+            const data = results.rows
+            return res.json({ message: 'Lay flashsale thanh cong', data })
+        })
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
 
-module.exports = { getOneSale, updateSale, getAllSale, updateSaleProduct, addSale, RemoveSale, UpdateFlashSale };
+module.exports = { getOneSale, updateSale, UpdateFlashSaleStatusOK, getAllFashSale, getAllSale, updateSaleProduct, addSale, RemoveSale, UpdateFlashSale, AddFlashSale };

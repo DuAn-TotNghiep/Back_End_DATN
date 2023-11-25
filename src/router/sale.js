@@ -2,7 +2,7 @@
 
 
 const express = require("express");
-const { getAllSale, updateSaleProduct ,addSale, updateSale, RemoveSale, getOneSale, UpdateFlashSale} = require("../controller/sale");
+const { getAllSale, updateSaleProduct ,addSale, updateSale, RemoveSale, getOneSale, UpdateFlashSale, AddFlashSale, getAllFashSale, UpdateFlashSaleStatusOK} = require("../controller/sale");
 const router = express.Router();
 
 router.get("/sale", getAllSale);
@@ -12,4 +12,7 @@ router.patch("/sale/:id/update", updateSale);
 router.delete("/sale/:id/remove", RemoveSale)
 router.post("/sale/add", addSale);
 router.patch("/sale/updateFlashSale", UpdateFlashSale);
+router.post("/sale/addflashsale", AddFlashSale);
+router.patch("/sale/updateflashsaleok", UpdateFlashSaleStatusOK);
+router.get("/flashsale", getAllFashSale);
 module.exports = router;
