@@ -34,7 +34,6 @@ const getOneSale = async (req, res) => {
         return res.status(500).json({ message: 'Loi api', err })
     }
 }
-
 const updateSaleProduct = async (req, res) => {
     try {
         const { sale_id, id } = req.body;
@@ -148,11 +147,13 @@ const RemoveSale = async (req, res) => {
         return res.status(500).json({ message: 'Lỗi API.' });
     }
 };
+let startJob;
+let endJob;
 const UpdateFlashSale = (req, res) => {
     try {
         const { giostart, phutstart, ngaystart, thangstart, gioend, phutend, ngayend, thangend, id_cat, sale_id } = req.body
-        let startJob;
-        let endJob;
+        // let startJob;
+        // let endJob;
         function runScheduledTask() {
             const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND sale_id IS NULL`; 99999999999999999999999999999
 
@@ -240,6 +241,12 @@ const DeleteFlashSale = (req, res) => {
     try {
         const id = req.params.id;
         const sql = `DELETE FROM flashsale WHERE id=${id}`;
+
+        if (startJob) {
+            startJob.cancel();
+        }
+
+
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(404).json({ message: "Xóa flashsale thất bại!" });
