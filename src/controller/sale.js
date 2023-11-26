@@ -154,7 +154,8 @@ const UpdateFlashSale = (req, res) => {
         let startJob;
         let endJob;
         function runScheduledTask() {
-            const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND sale_id IS NULL`;
+            const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND sale_id IS NULL`; 99999999999999999999999999999
+
 
             connect.query(selectQuery, (err, results) => {
                 if (err) {
@@ -235,6 +236,23 @@ const AddFlashSale = (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+const DeleteFlashSale = (req, res) => {
+    try {
+        const id = req.params.id;
+        const sql = `DELETE FROM flashsale WHERE id=${id}`;
+        connect.query(sql, (err, result) => {
+            if (err) {
+                return res.status(404).json({ message: "Xóa flashsale thất bại!" });
+            }
+            if (result.rowCount === 0) {
+                return res.status(404).json({ message: "Xóa flashsale thất bại, ID không tồn tại!" });
+            }
+            return res.status(200).json({ message: "Xóa flashsale thành công!" })
+        })
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi API' });
+    }
+}
 const UpdateFlashSaleStatusOK = (req, res) => {
     try {
         const { category_id } = req.body
@@ -264,4 +282,4 @@ const getAllFashSale = (req, res) => {
     }
 }
 
-module.exports = { getOneSale, updateSale, UpdateFlashSaleStatusOK, getAllFashSale, getAllSale, updateSaleProduct, addSale, RemoveSale, UpdateFlashSale, AddFlashSale };
+module.exports = { DeleteFlashSale, getOneSale, updateSale, UpdateFlashSaleStatusOK, getAllFashSale, getAllSale, updateSaleProduct, addSale, RemoveSale, UpdateFlashSale, AddFlashSale };
