@@ -623,17 +623,18 @@ const UpdateKho = (req, res) => {
 
       const currentKho = selectResult.rows[0].kho;
       const newKho = currentKho - quantity;
-
+    
       if (newKho < 0) {
         return res.status(400).json({ message: "Số lượng tồn kho không đủ" });
       }
-
+      const isOutOfStock = newKho <= 0;
       const sql2 = `
-                UPDATE product 
-                SET 
-                    kho = ${newKho}
-                WHERE product_id = ${productId}
-                RETURNING *`;
+      UPDATE product 
+      SET 
+        kho = ${newKho},
+        isbblock = ${isOutOfStock ? true : false}  -- Set isbblock to true if newKho is 0
+      WHERE product_id = ${productId}
+      RETURNING *`;
 
       connect.query(sql2, (err, updateResult) => {
         if (err) {
