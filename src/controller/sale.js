@@ -156,8 +156,6 @@ const UpdateFlashSale = (req, res) => {
         // let endJob;
         function runScheduledTask() {
             const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND sale_id IS NULL`; 99999999999999999999999999999
-
-
             connect.query(selectQuery, (err, results) => {
                 if (err) {
                     return res.status(500).json({ message: 'Không lấy được sản phẩm', err });
@@ -241,12 +239,9 @@ const DeleteFlashSale = (req, res) => {
     try {
         const id = req.params.id;
         const sql = `DELETE FROM flashsale WHERE id=${id}`;
-
         if (startJob) {
             startJob.cancel();
         }
-
-
         connect.query(sql, (err, result) => {
             if (err) {
                 return res.status(404).json({ message: "Xóa flashsale thất bại!" });
