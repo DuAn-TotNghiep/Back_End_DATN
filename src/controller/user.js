@@ -535,5 +535,38 @@ const updateBlockUser = async (req, res) => {
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
+const ChangePassword = async (req, res) => {
+  try {
+    const { userId, currentPassword, newPassword } = req.body;
 
-module.exports = { ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile, updateBlockUser };
+    // Kiểm tra xem userId tồn tại và lấy thông tin người dùng từ cơ sở dữ liệu
+    const getUserQuery = "SELECT * FROM users WHERE id = $1";
+    const { rows } = await connect.query(getUserQuery, [userId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Người dùng không tồn tại" });
+    }
+
+    const user = rows[0];
+
+    // Kiểm tra mật khẩu hiện tại có khớp không
+    const passwordMatch = await bcrypt.compare(currentPassword, user.user_password);
+
+    if (!passwordMatch) {
+      return res.status(400).json({ message: "Mật khẩu hiện tại không đúng" });
+    }
+
+    // Mã hóa mật khẩu mới và cập nhật vào cơ sở dữ liệu
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    const updatePasswordQuery = "UPDATE users SET user_password = $1 WHERE id = $2";
+    await connect.query(updatePasswordQuery, [hashedNewPassword, userId]);
+
+    res.status(200).json({ message: "Cập nhật mật khẩu thành công" });
+  } catch (error) {
+    console.error("Lỗi khi cập nhật mật khẩu:", error);
+    res.status(500).json({ message: "Đã xảy ra lỗi" });
+  }
+}
+
+module.exports = {ChangePassword, ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile, updateBlockUser };
