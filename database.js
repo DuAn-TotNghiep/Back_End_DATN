@@ -28,6 +28,6 @@ const connect = new Client({
   // database: "DATN_2023_MAIN",
   // database: "DUAN",
 
-  database: "DATN_2023_MAIN"
+  database: "DUAN"
 });
 module.exports = connect;
