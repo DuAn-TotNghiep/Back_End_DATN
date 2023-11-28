@@ -155,7 +155,7 @@ const UpdateFlashSale = (req, res) => {
         // let startJob;
         // let endJob;
         function runScheduledTask() {
-            const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND sale_id IS NULL`; 99999999999999999999999999999
+            const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND sale_id IS NULL`; 
             connect.query(selectQuery, (err, results) => {
                 if (err) {
                     return res.status(500).json({ message: 'Không lấy được sản phẩm', err });
