@@ -155,7 +155,7 @@ const UpdateFlashSale = (req, res) => {
         // let startJob;
         // let endJob;
         function runScheduledTask() {
-            const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND sale_id IS NULL`; 
+            const selectQuery = `SELECT * FROM product WHERE category_id=${id_cat} AND sale_id IS NULL`;
             connect.query(selectQuery, (err, results) => {
                 if (err) {
                     return res.status(500).json({ message: 'Không lấy được sản phẩm', err });
@@ -235,6 +235,36 @@ const AddFlashSale = (req, res) => {
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+
+const EndScheduledTask = (categoryId) => {
+    const selectQuery = `SELECT * FROM product WHERE category_id=${categoryId} AND flashsale=true`;
+
+    connect.query(selectQuery, (err, results) => {
+        if (err) {
+            console.error('Không lấy được sản phẩm khi kết thúc flash sale', err);
+            return;
+        }
+
+        const productsToUpdate = results.rows;
+
+        productsToUpdate.forEach(product => {
+            const updateQuery = `UPDATE product SET sale_id = null ,flashsale = false WHERE product_id = ${product.product_id}`;
+
+            connect.query(updateQuery, (err) => {
+                if (err) {
+                    console.error('Không sửa được flash sale khi kết thúc', err);
+                }
+            });
+        });
+
+        const deleteFlashSaleQuery = `DELETE FROM flashsale WHERE category_id = ${categoryId}`;
+        connect.query(deleteFlashSaleQuery, (err) => {
+            if (err) {
+                console.error('Lỗi khi xóa flash sale khi kết thúc', err);
+            }
+        });
+    });
+};
 const DeleteFlashSale = (req, res) => {
     try {
         const id = req.params.id;
@@ -242,19 +272,35 @@ const DeleteFlashSale = (req, res) => {
         if (startJob) {
             startJob.cancel();
         }
-        connect.query(sql, (err, result) => {
+
+        // Lấy categoryId từ flashsale cần xóa
+        const getCategoryQuery = `SELECT category_id FROM flashsale WHERE id = ${id}`;
+        connect.query(getCategoryQuery, (err, result) => {
             if (err) {
-                return res.status(404).json({ message: "Xóa flashsale thất bại!" });
+                return res.status(500).json({ message: 'Lỗi lấy categoryId từ flashsale', err });
             }
-            if (result.rowCount === 0) {
-                return res.status(404).json({ message: "Xóa flashsale thất bại, ID không tồn tại!" });
-            }
-            return res.status(200).json({ message: "Xóa flashsale thành công!" })
-        })
+
+            const categoryId = result.rows[0].category_id;
+
+            // Gọi hàm EndScheduledTask để cập nhật sản phẩm khi kết thúc flash sale
+            EndScheduledTask(categoryId);
+
+            // Tiếp tục xóa flashsale
+            connect.query(sql, (err, result) => {
+                if (err) {
+                    return res.status(404).json({ message: "Xóa flashsale thất bại!" });
+                }
+                if (result.rowCount === 0) {
+                    return res.status(404).json({ message: "Xóa flashsale thất bại, ID không tồn tại!" });
+                }
+
+                return res.status(200).json({ message: "Xóa flashsale thành công!" });
+            });
+        });
     } catch (error) {
         return res.status(500).json({ message: 'Lỗi API' });
     }
-}
+};
 const UpdateFlashSaleStatusOK = (req, res) => {
     try {
         const { category_id } = req.body
