@@ -5,20 +5,32 @@ const connect = require('../../database');
 
 const getBill = async (req, res) => {
     try {
-        const sql = `SELECT * FROM bill`;
+        const sql = `
+            SELECT *
+            FROM bill
+            JOIN orders ON bill.order_id = orders.order_id
+            JOIN checkout ON orders.checkout_id = checkout.id
+            JOIN users ON checkout.user_id = users.id
+        `;
+
         const results = await connect.query(sql);
+
         if (!results || !results.rows || results.rows.length === 0) {
-            return res.status(404).json({ message: 'Không tìm thấy bill nào.' });
+            return res.status(404).json({ message: 'Không tìm thấy thông tin bill nào.' });
         }
+
         const data = results.rows;
         return res.status(200).json({
-            message: 'Lấy tất cả bill thành công',
+            message: 'Lấy thông tin bill và thông tin từ bảng checkout thành công',
             data,
         });
     } catch (err) {
+        console.error(err);
         return res.status(500).json({ message: 'Lỗi API' });
     }
 }
+
+
 const getOneBill = async (req, res) => {
     try {
         const { id } = req.params
@@ -58,16 +70,16 @@ const bill = async (req, res) => {
             `INSERT INTO bill (user_id, order_id, bill_date) VALUES (${user_id}, ${order_id}, '${bill_date}') RETURNING *`
 
         connect.query(sql, (err, result) => {
-            if(err){
-                return res.status(500).json({message: "loi them bill",err})
+            if (err) {
+                return res.status(500).json({ message: "loi them bill", err })
             }
             const data = result.rows
             console.log(data);
             return res.status(200).json({ message: 'Tạo  bill thành công', data });
         })
 
-        
-       
+
+
         // if (result.rowCount > 0) {
         //     // Lấy thông tin từ bảng "orders"
         //     const getOrdersSql = {
