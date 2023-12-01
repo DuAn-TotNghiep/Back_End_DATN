@@ -1,5 +1,6 @@
 const { DateTime } = require("luxon");
 const connect = require("../../database");
+const { BillSchema } = require("../schema/BillSchema");
 
 const getBill = async (req, res) => {
     try {
@@ -46,6 +47,11 @@ const updateBill = async (req, res) => {
         if (!billExist.rows || billExist.rows.length === 0) {
             return res.status(404).json({ message: "Hóa đơn không tồn tại!" });
         }
+        // Kiểm tra dữ liệu đầu vào theo schema
+        const { error } = BillSchema.validate({ user_phone, province, district, ward, address });
+        if (error) {
+            return res.status(400).json({ message: error.message });
+        }
         // Nếu tồn tại, tiến hành cập nhật
         const updateCheckoutSql = `
             UPDATE checkout
@@ -55,7 +61,6 @@ const updateBill = async (req, res) => {
             AND orders.order_id = $5
             RETURNING *
         `;
-
         connect.query(
             updateCheckoutSql,
             [address, province, district, ward, billExist.rows[0].order_id],
@@ -165,8 +170,34 @@ const bill = async (req, res) => {
         return res.status(500).json({ message: "Lỗi API" });
     }
 };
+const getOneBill2 = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sql = `
+            SELECT *
+            FROM bill
+            JOIN orders ON bill.order_id = orders.order_id
+            JOIN checkout ON orders.checkout_id = checkout.id
+            JOIN users ON checkout.user_id = users.id
+            WHERE bill.bill_id = ${id}
+        `;
+
+        const results = await connect.query(sql);
+
+        if (!results || !results.rows || results.rows.length === 0) {
+            return res.status(404).json({ message: `Không tìm thấy hóa đơn có id ${id}` });
+        }
+
+        const data = results.rows[0]; // Chỉ lấy phần tử đầu tiên vì chỉ có một hóa đơn
+        return res.status(200).json({ message: `Lấy thông tin hóa đơn thành công`, data });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Lỗi API', err });
+    }
+};
 
 module.exports = {
+    getOneBill2,
     updateBill,
     bill,
     getBill,
