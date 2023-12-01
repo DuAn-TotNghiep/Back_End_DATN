@@ -1,7 +1,5 @@
-const { DateTime } = require('luxon');
-const connect = require('../../database');
-
-
+const { DateTime } = require("luxon");
+const connect = require("../../database");
 
 const getBill = async (req, res) => {
     try {
@@ -16,69 +14,131 @@ const getBill = async (req, res) => {
         const results = await connect.query(sql);
 
         if (!results || !results.rows || results.rows.length === 0) {
-            return res.status(404).json({ message: 'Không tìm thấy thông tin bill nào.' });
+            return res
+                .status(404)
+                .json({ message: "Không tìm thấy thông tin bill nào." });
         }
 
         const data = results.rows;
         return res.status(200).json({
-            message: 'Lấy thông tin bill và thông tin từ bảng checkout thành công',
+            message: "Lấy thông tin bill và thông tin từ bảng checkout thành công",
             data,
         });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ message: 'Lỗi API' });
+        return res.status(500).json({ message: "Lỗi API" });
     }
-}
+};
 
+const updateBill = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { province, district, ward, address } = req.body;
+        const { user_phone } = req.body;
+
+        // Kiểm tra xem hóa đơn có tồn tại
+        const billExist = await connect.query(
+            "SELECT * FROM bill WHERE bill_id = $1",
+            [id]
+        );
+        // console.log(billExist);
+
+        if (!billExist.rows || billExist.rows.length === 0) {
+            return res.status(404).json({ message: "Hóa đơn không tồn tại!" });
+        }
+        // Nếu tồn tại, tiến hành cập nhật
+        const updateCheckoutSql = `
+            UPDATE checkout
+            SET address = $1, province = $2, district = $3, ward = $4
+            FROM orders
+            WHERE checkout.id = orders.checkout_id
+            AND orders.order_id = $5
+            RETURNING *
+        `;
+
+        connect.query(
+            updateCheckoutSql,
+            [address, province, district, ward, billExist.rows[0].order_id],
+            (err, result) => {
+                if (err) {
+                    return res
+                        .status(500)
+                        .json({ message: "Lỗi không thể cập nhật địa chỉ!", err });
+                }
+                const data = result.rows[0];
+                const updateUsersSql = `
+            UPDATE users
+            SET user_phone = $1
+            WHERE id = $2;
+`;
+                connect.query(
+                    updateUsersSql,
+                    [user_phone, data.user_id],
+                    (err, result) => {
+                        if (err) {
+                            return res
+                                .status(500)
+                                .json({ message: "Lỗi không thể cập nhật số điện thoại", err });
+                        }
+                        return res
+                            .status(200)
+                            .json({ message: "Cập nhật thông tin hóa đơn thành công!" });
+                    }
+                );
+                console.log(data);
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Lỗi API", error: error });
+    }
+};
 
 const getOneBill = async (req, res) => {
     try {
-        const { id } = req.params
-        const sql = `SELECT * FROM bill WHERE checkout_id = ${id} RETURNING*`
+        const { id } = req.params;
+        const sql = `SELECT * FROM bill WHERE checkout_id = ${id} RETURNING*`;
         connect.query(sql, (err, results) => {
             if (err) {
-                return res.status(500).json({ message: 'Lấy 1 id thất bại', err })
+                return res.status(500).json({ message: "Lấy 1 id thất bại", err });
             }
-            const data = results.rows
-            return res.status(200).json({ message: 'Lấy 1 id thành công', data })
-        })
+            const data = results.rows;
+            return res.status(200).json({ message: "Lấy 1 id thành công", data });
+        });
     } catch (err) {
-        return res.status(500).json({ message: 'Lỗi API', err })
+        return res.status(500).json({ message: "Lỗi API", err });
     }
-}
+};
 const getOneBillInCheckOut = async (req, res) => {
     try {
-        const { id } = req.params
-        const sql = `SELECT * FROM bill WHERE order_id = ${id}`
+        const { id } = req.params;
+        const sql = `SELECT * FROM bill WHERE order_id = ${id}`;
         connect.query(sql, (err, results) => {
             if (err) {
-                return res.status(500).json({ message: 'Lấy 1 id thất bại', err })
+                return res.status(500).json({ message: "Lấy 1 id thất bại", err });
             }
-            const data = results.rows
-            return res.status(200).json({ message: 'Lấy 1 id thành công', data })
-        })
+            const data = results.rows;
+            return res.status(200).json({ message: "Lấy 1 id thành công", data });
+        });
     } catch (err) {
-        return res.status(500).json({ message: 'Lỗi API', err })
+        return res.status(500).json({ message: "Lỗi API", err });
     }
-}
+};
 const bill = async (req, res) => {
     try {
         const { user_id, order_id } = req.body;
 
-        const bill_date = DateTime.local().setZone('Asia/Ho_Chi_Minh');
-        const sql =
-            `INSERT INTO bill (user_id, order_id, bill_date) VALUES (${user_id}, ${order_id}, '${bill_date}') RETURNING *`
+        const bill_date = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+        const sql = `INSERT INTO bill (user_id, order_id, bill_date) VALUES (${user_id}, ${order_id}, '${bill_date}') RETURNING *`;
 
         connect.query(sql, (err, result) => {
             if (err) {
-                return res.status(500).json({ message: "loi them bill", err })
+                return res.status(500).json({ message: "loi them bill", err });
             }
-            const data = result.rows
+            const data = result.rows;
             console.log(data);
-            return res.status(200).json({ message: 'Tạo  bill thành công', data });
-        })
-
-
+            return res.status(200).json({ message: "Tạo  bill thành công", data });
+        });
 
         // if (result.rowCount > 0) {
         //     // Lấy thông tin từ bảng "orders"
@@ -102,8 +162,14 @@ const bill = async (req, res) => {
         //     return res.status(500).json({ message: 'Tạo bill thất bại' });
         // }
     } catch (error) {
-        return res.status(500).json({ message: 'Lỗi API' });
+        return res.status(500).json({ message: "Lỗi API" });
     }
-}
+};
 
-module.exports = { bill, getBill, getOneBill, getOneBillInCheckOut };
+module.exports = {
+    updateBill,
+    bill,
+    getBill,
+    getOneBill,
+    getOneBillInCheckOut,
+};
