@@ -209,6 +209,22 @@ const getAllProductsNoBlock = async (req, res) => {
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
+const getAllProductsNoBlock1 = async (req, res) => {
+  try {
+    const sql = `SELECT * FROM product WHERE isbblock = false AND flashsale=true`;
+    const results = await connect.query(sql);
+    if (!results || !results.rows || results.rows.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy san pham nào." });
+    }
+    const data = results.rows;
+    return res.status(200).json({
+      message: "Lấy tất cả sản phẩm thành công",
+      data,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
 const getAllProductsBlock = async (req, res) => {
   try {
     const sql = `SELECT * FROM product WHERE isbblock = true`;
@@ -623,7 +639,7 @@ const UpdateKho = (req, res) => {
 
       const currentKho = selectResult.rows[0].kho;
       const newKho = currentKho - quantity;
-    
+
       if (newKho < 0) {
         return res.status(400).json({ message: "Số lượng tồn kho không đủ" });
       }
@@ -999,5 +1015,6 @@ module.exports = {
   GetAllOutstan,
   GetNewProducts3Days,
   SumKho,
-  getAllProductsBlock
+  getAllProductsBlock,
+  getAllProductsNoBlock1
 };

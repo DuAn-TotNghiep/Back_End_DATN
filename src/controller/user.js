@@ -134,9 +134,9 @@ const Signup = async (req, res) => {
     const checkUserQuery = "SELECT * FROM users WHERE user_email = $1";
     const { rows } = await connect.query(checkUserQuery, [email]);
 
-    // if (rows) {
-    //   return res.status(400).json({ message: "Tài khoản đã tồn tại" });
-    // }
+    if (rows) {
+      return res.status(400).json({ message: "Tài khoản đã tồn tại" });
+    }
 
     // Mã hóa mật khẩu
     const hashPass = await bcrypt.hash(user_password, 10);
@@ -344,6 +344,7 @@ const TopUser = async (req, res) => {
     const sql = `
             SELECT user_id, COUNT(*) as order_count
             FROM orders
+            WHERE user_id IS NOT NULL
             GROUP BY user_id
             ORDER BY order_count DESC
             LIMIT 3
@@ -569,4 +570,4 @@ const ChangePassword = async (req, res) => {
   }
 }
 
-module.exports = {ChangePassword, ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile, updateBlockUser };
+module.exports = { ChangePassword, ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile, updateBlockUser };
