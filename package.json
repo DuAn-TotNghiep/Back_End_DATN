@@ -5,7 +5,8 @@
 	"main": "app.js",
 	"type": "commonjs",
 	"scripts": {
-		"dev": "nodemon app.js"
+		"dev": "nodemon app.js",
+		"build": "tsc && build"
 	},
 	"dependencies": {
 		"bcrypt": "^5.1.1",
