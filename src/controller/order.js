@@ -221,7 +221,8 @@ const UpdateShipDone = (req, res) => {
           .json({ message: "khong sua duoc trang thai shipdone", err });
       }
       const data = result.rows[0];
-      io.emit("shiping", { message: "Đơn hàng đã được giao", data });
+
+      // io.emit("shiping", { message: "Đơn hàng đã được giao", data });
       setTimeout(() => {
         if (!responseSent) {
           const completeReq = { body: { id } };
@@ -246,7 +247,8 @@ const UpdateDone = (req, res) => {
           .json({ message: "khong sua duoc trang thai done order", err });
       }
       const data = result.rows[0];
-      io.emit("statusdone", { message: "Đã Nhận Hàng", data });
+      // io.emit("statusdone", { message: "Đã Nhận Hàng", data });
+
       setTimeout(() => {
         if (!responseSent) {
           const completeReq = { body: { id } };
@@ -269,10 +271,32 @@ const UpdateComplete = (req, res) => {
           .json({ message: "khong sua duoc trang thai complete order", err });
       }
       const data = result.rows[0];
-      io.emit("complete", { message: "Đơn hàng đã hoàn thành", data });
+      const completeReq = { body: { id } };
+      sendStatusByEmail(completeReq, res)
+      // io.emit("complete", { message: "Đơn hàng đã hoàn thành", data });
       return res
         .status(200)
         .json({ message: "sua thanh cong trang thai complete order", data });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Loi API", err });
+  }
+};
+const UpdateBomd = (req, res) => {
+  try {
+    const { id } = req.body;
+    const sql = `UPDATE orders SET status=7 WHERE order_id=${id}`;
+    connect.query(sql, (err, result) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "khong sua duoc trang thai complete order", err });
+      }
+      const data = result.rows[0];
+      io.emit("bomd", { message: "Khách hàng không nhận hàng", data });
+      return res
+        .status(200)
+        .json({ message: "sua thanh cong trang thai không nhận hàng", data });
     });
   } catch (err) {
     return res.status(500).json({ message: "Loi API", err });
@@ -538,6 +562,40 @@ const getCompleteOrders = async (req, res) => {
     return res.status(500).json({ message: "Lỗi API", error: error.message });
   }
 };
+const getBomdOrders = async (req, res) => {
+  try {
+    // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+    // const formattedDate = today.toFormat("yyyy-MM-dd");
+    const sql = `SELECT * FROM orders WHERE status = '7' ORDER BY order_date DESC`;
+
+    const result = await connect.query(sql);
+
+    const confirmedOrders = result.rows;
+    return res.status(200).json({
+      message: "Lấy danh sách đơn hàng hoàn thành thành công",
+      orders: confirmedOrders,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi API", error: error.message });
+  }
+};
+const getCompleteAndDoneOrders = async (req, res) => {
+  try {
+    // const today = DateTime.local().setZone("Asia/Ho_Chi_Minh");
+    // const formattedDate = today.toFormat("yyyy-MM-dd");
+    const sql = `SELECT * FROM orders WHERE status = '6' OR status = '5' ORDER BY order_date DESC`;
+
+    const result = await connect.query(sql);
+
+    const confirmedOrders = result.rows;
+    return res.status(200).json({
+      message: "Lấy danh sách đơn hàng hoàn thành thành công",
+      orders: confirmedOrders,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi API", error: error.message });
+  }
+};
 const getCancelledOrders = async (req, res) => {
   try {
     const sql = `
@@ -614,7 +672,7 @@ const sendStatusByEmail = (req, res) => {
             status = "Đã đặt hàng";
           }
           if (data.status == 3) {
-            status = "Đang vận chuyển";
+            status = "Đơn hàng đã bàn giao cho shipper";
           }
           if (data.status == 4) {
             status = "Đã vận chuyển thành công";
@@ -675,7 +733,7 @@ const sendStatusByEmail = (req, res) => {
               status = "Đã đặt hàng";
             }
             if (data.status == 3) {
-              status = "Đang vận chuyển";
+              status = "Đã bàn giao cho shipper";
             }
             if (data.status == 4) {
               status = "Đã vận chuyển thành công";
@@ -982,5 +1040,8 @@ module.exports = {
   searchOrdersByUserPhoneShipping,
   searchOrdersByUserPhoneShipDone,
   searchOrdersByUserPhoneDone,
-  searchOrdersByUserPhoneComplete
+  searchOrdersByUserPhoneComplete,
+  getCompleteAndDoneOrders,
+  getBomdOrders,
+  UpdateBomd
 };
