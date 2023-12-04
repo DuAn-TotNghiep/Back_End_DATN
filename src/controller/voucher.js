@@ -44,7 +44,7 @@ const getAllVoucherRule = async (req, res) => {
                         return res.status(200).json({ message: 'Lấy tất cả voucher thành công!', data });
 
                     })
-                } else {
+                } else if (500000 < total && total <= 3000000) {
                     const sql = `SELECT * FROM voucher WHERE voucher_amount <= 100000 AND voucher_status='active'`;
                     connect.query(sql, (err, result) => {
                         if (err) {
@@ -66,7 +66,7 @@ const getAllVoucherRule = async (req, res) => {
                         return res.status(200).json({ message: 'Lấy tất cả voucher thành công!', data });
 
                     })
-                } else {
+                } else if (500000 < total && total <= 3000000) {
                     const sql = `SELECT * FROM voucher WHERE voucher_amount <= 50000 AND voucher_status='active'`;
                     connect.query(sql, (err, result) => {
                         if (err) {
@@ -74,7 +74,6 @@ const getAllVoucherRule = async (req, res) => {
                         }
                         const data = result.rows;
                         return res.status(200).json({ message: 'Lấy tất cả voucher thành công!', data });
-
                     })
                 }
             }
