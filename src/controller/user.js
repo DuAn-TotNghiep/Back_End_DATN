@@ -297,6 +297,60 @@ const Signin = async (req, res) => {
     res.status(500).json({ message: "Đã xảy ra lỗi" });
   }
 };
+const SigninNoToken = async (req, res) => {
+  try {
+    const { user_email, user_password } = req.body;
+
+    const { error } = userSignin.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    // Kiểm tra xem tài khoản tồn tại
+    const checkUserQuery = "SELECT * FROM users WHERE user_email = $1";
+    const { rows } = await connect.query(checkUserQuery, [user_email]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Tài khoản không tồn tại" });
+    }
+
+    const user = rows[0];
+
+    if (user.block) {
+      return res.status(403).json({ message: "Tài khoản của bạn đã bị chặn" });
+    }
+    // Kiểm tra mật khẩu
+    const isPasswordValid = await bcrypt.compare(
+      user_password,
+      user.user_password
+    );
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Mật khẩu không đúng" });
+    }
+
+
+    res.status(200).json({
+      message: "Đăng nhập thành công",
+      user: {
+        id: user.id,
+        user_lastname: user.user_lastname,
+        user_firstname: user.user_firstname,
+        user_province: user.user_province,
+        user_district: user.user_district, user_ward: user.user_ward,
+        user_address: user.user_address,
+        user_image: user.user_image,
+        user_email: user.user_email,
+        user_phone: user.user_phone,
+        role: user.role,
+        otp: user.otp
+      },
+    });
+  } catch (error) {
+    console.error("Lỗi khi đăng nhập:", error);
+    res.status(500).json({ message: "Đã xảy ra lỗi" });
+  }
+};
 const SigninProfile = async (req, res) => {
   try {
     const { user_email, user_password } = req.body;
@@ -570,4 +624,4 @@ const ChangePassword = async (req, res) => {
   }
 }
 
-module.exports = { ChangePassword, ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile, updateBlockUser };
+module.exports = {SigninNoToken, ChangePassword, ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile, updateBlockUser };
