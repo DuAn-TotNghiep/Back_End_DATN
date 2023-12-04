@@ -133,11 +133,10 @@ const Signup = async (req, res) => {
     // Kiểm tra xem tài khoản đã tồn tại hay chưa
     const checkUserQuery = "SELECT * FROM users WHERE user_email = $1";
     const { rows } = await connect.query(checkUserQuery, [email]);
-
-    if (rows) {
+console.log(rows );
+    if (rows == []) {
       return res.status(400).json({ message: "Tài khoản đã tồn tại" });
     }
-
     // Mã hóa mật khẩu
     const hashPass = await bcrypt.hash(user_password, 10);
 
@@ -324,7 +323,7 @@ const SigninNoToken = async (req, res) => {
       user_password,
       user.user_password
     );
-
+    const accessToken = jwt.sign({ user_id: user.id }, "datn");
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Mật khẩu không đúng" });
     }
@@ -345,6 +344,7 @@ const SigninNoToken = async (req, res) => {
         role: user.role,
         otp: user.otp
       },
+      accessToken: accessToken,
     });
   } catch (error) {
     console.error("Lỗi khi đăng nhập:", error);
