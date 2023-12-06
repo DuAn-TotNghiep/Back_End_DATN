@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const { addProduct, updateProduct } = require("../schema/productSchema");
 const { DateTime } = require("luxon");
 const io = require("../../app");
+const _ = require('lodash');
 const AddProduct = async (req, res, next) => {
   try {
     const { color_id, size_id, category_id, name, image, desc, price, kho } = req.body;
@@ -116,33 +117,30 @@ const UpdateImageProduct = async (req, res, next) => {
 
 // serachProduct
 
+
+
 const searchProduct = async (req, res) => {
   try {
     let product_name = req.body.product_name;
     product_name = product_name.trim();
-    let regex = `%${product_name}%`;
 
-    // Trang hiện tại và số sản phẩm trên mỗi trang
-    const page = req.query.page || 1; // Trang mặc định là 1
-    const perPage = 9; // Số sản phẩm trên mỗi trang
+    // Chuyển đổi chuỗi thành dạng không dấu
+    const searchString = _.deburr(product_name.toLowerCase());
 
-    let sql = `SELECT * FROM product WHERE product_name ILIKE $1`;
-    const result = await connect.query(sql, [regex]);
+    // Truy vấn để lấy tất cả sản phẩm có tên chứa product_name
+    let sql = `
+      SELECT * 
+      FROM product 
+      WHERE lower(unaccent(product.product_name)) LIKE $1
+    `;
 
-    if (result.rows.length == 0) {
+    const result = await connect.query(sql, [`%${searchString}%`]);
+
+    if (result.rows.length === 0) {
       return res.json({
         message: "Không tìm thấy sản phẩm",
       });
     }
-
-    // // Tính toán số lượng trang
-    // const totalProducts = result.rows.length;
-    // const totalPages = Math.ceil(totalProducts / perPage);
-
-    // // Lọc kết quả để lấy sản phẩm trên trang hiện tại
-    // const startIndex = (page - 1) * perPage;
-    // const endIndex = startIndex + perPage;
-    // const productsOnPage = result.rows.slice(startIndex, endIndex);
 
     return res.json({
       message: "Tìm thấy sản phẩm",
@@ -153,24 +151,28 @@ const searchProduct = async (req, res) => {
   }
 };
 
+
 // getProductSearchCategory
+
 
 const getProductSearchCategory = async (req, res) => {
   try {
     let category_name = req.body.category_name;
     category_name = category_name.trim();
-    let regex = `%${category_name}%`;
+
+    // Chuyển đổi chuỗi thành dạng không dấu
+    const searchString = _.deburr(category_name.toLowerCase());
 
     // Truy vấn để lấy tất cả sản phẩm có tên chứa category_name
     let sql = `
-            SELECT product.* 
-            FROM product 
-            WHERE product.product_name ILIKE $1
-        `;
+      SELECT product.* 
+      FROM product 
+      WHERE lower(unaccent(product.product_name)) LIKE $1
+    `;
 
-    const result = await connect.query(sql, [regex]);
+    const result = await connect.query(sql, [`%${searchString}%`]);
 
-    if (result.rows.length == 0) {
+    if (result.rows.length === 0) {
       return res.json({
         message: "Không tìm thấy sản phẩm của danh mục bạn đã chọn",
       });
@@ -184,6 +186,8 @@ const getProductSearchCategory = async (req, res) => {
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
+
+
 
 const getAllProducts = async (req, res) => {
   try {
