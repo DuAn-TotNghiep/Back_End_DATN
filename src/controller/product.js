@@ -93,7 +93,7 @@ const UpdateImageProduct = async (req, res, next) => {
   try {
     const productId = req.params.id;
     const { image } = req.body;
-console.log(image , productId);
+    console.log(image, productId);
     const sql2 = `
       UPDATE product 
       SET 
@@ -405,6 +405,21 @@ const GetOneProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const sql = `SELECT * FROM product WHERE product_id = ${id}`;
+    connect.query(sql, (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: "Lay one that bai", err });
+      }
+      const data = results.rows;
+      return res.status(200).json({ message: "Lay one thanh cong", data });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Loi api", err });
+  }
+};
+const GetOneProductBlock = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sql = `SELECT * FROM product WHERE product_id = ${id} AND isbblock =false`;
     connect.query(sql, (err, results) => {
       if (err) {
         return res.status(500).json({ message: "Lay one that bai", err });
@@ -1039,5 +1054,6 @@ module.exports = {
   SumKho,
   getAllProductsBlock,
   getAllProductsNoBlock1,
-  UpdateImageProduct
+  UpdateImageProduct,
+  GetOneProductBlock
 };
