@@ -37,7 +37,8 @@ const {
   GetNewProducts3Days,
   SumKho,
   getAllProductsBlock,
-  getAllProductsNoBlock1
+  getAllProductsNoBlock1,
+  UpdateImageProduct
 } = require("../controller/product");
 
 const router = express.Router();
@@ -56,6 +57,7 @@ router.get("/product/topproductsale", GetTopSaleProduct);
 router.get("/product/countproductoday", CountOrdersToday);
 router.get("/product/countproductmonth", CountOrdersMonth);
 router.patch("/product/:id/update", UpdateProduct);
+router.patch("/product/:id/updateimage", UpdateImageProduct);
 router.patch("/product/updatekho", UpdateKho);
 router.patch("/product/sumkho", SumKho);
 router.get("/product/kho", getAllKho);

@@ -40,7 +40,6 @@ const UpdateProduct = async (req, res, next) => {
       size_id,
       category_id,
       name,
-      image,
       desc,
       price,
       kho
@@ -59,13 +58,12 @@ const UpdateProduct = async (req, res, next) => {
         return res.status(404).json({ message: "Sản phẩm không tồn tại" });
       }
 
-      // Sản phẩm tồn tại, tiến hành cập nhật
+      // Sản phẩm tồn tại, tiến hành cập nhật  image = Array['${image}'],
       const sql2 = `
                 UPDATE product 
                 SET 
                     size_id = Array[${size_id}],
                     color_id = Array[${color_id}],
-                    image = Array['${image}'],
                     category_id = ${category_id},
                     product_name = '${name}',
                     product_description = '${desc}',
@@ -86,6 +84,30 @@ const UpdateProduct = async (req, res, next) => {
           .status(200)
           .json({ message: "Sửa sản phẩm thành công", data });
       });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Lỗi API", err });
+  }
+};
+const UpdateImageProduct = async (req, res, next) => {
+  try {
+    const productId = req.params.id;
+    const { image } = req.body;
+console.log(image , productId);
+    const sql2 = `
+      UPDATE product 
+      SET 
+        image = Array['${image}']
+      WHERE product_id = ${productId}
+      RETURNING *`;
+
+    connect.query(sql2, (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: "Lỗi không thể cập nhật ảnh sản phẩm", err });
+      }
+
+      const data = result.rows[0];
+      return res.status(200).json({ message: "Sửa ảnh sản phẩm thành công", data });
     });
   } catch (err) {
     return res.status(500).json({ message: "Lỗi API", err });
@@ -1016,5 +1038,6 @@ module.exports = {
   GetNewProducts3Days,
   SumKho,
   getAllProductsBlock,
-  getAllProductsNoBlock1
+  getAllProductsNoBlock1,
+  UpdateImageProduct
 };
