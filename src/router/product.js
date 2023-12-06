@@ -38,7 +38,8 @@ const {
   SumKho,
   getAllProductsBlock,
   getAllProductsNoBlock1,
-  UpdateImageProduct
+  UpdateImageProduct,
+  GetOneProductBlock
 } = require("../controller/product");
 
 const router = express.Router();
@@ -53,6 +54,7 @@ router.get("/product/outstan", GetOutstan);
 router.patch("/product/updateoutstanproduct", updateOutstanProduct);
 router.get("/product/sale", GetSale);
 router.get("/product/:id/getone", GetOneProduct);
+router.get("/product/:id/getoneblock", GetOneProductBlock);
 router.get("/product/topproductsale", GetTopSaleProduct);
 router.get("/product/countproductoday", CountOrdersToday);
 router.get("/product/countproductmonth", CountOrdersMonth);
