@@ -369,10 +369,11 @@ const updateOutstanProduct = async (req, res) => {
 };
 const GetSale = async (req, res) => {
   try {
-    const sql = `SELECT product.*, sale.sale_distcount FROM product
-        JOIN sale ON product.sale_id = sale.sale_id
-        WHERE sale.sale_distcount > 0 AND product.flashsale=false
-        LIMIT 8;
+    const sql = ` SELECT product.*, sale.sale_distcount
+  FROM product
+  JOIN sale ON product.sale_id = sale.sale_id
+  WHERE sale.sale_distcount > 0 AND (product.flashsale = false OR product.flashsale IS NULL)
+  LIMIT 8
         `;
     connect.query(sql, (err, results) => {
       if (err) {
