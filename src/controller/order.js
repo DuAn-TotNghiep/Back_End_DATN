@@ -40,7 +40,11 @@ ORDER BY CASE
     WHEN status = '1' THEN 1
     WHEN status = '2' THEN 2
      WHEN status = '3' THEN 3
-      WHEN status = '0' THEN 4
+       WHEN status = '4' THEN 4
+         WHEN status = '5' THEN 5
+           WHEN status = '6' THEN 6
+             WHEN status = '7' THEN 7
+      WHEN status = '0' THEN 8
 END,
 order_date DESC`;
     connect.query(sql, (err, result) => {
@@ -277,6 +281,26 @@ const UpdateComplete = (req, res) => {
       return res
         .status(200)
         .json({ message: "sua thanh cong trang thai complete order", data });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "Loi API", err });
+  }
+};
+const UpdateOrder = (req, res) => {
+  try {
+    const { id } = req.body;
+    console.log(id);
+    const sql = `UPDATE orders SET payment_type='ok' WHERE order_id=${id}`;
+    connect.query(sql, (err, result) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "sua that bai", err });
+      }
+      const data = result.rows[0];
+      return res
+        .status(200)
+        .json({ message: "sua thanh cong hoan hang thanh cong", data });
     });
   } catch (err) {
     return res.status(500).json({ message: "Loi API", err });
@@ -1043,5 +1067,6 @@ module.exports = {
   searchOrdersByUserPhoneComplete,
   getCompleteAndDoneOrders,
   getBomdOrders,
-  UpdateBomd
+  UpdateBomd,
+  UpdateOrder
 };

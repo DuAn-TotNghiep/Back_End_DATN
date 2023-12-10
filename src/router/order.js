@@ -39,7 +39,8 @@ const {
   searchOrdersByUserPhoneComplete,
   getCompleteAndDoneOrders,
   getBomdOrders,
-  UpdateBomd
+  UpdateBomd,
+  UpdateOrder
 } = require("../controller/order");
 const router = express.Router();
 router.post("/order/add", order);
@@ -57,6 +58,7 @@ router.patch("/order/shipdone", UpdateShipDone);
 router.patch("/order/bomd", UpdateBomd);
 router.patch("/order/done", UpdateDone);
 router.patch("/order/complate", UpdateComplete);
+router.patch("/order/sumbomd", UpdateOrder);
 router.get("/order/orderinweek", ListOrderInWeek);
 router.get("/order/getorderadmin", GetOrderForAdmin);
 router.get("/order/orderplace", getPlacedOrders);

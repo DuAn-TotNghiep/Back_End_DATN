@@ -237,7 +237,7 @@ const getAllProductsNoBlock = async (req, res) => {
 };
 const getAllProductsNoBlock1 = async (req, res) => {
   try {
-    const sql = `SELECT * FROM product WHERE isbblock = false AND flashsale=true`;
+    const sql = `SELECT * FROM product WHERE isbblock = false AND (flashsale=true )`;
     const results = await connect.query(sql);
     if (!results || !results.rows || results.rows.length === 0) {
       return res.status(404).json({ message: "Không tìm thấy san pham nào." });
@@ -733,8 +733,8 @@ const SumKho = (req, res) => {
       }
 
       const currentKho = selectResult.rows[0].kho;
-      const newKho = currentKho + quantity;
-
+      const newKho = Number(currentKho + quantity);
+      console.log(newKho);
       if (newKho < 0) {
         return res.status(400).json({ message: "Số lượng tồn kho không đủ" });
       }

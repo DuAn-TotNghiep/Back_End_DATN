@@ -212,6 +212,9 @@ const UpdateFlashSale = (req, res) => {
         startJob = schedule.scheduleJob(`${phutstart} ${giostart} ${ngaystart} ${thangstart} *`, function () {
             runScheduledTask();
         });
+        schedule.scheduleJob(`${phutend} ${gioend} ${ngayend} ${thangend} *`, function () {
+            EndScheduledTask();
+        });
         endJob = schedule.scheduleJob(`${phutend} ${gioend} ${ngayend} ${thangend} *`, function () {
             EndScheduledTask();
         });
