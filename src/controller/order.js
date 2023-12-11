@@ -649,15 +649,23 @@ const generateStatus = (req, res) => {
     console.log(data);
   });
 };
-const generateAndSendStatusOrder = (email) => {
-  const otp = generateOTP();
-  otps[email] = {
-    otp,
-    createdTime: Date.now(), // Sử dụng Date.now() để lưu thời gian tạo mã OTP
-  };
-  sendOTPByEmail(email, otp);
-  return otp;
-};
+const getProduct = (id, quantity) => {
+  const sql = `SELECT * FROM product WHERE product_id=${id} `
+  connect.query(sql, (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: "Khong lay duoc order", err });
+    }
+    const data = result.rows[0];
+    const productHtml = `
+          <tr>
+            <td>${data?.product_name}</td>
+            <td>${quantity}</td>
+            <td>${data?.product_price}</td>
+          </tr>
+        `;
+    return (productHtml);
+  })
+}
 const nodemailer = require("nodemailer");
 const numberFormatter = require("number-formatter");
 const sendStatusByEmail = (req, res) => {
@@ -670,16 +678,18 @@ const sendStatusByEmail = (req, res) => {
       }
       const data = result.rows[0];
       const sql1 = `SELECT * FROM checkout WHERE id=${data?.checkout_id}`;
-      connect.query(sql1, (err, result) => {
+      connect.query(sql1, async (err, result) => {
         if (err) {
           return res
             .status(500)
             .json({ message: "Khong lay duoc checkout", err });
         }
         const data1 = result.rows[0];
+
         let status = "";
         console.log(data1);
         if (data?.user_id === null) {
+          const checkoutOffObject = JSON.parse(data1?.checkout_off || "");
           const formattedAmount = numberFormatter("#,###", data.order_total);
           const checkoutData = JSON.parse(data1.checkout_off);
           const transporter = nodemailer.createTransport({
@@ -707,6 +717,9 @@ const sendStatusByEmail = (req, res) => {
           if (data.status == 6) {
             status = "Đơn hàng hoàn thành";
           }
+          if (data.status == 7) {
+            status = "Đơn hàng bị hoàn trả";
+          }
           if (data.status == 0) {
             status = "Đơn hàng đã bị hủy";
           }
@@ -716,11 +729,69 @@ const sendStatusByEmail = (req, res) => {
             to: checkoutData.email,
             subject: `Thông báo tình trạng đơn hàng #${data?.order_id}`,
             html: `
-                        <p>Tình trạng đơn hàng của bạn: ${status}</p>
-                        ${data.status == 0 && text ? `<p>Lý do hủy: ${text}</p>` : ""}
-                        Ngày đặt hàng: ${data.order_date}</p>
-                         <p>Tổng tiền: <h3>${formattedAmount}VND</h3></p>
-                        `,
+    <p style="font-size: 16px;">Tình trạng đơn hàng của bạn: ${status}</p>
+    ${data.status == 0 && text ? `<p style="font-size: 16px;">Lý do hủy: ${text}</p>` : ""}
+    <p style="font-size: 16px;">Ngày đặt hàng: ${data.order_date}</p>
+     <p>Thông tin sản phẩm: </p>
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+      <thead>
+         
+        <tr>
+          <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Sản phẩm</th>
+          <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Giá</th>
+          <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Kích thước/Màu</th>
+          <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Số lượng</th>
+        </tr>
+      </thead>
+      <tbody>
+            
+      ${await Promise.all(
+              data1?.product?.map(async (productData) => {
+                console.log(productData)
+                return new Promise(async (resolve, reject) => {
+                  const sql = `SELECT * FROM product WHERE product_id=${productData?.product_id} `;
+
+                  connect.query(sql, async (err, result) => {
+                    if (err) {
+                      reject({ message: "Khong lay duoc order", err });
+                    } else {
+                      const data = result.rows[0];
+                      let sqlSale = `SELECT * FROM sale`;
+                      const sale = await connect.query(sqlSale);
+                      const salediscount = sale?.rows?.find((data1) => data1?.sale_id == data?.sale_id)?.sale_distcount
+                      const price = data?.product_price * (salediscount / 100)
+                      const formattedAmounts = numberFormatter("#,###", data.product_price);
+                      const sizeName = `SELECT * FROM size WHERE size_id = ${productData?.size}`;
+                      const sizeNameQuery = await connect.query(sizeName)
+                      const sizeColor = `SELECT * FROM color WHERE color_id = ${productData?.color}`;
+                      const sizeColorQuery = await connect.query(sizeColor)
+
+
+
+                      const html = `
+                <tr>
+                  <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">${data?.product_name}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">
+                  ${price ? `${data?.product_price - price}` : `${formattedAmounts}`}
+                  </td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">${sizeNameQuery.rows[0].size_name} - ${sizeColorQuery.rows[0].color_name} </td>
+                  <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">${productData?.quantity}</td>
+                </tr>
+              `;
+                      resolve(html);
+                    }
+                  });
+                });
+              }) || []
+            ).then(htmlArray => htmlArray.join(''))
+              }
+       
+      </tbody>
+    </table>
+    <p style="font-size: 16px;">Địa chỉ giao hàng: <h3>${data1.address}-${data1.ward}-${data1.district}-${data1.province}</h3></p>
+    <p style="font-size: 16px;">Thông tin liên hệ: <h3>${checkoutOffObject.name} - ${checkoutOffObject.phone} - ${checkoutOffObject.email}</h3></p>
+    <p style="font-size: 16px;">Tổng tiền: <h3>${formattedAmount}VND</h3></p>
+  `,
           };
           transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
@@ -735,7 +806,7 @@ const sendStatusByEmail = (req, res) => {
           });
         } else {
           const sql2 = `SELECT * FROM users WHERE id=${data?.user_id}`;
-          connect.query(sql2, (err, result) => {
+          connect.query(sql2, async (err, result) => {
             if (err) {
               return res
                 .status(500)
@@ -743,6 +814,8 @@ const sendStatusByEmail = (req, res) => {
             }
             const data2 = result.rows[0];
             const formattedAmount = numberFormatter("#,###", data.order_total);
+
+
             const transporter = nodemailer.createTransport({
               service: "Gmail",
               auth: {
@@ -768,6 +841,9 @@ const sendStatusByEmail = (req, res) => {
             if (data.status == 6) {
               status = "Đơn hàng hoàn thành";
             }
+            if (data.status == 7) {
+              status = "Đơn hàng bị hoàn trả";
+            }
             if (data.status == 0) {
               status = "Đơn hàng đã bị hủy";
             }
@@ -777,11 +853,69 @@ const sendStatusByEmail = (req, res) => {
               to: data2.user_email,
               subject: `Thông báo tình trạng đơn hàng #${data?.order_id}`,
               html: `
-                        <p>Tình trạng đơn hàng của bạn: ${status}</p>
-                        ${data.status == 0 && text ? `<p>Lý do hủy: ${text}</p>` : ""}
-                        Ngày đặt hàng: ${data.order_date}</p>
-                         <p>Tổng tiền: <h3>${formattedAmount}VND</h3></p>
-                        `,
+    <p style="font-size: 16px;">Tình trạng đơn hàng của bạn: ${status}</p>
+    ${data.status == 0 && text ? `<p style="font-size: 16px;">Lý do hủy: ${text}</p>` : ""}
+    <p style="font-size: 16px;">Ngày đặt hàng: ${data.order_date}</p>
+     <p>Thông tin sản phẩm: </p>
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+      <thead>
+       
+        <tr>
+          <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Sản phẩm</th>
+          <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Giá</th>
+          <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Kích thước/Màu</th>
+          <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Số lượng</th>
+        </tr>
+      </thead>
+      <tbody>
+
+      ${await Promise.all(
+                data1?.product?.map(async (productData) => {
+                  console.log(productData)
+                  return new Promise(async (resolve, reject) => {
+                    const sql = `SELECT * FROM product WHERE product_id=${productData?.product_id} `;
+
+                    connect.query(sql, async (err, result) => {
+                      if (err) {
+                        reject({ message: "Khong lay duoc order", err });
+                      } else {
+                        const data = result.rows[0];
+                        let sqlSale = `SELECT * FROM sale`;
+                        const sale = await connect.query(sqlSale);
+                        const salediscount = sale?.rows?.find((data1) => data1?.sale_id == data?.sale_id)?.sale_distcount
+                        const price = data?.product_price * (salediscount / 100)
+                        const formattedAmounts = numberFormatter("#,###", data.product_price);
+                        const sizeName = `SELECT * FROM size WHERE size_id = ${productData?.size}`;
+                        const sizeNameQuery = await connect.query(sizeName)
+                        const sizeColor = `SELECT * FROM color WHERE color_id = ${productData?.color}`;
+                        const sizeColorQuery = await connect.query(sizeColor)
+
+
+
+                        const html = `
+                <tr>
+                  <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">${data?.product_name}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">
+                  ${price ? `${data?.product_price - price}` : `${formattedAmounts}`}
+                  </td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">${sizeNameQuery.rows[0].size_name} - ${sizeColorQuery.rows[0].color_name} </td>
+                  <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">${productData?.quantity}</td>
+                </tr>
+              `;
+                        resolve(html);
+                      }
+                    });
+                  });
+                }) || []
+              ).then(htmlArray => htmlArray.join(''))
+                }
+       
+      </tbody>
+    </table>
+    <p style="font-size: 16px;">Địa chỉ giao hàng: <h3>${data1.address}-${data1.ward}-${data1.district}-${data1.province}</h3></p>
+    <p style="font-size: 16px;">Thông tin liên hệ: <h3> ${data2.user_lastname} ${data2.user_firstname} - ${data2.user_email} - ${data2.user_phone} </h3></p>
+    <p style="font-size: 16px;">Tổng tiền: <h3>${formattedAmount}VND</h3></p>
+  `,
             };
             transporter.sendMail(mailOptions, (error, info) => {
               if (error) {
