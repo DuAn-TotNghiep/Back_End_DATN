@@ -340,7 +340,7 @@ const getTotalPerMonth = (req, res) => {
 
   try {
     const monthlyTotals = [];
-    for (let i = 0; i < 13; i++) { // Lấy dữ liệu cho 6 tháng
+    for (let i = 0; i < 13; i++) {
       const endOfMonth = today.minus({ months: i }).endOf('month');
       const startOfMonth = endOfMonth.startOf('month');
       const monthName = startOfMonth.setLocale('vi').toFormat('M/yyyy'); // Lấy tên tháng
@@ -350,6 +350,7 @@ const getTotalPerMonth = (req, res) => {
         FROM orders 
         WHERE 
         DATE(order_date) BETWEEN '${startOfMonth.toISODate()}' AND '${endOfMonth.toISODate()}'
+AND status = '6'
       `;
 
       connect.query(sql, (err, results) => {
