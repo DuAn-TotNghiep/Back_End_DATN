@@ -12,7 +12,7 @@ router.get("/user/:id/getone", GetOneUser)
 router.post("/signup", verifyOTPMiddleware, verifyOTPRoute, Signup);
 router.post("/sendOtp", verifyOTPMiddleware, generateAndSendOTPRoute);
 router.post("/verifyOtp", verifyOTPMiddleware, verifyOTPRoute);
-router.patch('/user/:id/update', updateProfile)
+router.patch('/user/:id/update',verifyOTPMiddleware, verifyOTPRoute, updateProfile)
 router.patch('/user/:id/updateaddress', updateAddress)
 router.post("/forgotpassword", verifyOTPMiddleware, verifyOTPRoute, ForgotPassword);
 router.patch("/user/blockuser", updateBlockUser);

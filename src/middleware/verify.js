@@ -17,11 +17,12 @@ const verifyOTP = (email, otpToCheck) => {
 const verifyOTPMiddleware = (req, res, next) => {
     const email = req.body.email;
     const otpToCheck = req.body.otp;
+    const userId = req.params.id;
     // console.log(email, otpToCheck);
     if (req.path === "/sendOtp") {
         // Nếu yêu cầu là để gửi OTP, không kiểm tra OTP mà chấp nhận
         next();
-    } else if (req.path === "/signup" || req.path === "/forgotpassword") {
+    } else if (req.path === "/signup" || req.path === "/forgotpassword" || req.path === `/user/${userId}/update`) {
         // Nếu yêu cầu là để xác minh OTP
         if (email && otpToCheck) {
             console.log(email);
