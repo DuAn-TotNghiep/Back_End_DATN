@@ -9,6 +9,7 @@ const otps = require('../otp'); // Import biến otps từ tệp otps.js
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 const { resolve } = require("path");
+const { log } = require("console");
 
 
 const generateOTP = () => {
@@ -455,7 +456,7 @@ const getAllUser = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const userId = req.params.id;
-    const { user_lastname, user_firstname, user_province, user_ward, user_district, user_address, user_image, user_phone } = req.body;
+    const { user_lastname, user_firstname, user_province, user_ward, user_district, user_address, user_image,email, user_phone } = req.body;
 
     // Kiểm tra xem sản phẩm có tồn tại không
     const sql1 = `SELECT * FROM users WHERE id = ${userId}`;
@@ -479,13 +480,16 @@ const updateProfile = async (req, res) => {
             user_district ='${user_district}',
             user_address ='${user_address}',
             user_image = '${user_image}',
+            user_email = '${email}',
             user_phone='${user_phone}'
             WHERE id=${userId}
             RETURNING *`;
 
       connect.query(sql2, (err, result) => {
-        if (err) {
+        if (err) {  
           return res.status(500).json({ message: 'Lỗi không thể cập nhật thông tin', err });
+          console.log(err);
+
         }
 
         const data = result.rows[0];
