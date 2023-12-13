@@ -2,7 +2,7 @@ const connect = require("../../database");
 const { DateTime } = require("luxon");
 const jwt = require("jsonwebtoken");
 const io = require("../../app");
-
+const schedule = require('node-schedule');
 const order = async (req, res) => {
   try {
     const { checkout_id, user_id, order_total, payment_status } = req.body;
@@ -217,25 +217,29 @@ const UpdateShipDone = (req, res) => {
     const { id } = req.body;
     let responseSent = false;
     const sql = `UPDATE orders SET status=4 WHERE order_id=${id} RETURNING*`;
+
     connect.query(sql, (err, result) => {
       if (err) {
         responseSent = true;
         return res
           .status(500)
-          .json({ message: "khong sua duoc trang thai shipdone", err });
+          .json({ message: "Không sửa được trạng thái ship done", err });
       }
+
       const data = result.rows[0];
 
-      // io.emit("shiping", { message: "Đơn hàng đã được giao", data });
-      setTimeout(() => {
+      io.emit("shiping", { message: "Đơn hàng đã được giao", data });
+
+      // Schedule a job to run after 10 seconds
+      schedule.scheduleJob(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), function () {
         if (!responseSent) {
           const completeReq = { body: { id } };
           UpdateComplete(completeReq, res);
         }
-      }, 60000);
+      });
     });
   } catch (err) {
-    return res.status(500).json({ message: "Loi API", err });
+    return res.status(500).json({ message: "Lỗi API", err });
   }
 };
 const UpdateDone = (req, res) => {
@@ -251,7 +255,7 @@ const UpdateDone = (req, res) => {
           .json({ message: "khong sua duoc trang thai done order", err });
       }
       const data = result.rows[0];
-      // io.emit("statusdone", { message: "Đã Nhận Hàng", data });
+      io.emit("statusdone", { message: "Đã Nhận Hàng", data });
 
       setTimeout(() => {
         if (!responseSent) {
