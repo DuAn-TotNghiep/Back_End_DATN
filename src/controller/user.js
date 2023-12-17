@@ -500,6 +500,47 @@ const updateProfile = async (req, res) => {
     return res.status(500).json({ message: 'Lỗi API', err });
   }
 }
+const updateProfile1 = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { user_lastname, user_firstname, user_phone } = req.body;
+
+    // Kiểm tra xem sản phẩm có tồn tại không
+    const sql1 = `SELECT * FROM users WHERE id = ${userId}`;
+    connect.query(sql1, (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu', err });
+      }
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Tài khoản không tồn tại' });
+      }
+
+      // Sản phẩm tồn tại, tiến hành cập nhật
+      const sql2 = `
+            UPDATE users
+            SET
+            user_lastname='${user_lastname}',
+            user_firstname='${user_firstname}',
+            user_phone='${user_phone}'
+            WHERE id=${userId}
+            RETURNING *`;
+
+      connect.query(sql2, (err, result) => {
+        if (err) {
+          return res.status(500).json({ message: 'Lỗi không thể cập nhật thông tin', err });
+          console.log(err);
+
+        }
+
+        const data = result.rows[0];
+        return res.status(200).json({ message: 'Sửa thông tin thành công', data });
+      });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: 'Lỗi API', err });
+  }
+}
 const updateAddress = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -628,4 +669,4 @@ const ChangePassword = async (req, res) => {
   }
 }
 
-module.exports = {SigninNoToken, ChangePassword, ForgotPassword, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile, updateBlockUser };
+module.exports = { SigninNoToken, ChangePassword, ForgotPassword, updateProfile1, Signup, updateAddress, Signin, SigninProfile, TopUser, GetOneUser, getAllUser, generateAndSendOTPRoute, someFunctionInController, verifyOTPRoute, updateProfile, updateBlockUser };

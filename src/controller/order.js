@@ -153,27 +153,41 @@ const CountOrderOnline = async (req, res) => {
 const UpdateCancell = (req, res) => {
   try {
     const { id } = req.body;
-    const sql = `UPDATE orders SET status=0 WHERE order_id=${id}`;
-    connect.query(sql, (err, result) => {
+    const checkStatusSql = `SELECT status FROM orders WHERE order_id=${id}`;
+
+    connect.query(checkStatusSql, (err, result) => {
       if (err) {
-        return res
-          .status(500)
-          .json({ message: "khong sua duoc trang thai cancell", err });
+        return res.status(500).json({ message: "Không thể kiểm tra trạng thái đơn hàng", err });
       }
-      const data = result.rows[0];
-      io.emit("cancell", { message: "Đơn Hàng Đã Bị Hủy", data });
-      return res
-        .status(200)
-        .json({ message: "sua thanh cong trang thai cancell", data });
+
+      const currentStatus = result.rows[0].status;
+
+      // Check if the current status is 1
+      if (currentStatus !== 1) {
+        return res.status(400).json({ message: "Không thể sửa trạng thái đơn hàng khi trạng thái không phải là đã đặt hàng" });
+      }
+
+      // If the current status is 1, proceed with the update
+      const updateSql = `UPDATE orders SET status=0 WHERE order_id=${id}`;
+      connect.query(updateSql, (err, result) => {
+        if (err) {
+          return res.status(500).json({ message: "Không thể cập nhật trạng thái đơn hàng", err });
+        }
+
+        const data = result.rows[0];
+        io.emit("cancell", { message: "Đơn Hàng Đã Bị Hủy", data });
+        return res.status(200).json({ message: "Cập nhật trạng thái đơn hàng thành công", data });
+      });
     });
   } catch (err) {
-    return res.status(500).json({ message: "Loi API", err });
+    return res.status(500).json({ message: "Lỗi API", err });
   }
 };
+
 const UpdateConfirm = (req, res) => {
   try {
     const { id } = req.body;
-    console.log(id);
+
     const sql = `UPDATE orders SET status=2 WHERE order_id=${id} RETURNING*`;
     connect.query(sql, (err, result) => {
       if (err) {
@@ -203,7 +217,7 @@ const UpdateShiping = (req, res) => {
           .json({ message: "khong sua duoc trang thai shiping", err });
       }
       const data = result.rows[0];
-      io.emit("confirm", { message: "Đơn hàng đã được xác nhận", data });
+      io.emit("confirm", { message: "Đơn hàng đã vận chuyển", data });
       return res
         .status(200)
         .json({ message: "sua thanh cong trang thai shipingr", data });
@@ -281,7 +295,7 @@ const UpdateComplete = (req, res) => {
       const data = result.rows[0];
       const completeReq = { body: { id } };
       sendStatusByEmail(completeReq, res)
-      // io.emit("complete", { message: "Đơn hàng đã hoàn thành", data });
+      io.emit("complete", { message: "Đơn hàng đã hoàn thành", data });
       return res
         .status(200)
         .json({ message: "sua thanh cong trang thai complete order", data });
