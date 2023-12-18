@@ -958,7 +958,7 @@ const searchOrdersByUserPhone = async (req, res) => {
   try {
     let order_id = req.body.order_id;
     if (!order_id || isNaN(order_id)) {
-      return res.status(500).json({ message: "Vui lòng cung cấp mã đơn hàng hợp lệ" });
+      return res.json({ message: "Vui lòng cung cấp mã đơn hàng hợp lệ" });
     }
 
     // Tìm đơn hàng từ bảng orders dựa trên order_id (đây là một số nguyên)
@@ -966,7 +966,7 @@ const searchOrdersByUserPhone = async (req, res) => {
     const orderResult = await connect.query(orderQuery, [order_id]);
 
     if (orderResult.rows.length === 0) {
-      return res.status(500).json({
+      return res.json({
         message: "Không tìm thấy mã đơn hàng này",
       });
     }
@@ -1016,7 +1016,33 @@ const searchOrdersByUserPhoneCancell = async (req, res) => {
     return res.status(500).json({ message: "Lỗi API" });
   }
 };
+const searchOrdersByUserPhoneCancell1 = async (req, res) => {
+  try {
+    let order_id = req.body.order_id;
+    if (!order_id || isNaN(order_id)) {
+      return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
+    }
 
+    const orderQuery = `SELECT * FROM orders WHERE order_id = $1 AND status= '7'`;
+    const orderResult = await connect.query(orderQuery, [order_id]);
+
+    if (orderResult.rows.length === 0) {
+      return res.json({
+        message: "Không tìm thấy đơn hàng cho order_id này",
+      });
+    }
+
+    const userId = orderResult.rows[0].user_id;
+
+    return res.json({
+      message: "Tìm thấy đơn hàng",
+      data: orderResult.rows,
+    });
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: "Lỗi API" });
+  }
+};
 const searchOrdersByUserPhoneConfirm = async (req, res) => {
   try {
     let order_id = req.body.order_id;
@@ -1106,9 +1132,9 @@ const searchOrdersByUserPhoneShipDone = async (req, res) => {
       return res.json({ message: "Vui lòng cung cấp order_id hợp lệ" });
     }
 
-    const orderQuery = `SELECT * FROM orders WHERE order_id = $1 AND status= '4'`;
-    const orderResult = await connect.query(orderQuery, [order_id]);
-
+    const orderQuery = `SELECT * FROM orders WHERE order_id = ${order_id} AND status BETWEEN '4' AND '6'`;
+    const orderResult = await connect.query(orderQuery);
+    console.log(orderResult);
     if (orderResult.rows.length === 0) {
       return res.json({
         message: "Không tìm thấy đơn hàng cho order_id này",
@@ -1117,7 +1143,7 @@ const searchOrdersByUserPhoneShipDone = async (req, res) => {
 
     const userId = orderResult.rows[0].user_id;
 
-    return res.json({
+    return res.status(200).json({
       message: "Tìm thấy đơn hàng",
       data: orderResult.rows,
     });
@@ -1220,5 +1246,6 @@ module.exports = {
   getCompleteAndDoneOrders,
   getBomdOrders,
   UpdateBomd,
-  UpdateOrder
+  UpdateOrder,
+  searchOrdersByUserPhoneCancell1
 };
