@@ -503,7 +503,7 @@ const updateProfile = async (req, res) => {
 const updateProfile1 = async (req, res) => {
   try {
     const userId = req.params.id;
-    const { user_lastname, user_firstname, user_phone } = req.body;
+    const { user_lastname, user_firstname, user_phone ,user_image} = req.body;
 
     // Kiểm tra xem sản phẩm có tồn tại không
     const sql1 = `SELECT * FROM users WHERE id = ${userId}`;
@@ -522,7 +522,8 @@ const updateProfile1 = async (req, res) => {
             SET
             user_lastname='${user_lastname}',
             user_firstname='${user_firstname}',
-            user_phone='${user_phone}'
+            user_phone='${user_phone}',
+            user_image='${user_image}'
             WHERE id=${userId}
             RETURNING *`;
 
