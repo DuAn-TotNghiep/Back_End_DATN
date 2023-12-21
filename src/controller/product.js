@@ -507,8 +507,8 @@ const CountOrdersToday = async (req, res) => {
     // Thực hiện truy vấn SQL để đếm số đơn hàng trong ngày
     const sqlQuery = `
         SELECT COUNT(*) AS checkoutday_date
-        FROM checkout
-        WHERE DATE(checkout_date) = '${formattedDate}';
+        FROM orders
+        WHERE DATE(order_date) = '${formattedDate}';
       `;
 
     // Thực hiện truy vấn SQL
@@ -545,30 +545,37 @@ const CountOrdersMonth = async (req, res) => {
     return res.status(500).json({ message: "Lỗi API", error: err.message });
   }
 };
-const SumProductDay = (req, res) => {
+const SumProductDay = async (req, res) => {
   try {
     const checkout_date = DateTime.local().setZone("Asia/Ho_Chi_Minh");
     const formattedDate = checkout_date.toFormat("yyyy-MM-dd");
-    const sql = `SELECT * FROM checkout WHERE DATE(checkout_date) = '${formattedDate}' `;
-    connect.query(sql, (err, result) => {
-      if (err) {
-        return res.status(500).json({ message: "loi", err });
-      }
-      let totalProductIds = 0;
+    const sql1 = `SELECT * FROM orders WHERE DATE(order_date) = '${formattedDate}' `;
+    const result = await connect.query(sql1);
+
+    let totalProductIds = 0;
+
+    // Create a function to get the product IDs for a given checkout ID
+    const getProductIds = async (checkoutId) => {
+      const sql = `SELECT * FROM checkout WHERE id= ${checkoutId} `;
+      const result = await connect.query(sql);
       const data = result.rows;
-      data?.map((data) => {
-        if (data && data.product) {
-          data?.product.map((data) => {
-            totalProductIds++;
-          });
+
+      data?.forEach((checkoutData) => {
+        if (checkoutData && checkoutData.product) {
+          totalProductIds += checkoutData.product.length;
         }
       });
-      return res.status(200).json({ totalProductIds });
-    });
+    };
+
+    // Use Promise.all to wait for all asynchronous operations to complete
+    await Promise.all(result?.rows?.map((data) => getProductIds(data.checkout_id)));
+
+    return res.status(200).json({ totalProductIds });
   } catch (err) {
     return res.status(500).json({ message: "Lỗi API", error: err.message });
   }
 };
+
 const FilterProductsByColor = (req, res) => {
   try {
     const { id } = req.params;

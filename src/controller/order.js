@@ -161,10 +161,9 @@ const UpdateCancell = (req, res) => {
       }
 
       const currentStatus = result.rows[0].status;
-
       // Check if the current status is 1
-      if (currentStatus !== 1) {
-        return res.status(400).json({ message: "Không thể sửa trạng thái đơn hàng khi trạng thái không phải là đã đặt hàng" });
+      if (currentStatus !== '1') {
+        return res.status(500).json({ message: "Không thể sửa trạng thái đơn hàng khi trạng thái không phải là đã đặt hàng" });
       }
 
       // If the current status is 1, proceed with the update
