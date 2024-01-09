@@ -15,7 +15,7 @@ const connect = new Client({
 
   host: "localhost",
   port: 5432, // Cổng mặc định của PostgreSQL là 5432
-   port: 3001, // Cổng mặc định của PostgreSQL là 5432
+  //  port: 3001, // Cổng mặc định của PostgreSQL là 5432
   // port: 3001, // Cổng mặc định của PostgreSQL là 5432
 
   // port: 3001, // Cổng mặc định của PostgreSQL là 5432
@@ -23,13 +23,13 @@ const connect = new Client({
 
   // database: "DATN_MAIN",
 
-  database: "DATN",
+  // database: "DATN",
   //  database: "DUANTN",
 
 
   // database: "DUANTN",
 
-  // database: "DATN_2023_MAIN",
+  database: "DATN_2023_MAIN",
   // database: "DUAN",
 
   // database: "DUAN"
