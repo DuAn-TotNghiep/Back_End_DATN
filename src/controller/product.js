@@ -31,7 +31,7 @@ const AddProduct = async (req, res, next) => {
   }
 };
 
-//update product
+
 
 const UpdateProduct = async (req, res, next) => {
   try {
